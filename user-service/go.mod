@@ -1,11 +1,8 @@
-module github.com/Arclight-V/mtch/auth-service
+module user-service
 
-go 1.24
+go 1.23.8
 
-require (
-	goji.io v2.0.2+incompatible
-	google.golang.org/grpc v1.72.0
-)
+require google.golang.org/grpc v1.72.0
 
 require (
 	golang.org/x/net v0.35.0 // indirect
@@ -15,9 +12,6 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 )
 
-require (
-	golang.org/x/crypto v0.33.0
-	proto v0.0.0
-)
+require proto v0.0.0
 
 replace proto => ../proto
