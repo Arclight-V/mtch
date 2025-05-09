@@ -21,20 +21,6 @@ const (
 
 var userClient pb.UserInfoClient
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	name := pat.Param(r, "name")
-	fmt.Fprintf(w, "Hello, %s! This is Matcha!", name)
-
-	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
-	defer cancel()
-	resp, err := userClient.Login(ctx, &pb.LoginRequest{Email: name, Password: "Password"})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	fmt.Fprintf(w, "Hello, %s (id=%d)! This is Matcha!", resp.User, resp.SessionId)
-
-}
-
 func login(w http.ResponseWriter, r *http.Request) {
 	log.Println("Login called")
 	if r.Header.Get("Content-Type") != "application/json" {
@@ -73,7 +59,6 @@ func main() {
 	userClient = pb.NewUserInfoClient(conn)
 
 	mux := goji.NewMux()
-	mux.HandleFunc(pat.Get("/hello/:name"), hello)
 	mux.HandleFunc(pat.Post("/login"), login)
 
 	log.Printf("server listening at %v", 8000)
