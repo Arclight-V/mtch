@@ -2,7 +2,6 @@ package grpcclient
 
 import (
 	"context"
-	"log"
 	pb "proto"
 )
 
@@ -16,7 +15,6 @@ func NewGRPCUserRepo(cli pb.UserInfoClient) *GrpcUserRepo {
 
 func (r *GrpcUserRepo) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
 	resp, err := r.cli.Login(ctx, request)
-	log.Println(resp, "19")
 	if err != nil {
 		return nil, err
 	}

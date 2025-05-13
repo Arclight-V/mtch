@@ -4,8 +4,6 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
-	goji "goji.io"
-	"goji.io/pat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
@@ -29,9 +27,7 @@ func main() {
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
 	userClient := auth.Interactor{UserRepo: repo}
 	handler = httpadapter.NewHandler(&userClient)
-	mux := goji.NewMux()
-	mux.HandleFunc(pat.Post("/login"), handler.Login)
 
 	log.Printf("server listening at %v", 8000)
-	http.ListenAndServe(":8000", mux)
+	http.ListenAndServe(":8000", httpadapter.NewRouter(handler))
 }
