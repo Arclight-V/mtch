@@ -12,6 +12,9 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 )
 
-require proto v0.0.0
+require (
+	golang.org/x/crypto v0.33.0
+	proto v0.0.0
+)
 
 replace proto => ../proto
