@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -22,16 +23,28 @@ func (s *server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 }
 func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	log.Println("Login called", req.Email, req.Password)
+
 	resp := &pb.LoginResponse{
 		User: &pb.User{
 			Uuid:      "uuid",
 			FirstName: "first_name",
 			LastName:  "last_name",
-			Password:  "password",
 			Email:     "email",
 		},
 		SessionId: "session_id",
 	}
+
+	hash_password_resp, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: temporary password, replace with a hash from the database
+	tmp_password := "password"
+	if err := bcrypt.CompareHashAndPassword(hash_password_resp, []byte(tmp_password)); err != nil {
+		return nil, err
+	}
+
 	return resp, nil
 }
 

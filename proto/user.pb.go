@@ -26,8 +26,7 @@ type User struct {
 	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
 	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Password      string                 `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
-	Email         string                 `protobuf:"bytes,6,opt,name=email,proto3" json:"email,omitempty"`
+	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -79,13 +78,6 @@ func (x *User) GetFirstName() string {
 func (x *User) GetLastName() string {
 	if x != nil {
 		return x.LastName
-	}
-	return ""
-}
-
-func (x *User) GetPassword() string {
-	if x != nil {
-		return x.Password
 	}
 	return ""
 }
@@ -265,6 +257,9 @@ type LoginResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	AccessToken   string                 `protobuf:"bytes,3,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,4,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	ExpiresIn     int64                  `protobuf:"varint,5,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -313,19 +308,39 @@ func (x *LoginResponse) GetSessionId() string {
 	return ""
 }
 
+func (x *LoginResponse) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *LoginResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+func (x *LoginResponse) GetExpiresIn() int64 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
 var File_user_proto protoreflect.FileDescriptor
 
 const file_user_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"user.proto\x12\vuserService\"\x88\x01\n" +
+	"user.proto\x12\vuserService\"l\n" +
 	"\x04User\x12\x12\n" +
 	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x1a\n" +
-	"\bpassword\x18\x05 \x01(\tR\bpassword\x12\x14\n" +
-	"\x05email\x18\x06 \x01(\tR\x05email\"\x7f\n" +
+	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\"\x7f\n" +
 	"\x0fRegisterRequest\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
@@ -336,14 +351,18 @@ const file_user_proto_rawDesc = "" +
 	"\x04user\x18\x01 \x01(\v2\x11.userService.UserR\x04user\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"U\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xbc\x01\n" +
 	"\rLoginResponse\x12%\n" +
 	"\x04user\x18\x01 \x01(\v2\x11.userService.UserR\x04user\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x02 \x01(\tR\tsessionId2\x93\x01\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12!\n" +
+	"\faccess_token\x18\x03 \x01(\tR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x04 \x01(\tR\frefreshToken\x12\x1d\n" +
+	"\n" +
+	"expires_in\x18\x05 \x01(\x03R\texpiresIn2\x93\x01\n" +
 	"\bUserInfo\x12G\n" +
 	"\bRegister\x12\x1c.userService.RegisterRequest\x1a\x1d.userService.RegisterResponse\x12>\n" +
-	"\x05Login\x12\x19.userService.LoginRequest\x1a\x1a.userService.LoginResponseB%Z#github.com/Arclight-V/mtch/proto;pbb\x06proto3"
+	"\x05Login\x12\x19.userService.LoginRequest\x1a\x1a.userService.LoginResponseB\x06Z\x04.;pbb\x06proto3"
 
 var (
 	file_user_proto_rawDescOnce sync.Once

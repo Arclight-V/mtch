@@ -12,8 +12,7 @@ message User {
   string uuid = 1;
   string first_name = 2;
   string last_name = 3;
-  string password = 5;
-  string email = 6;
+  string email = 4;
 }
 
 message RegisterRequest {
@@ -35,4 +34,7 @@ message LoginRequest {
 message LoginResponse {
   User user = 1;
   string session_id = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  int64 expires_in = 5;
 }

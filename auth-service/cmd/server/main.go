@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
+	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -15,6 +16,9 @@ const (
 	grpcAddr = "localhost:50051"
 )
 
+// move to Vault
+var secretKey = []byte("secret-key")
+
 var handler *httpadapter.Handler
 
 func main() {
@@ -25,7 +29,8 @@ func main() {
 	defer conn.Close()
 
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
-	userClient := auth.Interactor{UserRepo: repo}
+	signer := infrastructure.NewJWTSigner(secretKey)
+	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer}
 	handler = httpadapter.NewHandler(&userClient)
 
 	log.Printf("server listening at %v", 8000)
