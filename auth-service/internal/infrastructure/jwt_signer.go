@@ -2,24 +2,52 @@ package infrastructure
 
 import (
 	"github.com/Arclight-V/mtch/auth-service/internal/domain"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"time"
+)
+
+const (
+	accessTTl  = 15 * time.Minute
+	refreshTTl = 30 * 24 * time.Hour
 )
 
 type JWTSigner struct {
-	key []byte
-	alg jwt.SigningMethod
+	accessKey  []byte
+	refreshKey []byte
+	alg        jwt.SigningMethod
 }
 
-func NewJWTSigner(secret []byte) *JWTSigner {
-	return &JWTSigner{key: secret, alg: jwt.SigningMethodHS256}
+func NewJWTSigner(accessKye, refreshKey []byte) *JWTSigner {
+	return &JWTSigner{accessKey: accessKye, refreshKey: refreshKey, alg: jwt.SigningMethodHS256}
 }
 
-func (s *JWTSigner) Sign(c domain.TokenClaims) (string, error) {
-	token := jwt.NewWithClaims(s.alg, jwt.MapClaims{
-		"subject": c.UserId,
-		"exp":     c.Exp.Unix(),
-		"role":    c.Role,
-		"issuer":  "auth-service",
-	})
-	return token.SignedString(s.key)
+func (s *JWTSigner) SignAccess(userId, sid string) (string, error) {
+	claims := domain.AccessClaims{
+		BaseClaims: domain.BaseClaims{UserId: userId, Sid: sid},
+		Roles:      []string{"user"},
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTTl)),
+			Issuer:    "auth-service",
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	return jwt.NewWithClaims(s.alg, claims).SignedString(s.accessKey)
+}
+
+func (s *JWTSigner) SignRefresh(userId, sid string) (string, string, error) {
+	jtiUUID := uuid.New()
+	claims := domain.RefreshClaims{
+		BaseClaims: domain.BaseClaims{UserId: userId, Sid: sid},
+		Jti:        jtiUUID.String(),
+		Typ:        "refresh",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshTTl)),
+			Issuer:    "auth-service",
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+	token, err := jwt.NewWithClaims(s.alg, claims).SignedString(s.refreshKey)
+	return token, jtiUUID.String(), err
 }

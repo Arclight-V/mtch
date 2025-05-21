@@ -16,8 +16,8 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt v3.2.2+incompatible
-	golang.org/x/crypto v0.33.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/google/uuid v1.6.0
 	proto v0.0.0
 )
 

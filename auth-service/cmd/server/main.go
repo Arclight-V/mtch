@@ -17,7 +17,8 @@ const (
 )
 
 // move to Vault
-var secretKey = []byte("secret-key")
+var secretAccessKey = []byte("secret-access-key")
+var secretRefreshKey = []byte("secret-refresh-key")
 
 var handler *httpadapter.Handler
 
@@ -29,7 +30,7 @@ func main() {
 	defer conn.Close()
 
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
-	signer := infrastructure.NewJWTSigner(secretKey)
+	signer := infrastructure.NewJWTSigner(secretAccessKey, secretRefreshKey)
 	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer}
 	handler = httpadapter.NewHandler(&userClient)
 

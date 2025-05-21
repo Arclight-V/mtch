@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"github.com/Arclight-V/mtch/auth-service/internal/domain"
 	pb "proto"
 )
 
@@ -11,5 +10,6 @@ type UserRepo interface {
 }
 
 type TokenSigner interface {
-	Sign(claims domain.TokenClaims) (string, error)
+	SignAccess(uuid, sid string) (string, error)
+	SignRefresh(uuid, sid string) (string, string, error)
 }
