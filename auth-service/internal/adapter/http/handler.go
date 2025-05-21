@@ -3,7 +3,6 @@ package httpadapter
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"log"
 	"net/http"
@@ -37,9 +36,26 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 	}
-	if resp != nil {
-		fmt.Fprintf(w, "Hello, %s %s!", resp.User.FirstName, resp.User.LastName)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    resp.RefreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(30 * 24 * time.Hour),
+	})
 
+	out := struct {
+		User        *pb.User `json:"user"`
+		AccessToken string   `json:"access_token"`
+		ExpiresIn   int64    `json:"expires_in"`
+	}{
+		User:        resp.User,
+		AccessToken: resp.AccessToken,
+		ExpiresIn:   resp.ExpiresIn,
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(&out)
 }

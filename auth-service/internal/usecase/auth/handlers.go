@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"github.com/Arclight-V/mtch/auth-service/internal/domain"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
 	pb "proto"
 	"time"
@@ -19,11 +18,11 @@ func (uc *Interactor) Login(ctx context.Context, request *pb.LoginRequest) (*pb.
 		return nil, err
 	}
 
-	access, err := uc.TokenSigner.Sign(domain.TokenClaims{UserId: resp.User.Uuid, Role: "user", Exp: time.Now().Add(time.Minute * 15)})
+	access, err := uc.TokenSigner.SignAccess(resp.User.Uuid, resp.SessionId)
 	if err != nil {
 		return nil, err
 	}
-	refresh, err := uc.TokenSigner.Sign(domain.TokenClaims{UserId: resp.User.Uuid, Role: "user", Exp: time.Now().Add(time.Hour * 24)})
+	refresh, err := uc.TokenSigner.SignAccess(resp.User.Uuid, resp.SessionId)
 	if err != nil {
 		return nil, err
 	}
