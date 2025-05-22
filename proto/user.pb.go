@@ -91,10 +91,8 @@ func (x *User) GetEmail() string {
 
 type RegisterRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
+	Password      string                 `protobuf:"bytes,1,opt,name=password,proto3" json:"password,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -127,20 +125,6 @@ func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
 func (*RegisterRequest) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *RegisterRequest) GetFirstName() string {
-	if x != nil {
-		return x.FirstName
-	}
-	return ""
-}
-
-func (x *RegisterRequest) GetLastName() string {
-	if x != nil {
-		return x.LastName
-	}
-	return ""
 }
 
 func (x *RegisterRequest) GetPassword() string {
@@ -340,13 +324,10 @@ const file_user_proto_rawDesc = "" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\"\x7f\n" +
-	"\x0fRegisterRequest\x12\x1d\n" +
-	"\n" +
-	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x1a\n" +
-	"\bpassword\x18\x04 \x01(\tR\bpassword\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\"9\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\"C\n" +
+	"\x0fRegisterRequest\x12\x1a\n" +
+	"\bpassword\x18\x01 \x01(\tR\bpassword\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\"9\n" +
 	"\x10RegisterResponse\x12%\n" +
 	"\x04user\x18\x01 \x01(\v2\x11.userService.UserR\x04user\"@\n" +
 	"\fLoginRequest\x12\x14\n" +

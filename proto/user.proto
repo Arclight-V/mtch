@@ -16,10 +16,8 @@ message User {
 }
 
 message RegisterRequest {
-  string first_name = 2;
-  string last_name = 3;
-  string password = 4;
-  string email = 5;
+  string password = 1;
+  string email = 2;
 }
 
 message RegisterResponse {

@@ -59,3 +59,35 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(&out)
 }
+
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	log.Println("Login called")
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
+		return
+	}
+	var req pb.RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	defer cancel()
+	resp, err := h.uc.Register(ctx, &req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusConflict)
+	}
+
+	// TODO:: add logic for calling the email service
+
+	// TODO:: add logic for struct user
+	out := struct {
+		User *pb.User `json:"user"`
+	}{
+		User: resp.User,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(&out)
+}

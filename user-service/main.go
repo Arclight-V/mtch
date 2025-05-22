@@ -18,7 +18,7 @@ type server struct {
 }
 
 func (s *server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	log.Println("Register called:", req.FirstName)
+	log.Println("Register called:", req.Email)
 	return nil, nil
 }
 func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {

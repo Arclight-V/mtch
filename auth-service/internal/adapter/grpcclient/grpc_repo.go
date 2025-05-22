@@ -20,3 +20,11 @@ func (r *GrpcUserRepo) Login(ctx context.Context, request *pb.LoginRequest) (*pb
 	}
 	return resp, nil
 }
+
+func (r *GrpcUserRepo) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+	resp, err := r.cli.Register(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
