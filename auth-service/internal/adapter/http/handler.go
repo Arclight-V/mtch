@@ -61,7 +61,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	log.Println("Login called")
+	log.Println("Register called")
 	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
 		return
@@ -77,6 +77,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	resp, err := h.uc.Register(ctx, &req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
+		return
 	}
 
 	// TODO:: add logic for calling the email service
