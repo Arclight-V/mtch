@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"net"
 	pb "proto"
+	"time"
+	"user-service/internal/models"
 )
 
 const (
@@ -17,9 +21,46 @@ type server struct {
 	pb.UnimplementedUserInfoServer
 }
 
+// TODO:: move to handler
+func NewPendingUser(email, hash string) (*models.User, error) {
+	// TODO
+	// if !validator.IsEmail(email) {
+	//	return nil, errors.New("invalid email")
+	// }
+	return &models.User{
+		UserID:       uuid.New(),
+		Email:        email,
+		PasswordHash: hash,
+		CreatedAt:    time.Now(),
+		Verified:     false,
+	}, nil
+}
+
+// TODO:: move to handler
+func userModelToProto(user *models.User) *pb.User {
+	return &pb.User{
+		Uuid:         user.UserID.String(),
+		Email:        user.Email,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+		Role:         user.Role,
+		Avatar:       *user.Avatar,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    timestamppb.New(user.CreatedAt),
+		UpdateAt:     timestamppb.New(user.UpdatedAt),
+		Verified:     user.Verified,
+	}
+}
+
+// TODO:: move to handler
 func (s *server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	log.Println("Register called:", req.Email)
-	return nil, nil
+	user, err := NewPendingUser(req.GetEmail(), req.GetPassword())
+	if err != nil {
+		return &pb.RegisterResponse{}, err
+	}
+
+	return &pb.RegisterResponse{User: userModelToProto(user)}, nil
 }
 func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	log.Println("Login called", req.Email, req.Password)

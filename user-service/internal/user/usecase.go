@@ -1,6 +1,11 @@
 package user
 
+import (
+	"context"
+	"user-service/internal/models"
+)
+
 // User User Case interface
 type UserUseCase interface {
-	// TODO:Add Register metod
+	Register(ctx context.Context, user *models.User) (*models.User, error)
 }

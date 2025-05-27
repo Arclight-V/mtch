@@ -15,8 +15,17 @@ type User struct {
 	// String?
 	Avatar *string `json:"avatar" db:"avatar"`
 	// String?
-	Password  string    `json:"password,omitempty" db:"password"`
-	CreatedAt time.Time `json:"created_at,omitempty" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty" db:"updated_at"`
-	Verified  bool      `json:"verified" db:"verified"`
+	PasswordHash string    `json:"password,omitempty" db:"password"`
+	CreatedAt    time.Time `json:"created_at,omitempty" db:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at,omitempty" db:"updated_at"`
+	Verified     bool      `json:"verified" db:"verified"`
+}
+
+// Get avatar string
+// TODO:: Use string?
+func (u *User) GetAvatar() string {
+	if u.Avatar == nil {
+		return ""
+	}
+	return *u.Avatar
 }
