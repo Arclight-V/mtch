@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"net"
 	pb "proto"
-	"time"
 	"user-service/internal/models"
+	"user-service/internal/user"
 )
 
 const (
@@ -19,21 +18,7 @@ const (
 
 type server struct {
 	pb.UnimplementedUserInfoServer
-}
-
-// TODO:: move to handler
-func NewPendingUser(email, hash string) (*models.User, error) {
-	// TODO
-	// if !validator.IsEmail(email) {
-	//	return nil, errors.New("invalid email")
-	// }
-	return &models.User{
-		UserID:       uuid.New(),
-		Email:        email,
-		PasswordHash: hash,
-		CreatedAt:    time.Now(),
-		Verified:     false,
-	}, nil
+	userUC user.UserUseCase
 }
 
 // TODO:: move to handler
@@ -55,7 +40,7 @@ func userModelToProto(user *models.User) *pb.User {
 // TODO:: move to handler
 func (s *server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	log.Println("Register called:", req.Email)
-	user, err := NewPendingUser(req.GetEmail(), req.GetPassword())
+	user, err := models.NewPendingUser(req.GetEmail(), req.GetPassword())
 	if err != nil {
 		return &pb.RegisterResponse{}, err
 	}

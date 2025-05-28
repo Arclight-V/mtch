@@ -21,6 +21,21 @@ type User struct {
 	Verified     bool      `json:"verified" db:"verified"`
 }
 
+// Create new pending User
+func NewPendingUser(email, hash string) (*User, error) {
+	// TODO
+	// if !validator.IsEmail(email) {
+	//	return nil, errors.New("invalid email")
+	// }
+	return &User{
+		UserID:       uuid.New(),
+		Email:        email,
+		PasswordHash: hash,
+		CreatedAt:    time.Now(),
+		Verified:     false,
+	}, nil
+}
+
 // Get avatar string
 // TODO:: Use string?
 func (u *User) GetAvatar() string {
