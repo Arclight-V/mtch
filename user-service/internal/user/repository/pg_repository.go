@@ -11,6 +11,10 @@ type UserRepository struct {
 	// db *sqlx.DB?
 }
 
+func NewUserRepository() *UserRepository {
+	return &UserRepository{}
+}
+
 func (u *UserRepository) Create(ctx context.Context, user *models.User) (*models.User, error) {
 	// TODO:: Add logic
 

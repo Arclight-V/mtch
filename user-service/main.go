@@ -9,7 +9,8 @@ import (
 	"net"
 	pb "proto"
 	"user-service/internal/models"
-	"user-service/internal/user"
+	"user-service/internal/user/repository"
+	userUserCase "user-service/internal/user/usecase"
 )
 
 const (
@@ -18,7 +19,6 @@ const (
 
 type server struct {
 	pb.UnimplementedUserInfoServer
-	userUC user.UserUseCase
 }
 
 // TODO:: move to handler
@@ -81,6 +81,12 @@ func main() {
 	}
 
 	s := grpc.NewServer()
+
+	userRepo := repository.NewUserRepository()
+	userUC := userUserCase.NewUserUseCase(userRepo)
+
+	usersServiceGlog = NewUsersService(userUC)
+
 	pb.RegisterUserInfoServer(s, &server{})
 
 	log.Printf("server listening at %v", lis.Addr())
