@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
+	"log"
 	pb "proto"
 	"time"
 )
@@ -35,6 +36,7 @@ func (uc *Interactor) Login(ctx context.Context, request *pb.LoginRequest) (*pb.
 
 func (uc *Interactor) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	resp, err := uc.UserRepo.Register(ctx, request)
+	log.Println(resp)
 	if err != nil {
 		return nil, err
 	}

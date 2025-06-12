@@ -18,8 +18,8 @@ func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*
 	if err != nil {
 		return &pb.RegisterResponse{}, err
 	}
-
-	return &pb.RegisterResponse{User: userModelToProto(user)}, nil
+	pbUser := userModelToProto(user)
+	return &pb.RegisterResponse{User: pbUser}, nil
 }
 func (s *usersService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	log.Println("Login called", req.Email, req.Password)

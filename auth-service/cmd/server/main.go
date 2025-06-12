@@ -30,6 +30,7 @@ func main() {
 	defer conn.Close()
 
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
+	log.Println(repo)
 	signer := infrastructure.NewJWTSigner(secretAccessKey, secretRefreshKey)
 	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer}
 	handler = httpadapter.NewHandler(&userClient)
