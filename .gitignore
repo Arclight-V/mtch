@@ -21,3 +21,15 @@
 
 # ...even if they are in subdirectories
 !*/
+
+# Build artifacts
+bin/
+pkg/
+
+# IDE specific files
+.idea/
+*.iml
+*.vscode/
+
+# macOS specific files
+.DS_Store

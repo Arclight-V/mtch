@@ -1,10 +1,16 @@
-.PHONY: build run test
+.PHONY: build run test clean
+
+BIN_DIR := bin
+SERVICE := user-service
 
 build:
-	go build -o user-service
+	go build -o $(BIN_DIR)/$(SERVICE) cmd/server/main.go
 
 run:
-	./user-service
+	.$(BIN_DIR)/$(SERVICE)
 
 test:
 	./... -race -cover
+
+clean:
+	rm -rf $(BIN_DIR)
