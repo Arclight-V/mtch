@@ -3,6 +3,7 @@ package httpadapter
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"log"
 	"net/http"
@@ -83,12 +84,14 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	// TODO:: add logic for calling the email service
 
 	// TODO:: add logic for struct user
+	log.Println("resp.User.Verified", resp.User.Verified)
 	out := struct {
 		User *pb.User `json:"user"`
 	}{
 		User: resp.User,
 	}
+	fmt.Println(resp.User)
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(&out)
 }

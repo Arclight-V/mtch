@@ -5,6 +5,7 @@ import (
 	pb "proto"
 )
 
+//go:generate mockgen -source=$GOFILE -package=mocks -destination=../mocks/ports_mock.go
 type UserRepo interface {
 	Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error)
 	Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error)

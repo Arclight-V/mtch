@@ -10,11 +10,11 @@ import (
 
 func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	log.Println("Register called:", req.Email)
-	pending_user, err := models.NewPendingUser(req.GetEmail(), req.GetPassword())
+	pendingUser, err := models.NewPendingUser(req.GetEmail(), req.GetPassword())
 	if err != nil {
 		return &pb.RegisterResponse{}, err
 	}
-	user, err := s.userUC.Register(ctx, pending_user)
+	user, err := s.userUC.Register(ctx, pendingUser)
 	if err != nil {
 		return &pb.RegisterResponse{}, err
 	}
