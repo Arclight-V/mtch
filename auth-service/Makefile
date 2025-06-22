@@ -7,7 +7,7 @@ build:
 	go build -o $(BIN_DIR)/$(SERVICE) cmd/server/main.go
 
 run:
-	.$(BIN_DIR)/$(SERVICE)
+	./$(BIN_DIR)/$(SERVICE)
 
 test:
 	./... -race -cover
