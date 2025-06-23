@@ -3,7 +3,7 @@ package httpadapter
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/dto"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"log"
 	"net/http"
@@ -67,15 +67,20 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
 		return
 	}
-	var req pb.RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	var in dto.RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	}
+	// TODO:: add validate.Stract(in) ?
+
+	protoReq := &pb.RegisterRequest{
+		Email:    in.Email,
+		Password: in.Password,
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()
-	resp, err := h.uc.Register(ctx, &req)
+	protoResp, err := h.uc.Register(ctx, protoReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
@@ -83,14 +88,14 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	// TODO:: add logic for calling the email service
 
-	// TODO:: add logic for struct user
-	log.Println("resp.User.Verified", resp.User.Verified)
-	out := struct {
-		User *pb.User `json:"user"`
-	}{
-		User: resp.User,
+	out := dto.RegisterResponse{
+		User: dto.PendingUserDTO{
+			UserID:   protoResp.User.Uuid,
+			Email:    protoResp.User.Email,
+			CreateAt: protoResp.User.CreatedAt.AsTime(),
+			Verified: protoResp.User.Verified,
+		},
 	}
-	fmt.Println(resp.User)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(&out)
