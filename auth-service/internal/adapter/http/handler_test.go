@@ -22,7 +22,6 @@ func routerWithMock(uc *mocks.MockUserRepo, ts *mocks.MockTokenSigner) http.Hand
 	return m
 }
 
-// TODO: add test impl
 func TestRegister(t *testing.T) {
 	type want struct {
 		code int

@@ -1,4 +1,4 @@
-.PHONY: build run test clean
+.PHONY: build run test clean mocks
 
 BIN_DIR := bin
 SERVICE := auth-service
@@ -10,7 +10,13 @@ run:
 	./$(BIN_DIR)/$(SERVICE)
 
 test:
-	./... -race -cover
+	go test -race -covermode=atomic -coverprofile=coverage.out ./...
 
 clean:
 	rm -rf $(BIN_DIR)
+
+mocks:
+	go generate ./...
+
+mocks-check: mocks
+	git diff --exit-code
