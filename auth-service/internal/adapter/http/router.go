@@ -6,11 +6,13 @@ import (
 	"net/http"
 )
 
+const apiBase = "/api/v1/"
+
 func NewRouter(h *Handler) http.Handler {
 	root := goji.NewMux()
 
 	api := goji.SubMux()
-	root.Handle(pat.New("/api/v1/*"), api)
+	root.Handle(pat.New(apiBase+"*"), api)
 
 	auth := goji.SubMux()
 	api.Handle(pat.New("/auth/*"), auth)

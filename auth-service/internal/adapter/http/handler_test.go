@@ -18,7 +18,7 @@ func routerWithMock(uc *mocks.MockUserRepo, ts *mocks.MockTokenSigner) http.Hand
 	m := goji.NewMux()
 	i := auth.Interactor{UserRepo: uc, TokenSigner: ts}
 	h := NewHandler(&i)
-	m.HandleFunc(pat.Post("/api/v1/auth/register"), h.Register)
+	m.HandleFunc(pat.Post(apiBase+"auth/register"), h.Register)
 	return m
 }
 
@@ -56,7 +56,7 @@ func TestRegister(t *testing.T) {
 			tt.stub(uc, ts)
 			router := routerWithMock(uc, ts)
 
-			req := httptest.NewRequest("POST", "/api/v1/auth/register", strings.NewReader(tt.body))
+			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
 			rr := httptest.NewRecorder()
 
@@ -116,7 +116,7 @@ func TestRegister_InvalidJSON(t *testing.T) {
 			ts := mocks.NewMockTokenSigner(ctrl)
 			router := NewRouter(NewHandler(&auth.Interactor{UserRepo: uc, TokenSigner: ts}))
 
-			req := httptest.NewRequest("POST", "/api/v1/auth/register", strings.NewReader(tt.body))
+			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
 			rr := httptest.NewRecorder()
 			router.ServeHTTP(rr, req)
