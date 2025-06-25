@@ -71,3 +71,56 @@ func TestRegister(t *testing.T) {
 		})
 	}
 }
+
+func TestRegister_InvalidJSON(t *testing.T) {
+	type want struct {
+		code int
+	}
+
+	tests := []struct {
+		name string
+		body string
+		want want
+	}{
+		{
+			name: "missing email",
+			body: `{"password":""}`,
+			want: want{http.StatusBadRequest},
+		},
+
+		{
+			name: "invalid email",
+			body: `{"password":"bad@"}`,
+			want: want{http.StatusBadRequest},
+		},
+
+		{
+			name: "missing password",
+			body: `{"":"example@mail.com"}`,
+			want: want{http.StatusBadRequest},
+		},
+
+		{
+			name: "invalid password",
+			body: `{"123":"example@mail.com"}`,
+			want: want{http.StatusBadRequest},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			uc := mocks.NewMockUserRepo(ctrl)
+			ts := mocks.NewMockTokenSigner(ctrl)
+			router := NewRouter(NewHandler(&auth.Interactor{UserRepo: uc, TokenSigner: ts}))
+
+			req := httptest.NewRequest("POST", "/api/v1/auth/register", strings.NewReader(tt.body))
+			req.Header.Set("Content-Type", "application/json")
+			rr := httptest.NewRecorder()
+			router.ServeHTTP(rr, req)
+			require.Equal(t, tt.want.code, rr.Code)
+		})
+	}
+}

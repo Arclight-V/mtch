@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/dto"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
+	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
 	pb "proto"
@@ -12,11 +13,12 @@ import (
 )
 
 type Handler struct {
-	uc *auth.Interactor
+	uc       *auth.Interactor
+	validate *validator.Validate
 }
 
 func NewHandler(uc *auth.Interactor) *Handler {
-	return &Handler{uc: uc}
+	return &Handler{uc: uc, validate: validator.New()}
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -70,8 +72,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	var in dto.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
-	// TODO:: add validate.Stract(in) ?
+	if err := h.validate.Struct(in); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	protoReq := &pb.RegisterRequest{
 		Email:    in.Email,
