@@ -5,6 +5,9 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"github.com/ulule/limiter/v3"
+	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	mem "github.com/ulule/limiter/v3/drivers/store/memory"
 	goji "goji.io"
 	"goji.io/pat"
 	"net/http"
@@ -122,5 +125,33 @@ func TestRegister_InvalidJSON(t *testing.T) {
 			router.ServeHTTP(rr, req)
 			require.Equal(t, tt.want.code, rr.Code)
 		})
+	}
+}
+
+func TestRateLimiter(t *testing.T) {
+	// Limiter
+	rate, _ := limiter.NewRateFromFormatted(rateFormatted)
+	store := mem.NewStore()
+	middleware := mhttp.NewMiddleware(limiter.New(store, rate, limiter.WithTrustForwardHeader(true)))
+
+	// fake handler-target
+	target := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	h := middleware.Handler(target)
+
+	for i := int64(1); i <= rate.Limit; i++ {
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/ping", nil)
+		req.Header.Set("X-Forwarded-For", "1.2.3.4")
+
+		h.ServeHTTP(rr, req)
+
+		if i <= rate.Limit {
+			require.Equal(t, http.StatusOK, rr.Code)
+		} else {
+			require.Equal(t, http.StatusTooManyRequests, rr.Code)
+		}
 	}
 }
