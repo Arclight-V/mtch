@@ -1,4 +1,4 @@
-.PHONY: build run test clean mocks
+.PHONY: build run test clean mocks swag
 
 BIN_DIR := bin
 SERVICE := auth-service
@@ -20,3 +20,6 @@ mocks:
 
 mocks-check: mocks
 	git diff --exit-code
+
+swag:
+	swag init -g cmd/server/main.go -o ./docs

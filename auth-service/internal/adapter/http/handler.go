@@ -63,6 +63,17 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(&out)
 }
 
+// Register
+// @Summary User Registration
+// @Description Creates an account, returns an unverified user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        RegisterRequest  body  dto.RegisterRequest  true "registration payload"
+// @Success      201  {object}    dto.RegisterResponse
+// @Failure      400 {object} string
+// @Failure      409 {object} string
+// @Router       /api/v1/auth/register [post]
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	log.Println("Register called")
 	if r.Header.Get("Content-Type") != "application/json" {

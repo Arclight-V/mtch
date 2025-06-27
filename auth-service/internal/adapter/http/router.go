@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 
+	_ "github.com/Arclight-V/mtch/auth-service/docs"
+	httpSwagger "github.com/swaggo/http-swagger"
 	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	mem "github.com/ulule/limiter/v3/drivers/store/memory"
 )
@@ -24,6 +26,7 @@ func NewRouter(h *Handler) http.Handler {
 	root.Use(rateLimiter())
 
 	api := goji.SubMux()
+	root.Handle(pat.New("/swagger/*"), httpSwagger.WrapHandler)
 	root.Handle(pat.New(apiBase+"*"), api)
 
 	auth := goji.SubMux()
