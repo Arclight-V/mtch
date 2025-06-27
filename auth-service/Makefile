@@ -3,7 +3,7 @@
 BIN_DIR := bin
 SERVICE := auth-service
 
-build:
+build: swag
 	go build -o $(BIN_DIR)/$(SERVICE) cmd/server/main.go
 
 run:
