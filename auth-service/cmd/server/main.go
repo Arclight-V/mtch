@@ -33,7 +33,7 @@ func main() {
 	log.Println(repo)
 	signer := infrastructure.NewJWTSigner(secretAccessKey, secretRefreshKey)
 	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer}
-	handler = httpadapter.NewHandler(&userClient)
+	handler = httpadapter.NewHandler(&userClient, &userClient)
 
 	log.Printf("server listening at %v", 8000)
 	http.ListenAndServe(":8000", httpadapter.NewRouter(handler))

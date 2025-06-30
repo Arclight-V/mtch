@@ -12,15 +12,13 @@ import (
 	"goji.io/pat"
 	"net/http"
 	"net/http/httptest"
-	pb "proto"
 	"strings"
 	"testing"
 )
 
-func routerWithMock(uc *mocks.MockUserRepo, ts *mocks.MockTokenSigner) http.Handler {
+func routerWithMock(regUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase) http.Handler {
 	m := goji.NewMux()
-	i := auth.Interactor{UserRepo: uc, TokenSigner: ts}
-	h := NewHandler(&i)
+	h := NewHandler(regUC, logUC)
 	m.HandleFunc(pat.Post(apiBase+"auth/register"), h.Register)
 	return m
 }
@@ -32,18 +30,17 @@ func TestRegister(t *testing.T) {
 	tests := []struct {
 		name string
 		body string
-		stub func(*mocks.MockUserRepo, *mocks.MockTokenSigner)
+		stub func(reqUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase)
 		want want
 	}{
 		{
 			name: "happy-path",
 			body: `{"email":"a@b.c", "password":"S3cret42"}`,
-			stub: func(uc *mocks.MockUserRepo, ts *mocks.MockTokenSigner) {
-				uc.
+			stub: func(reqUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase) {
+				reqUC.
 					EXPECT().
-					Register(gomock.Any(), &pb.RegisterRequest{Email: "a@b.c", Password: "S3cret42"}).
-					Return(&pb.RegisterResponse{User: &pb.User{Email: "a@b.c", PasswordHash: "S3cret42"}}, nil).
-					Times(1)
+					Register(gomock.Any(), auth.RegisterInput{Email: "a@b.c", Password: "S3cret42"}).
+					Return(auth.RegisterOutput{Email: "a@b.c"}, nil).Times(1)
 			},
 			want: want{http.StatusCreated},
 		},
@@ -54,10 +51,10 @@ func TestRegister(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			uc := mocks.NewMockUserRepo(ctrl)
-			ts := mocks.NewMockTokenSigner(ctrl)
-			tt.stub(uc, ts)
-			router := routerWithMock(uc, ts)
+			regUC := mocks.NewMockRegisterUseCase(ctrl)
+			logUC := mocks.NewMockLoginUseCase(ctrl)
+			tt.stub(regUC, logUC)
+			router := routerWithMock(regUC, logUC)
 
 			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
@@ -115,9 +112,9 @@ func TestRegister_InvalidJSON(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			uc := mocks.NewMockUserRepo(ctrl)
-			ts := mocks.NewMockTokenSigner(ctrl)
-			router := NewRouter(NewHandler(&auth.Interactor{UserRepo: uc, TokenSigner: ts}))
+			regUC := mocks.NewMockRegisterUseCase(ctrl)
+			logUC := mocks.NewMockLoginUseCase(ctrl)
+			router := NewRouter(NewHandler(regUC, logUC))
 
 			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
