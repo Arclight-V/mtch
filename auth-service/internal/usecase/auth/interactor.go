@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
-	"log"
 	pb "proto"
 	"time"
 )
@@ -44,15 +43,21 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 		Password: input.Password,
 	}
 	resp, err := uc.UserRepo.Register(ctx, pbRegReq)
-	log.Println(resp)
 	if err != nil {
 		return RegisterOutput{}, err
 	}
+
 	output := RegisterOutput{
 		UserID:    resp.User.Uuid,
 		Email:     resp.User.Email,
 		CreatedAt: resp.User.CreatedAt.AsTime(),
 		Verified:  resp.User.Verified,
 	}
+
+	access, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
+	if err != nil {
+		return RegisterOutput{}, err
+	}
+	output.VerifyToken = access
 	return output, nil
 }

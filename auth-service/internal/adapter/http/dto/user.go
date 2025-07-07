@@ -5,8 +5,9 @@ import (
 )
 
 type PendingUserDTO struct {
-	UserID   string    `json:"userid"`
-	Email    string    `json:"email"`
-	CreateAt time.Time `json:"create_at"`
-	Verified bool      `json:"verified"`
+	UserID      string    `json:"userid"`
+	Email       string    `json:"email"`
+	CreateAt    time.Time `json:"create_at"`
+	Verified    bool      `json:"verified"`
+	VerifyToken string    `json:"verify_token"`
 }

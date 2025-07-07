@@ -21,3 +21,8 @@ type RefreshClaims struct {
 	Typ string `json:"typ"`
 	jwt.RegisteredClaims
 }
+
+type VerifyClaims struct {
+	jwt.RegisteredClaims
+	Purpose string `json:"purpose"`
+}

@@ -23,10 +23,6 @@ type User struct {
 
 // Create new pending User
 func NewPendingUser(email, hash string) (*User, error) {
-	// TODO
-	// if !validator.IsEmail(email) {
-	//	return nil, errors.New("invalid email")
-	// }
 	return &User{
 		UserID:       uuid.New(),
 		Email:        email,

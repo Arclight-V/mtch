@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/dto"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
 	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
@@ -12,13 +13,15 @@ import (
 )
 
 type Handler struct {
-	regUC    auth.RegisterUseCase
-	loginUC  auth.LoginUseCase
-	validate *validator.Validate
+	regUC             auth.RegisterUseCase
+	loginUC           auth.LoginUseCase
+	validate          *validator.Validate
+	hasher            security.PasswordHasher
+	passwordValidator security.PasswordValidator
 }
 
-func NewHandler(regUC auth.RegisterUseCase, loginUC auth.LoginUseCase) *Handler {
-	return &Handler{regUC: regUC, loginUC: loginUC, validate: validator.New()}
+func NewHandler(regUC auth.RegisterUseCase, loginUC auth.LoginUseCase, hasher security.PasswordHasher, passwordValidator security.PasswordValidator) *Handler {
+	return &Handler{regUC: regUC, loginUC: loginUC, hasher: hasher, passwordValidator: passwordValidator, validate: validator.New()}
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -91,9 +94,16 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := h.passwordValidator.Validate(in.Password); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	regInput := auth.RegisterInput{
-		Email:    in.Email,
-		Password: in.Password,
+		Email: in.Email,
+	}
+	if err := regInput.SetPassword(in.Password, h.hasher); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
@@ -108,10 +118,11 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	out := dto.RegisterResponse{
 		User: dto.PendingUserDTO{
-			UserID:   regOutput.UserID,
-			Email:    regOutput.Email,
-			CreateAt: regOutput.CreatedAt,
-			Verified: regOutput.Verified,
+			UserID:      regOutput.UserID,
+			Email:       regOutput.Email,
+			CreateAt:    regOutput.CreatedAt,
+			Verified:    regOutput.Verified,
+			VerifyToken: regOutput.VerifyToken,
 		},
 	}
 	w.Header().Set("Content-Type", "application/json")
