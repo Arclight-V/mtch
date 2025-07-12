@@ -16,9 +16,9 @@ import (
 	"testing"
 )
 
-func routerWithMock(regUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase, hasher *mocks.MockPasswordHasher) http.Handler {
+func routerWithMock(regUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase) http.Handler {
 	m := goji.NewMux()
-	h := NewHandler(regUC, logUC, hasher)
+	h := NewHandler(regUC, logUC)
 	m.HandleFunc(pat.Post(apiBase+"auth/register"), h.Register)
 	return m
 }
@@ -30,18 +30,18 @@ func TestRegister(t *testing.T) {
 	tests := []struct {
 		name string
 		body string
-		stub func(reqUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase, hasher *mocks.MockPasswordHasher)
+		stub func(reqUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase)
 		want want
 	}{
 		{
 			name: "happy-path",
 			body: `{"email":"a@b.c", "password":"S3cret42"}`,
-			stub: func(reqUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase, hasher *mocks.MockPasswordHasher) {
-				passwordHash := "hashed-password"
-				hasher.EXPECT().Hash("S3cret42").Return(passwordHash, nil)
+			stub: func(reqUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase) {
+				//passwordHash := "hashed-password"
+				//hasher.EXPECT().Hash("S3cret42").Return(passwordHash, nil)
 				reqUC.
 					EXPECT().
-					Register(gomock.Any(), auth.RegisterInput{Email: "a@b.c", Password: passwordHash}).
+					Register(gomock.Any(), auth.RegisterInput{Email: "a@b.c", Password: "S3cret42"}).
 					Return(auth.RegisterOutput{Email: "a@b.c"}, nil).Times(1)
 			},
 			want: want{http.StatusCreated},
@@ -55,9 +55,8 @@ func TestRegister(t *testing.T) {
 
 			regUC := mocks.NewMockRegisterUseCase(ctrl)
 			logUC := mocks.NewMockLoginUseCase(ctrl)
-			hasher := mocks.NewMockPasswordHasher(ctrl)
-			tt.stub(regUC, logUC, hasher)
-			router := routerWithMock(regUC, logUC, hasher)
+			tt.stub(regUC, logUC)
+			router := routerWithMock(regUC, logUC)
 
 			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
@@ -117,8 +116,7 @@ func TestRegister_InvalidJSON(t *testing.T) {
 
 			regUC := mocks.NewMockRegisterUseCase(ctrl)
 			logUC := mocks.NewMockLoginUseCase(ctrl)
-			hasher := mocks.NewMockPasswordHasher(ctrl)
-			router := NewRouter(NewHandler(regUC, logUC, hasher))
+			router := NewRouter(NewHandler(regUC, logUC))
 
 			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")

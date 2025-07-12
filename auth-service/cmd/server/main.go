@@ -36,10 +36,10 @@ func main() {
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
 	log.Println(repo)
 	signer := infrastructure.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
-	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer}
 	hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
 	passwordValidator := passwd.NewUserPasswordValidator()
-	handler = httpadapter.NewHandler(&userClient, &userClient, hasher, passwordValidator)
+	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer, Hasher: hasher, PasswordValidator: passwordValidator}
+	handler = httpadapter.NewHandler(&userClient, &userClient)
 
 	log.Printf("server listening at %v", 8000)
 	http.ListenAndServe(":8000", httpadapter.NewRouter(handler))

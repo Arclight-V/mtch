@@ -3,13 +3,16 @@ package auth
 import (
 	"context"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
 	pb "proto"
 	"time"
 )
 
 type Interactor struct {
-	UserRepo    usecase.UserRepo
-	TokenSigner usecase.TokenSigner
+	UserRepo          usecase.UserRepo
+	TokenSigner       usecase.TokenSigner
+	Hasher            security.PasswordHasher
+	PasswordValidator security.PasswordValidator
 }
 
 func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
@@ -38,6 +41,14 @@ func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput,
 }
 
 func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (RegisterOutput, error) {
+	if err := uc.PasswordValidator.Validate(input.Password); err != nil {
+		return RegisterOutput{}, err
+	}
+
+	if err := input.SetPassword(input.Password, uc.Hasher); err != nil {
+		return RegisterOutput{}, err
+	}
+
 	pbRegReq := &pb.RegisterRequest{
 		Email:    input.Email,
 		Password: input.Password,

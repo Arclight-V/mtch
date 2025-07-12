@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/dto"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
 	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
@@ -13,15 +12,13 @@ import (
 )
 
 type Handler struct {
-	regUC             auth.RegisterUseCase
-	loginUC           auth.LoginUseCase
-	validate          *validator.Validate
-	hasher            security.PasswordHasher
-	passwordValidator security.PasswordValidator
+	regUC    auth.RegisterUseCase
+	loginUC  auth.LoginUseCase
+	validate *validator.Validate
 }
 
-func NewHandler(regUC auth.RegisterUseCase, loginUC auth.LoginUseCase, hasher security.PasswordHasher, passwordValidator security.PasswordValidator) *Handler {
-	return &Handler{regUC: regUC, loginUC: loginUC, hasher: hasher, passwordValidator: passwordValidator, validate: validator.New()}
+func NewHandler(regUC auth.RegisterUseCase, loginUC auth.LoginUseCase) *Handler {
+	return &Handler{regUC: regUC, loginUC: loginUC, validate: validator.New()}
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -94,16 +91,9 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.passwordValidator.Validate(in.Password); err != nil {
-		writeJSONError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
 	regInput := auth.RegisterInput{
-		Email: in.Email,
-	}
-	if err := regInput.SetPassword(in.Password, h.hasher); err != nil {
-		writeJSONError(w, http.StatusBadRequest, err.Error())
+		Email:    in.Email,
+		Password: in.Password,
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
