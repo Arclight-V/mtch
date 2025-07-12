@@ -104,14 +104,13 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO:: add logic for calling the email service
-
 	out := dto.RegisterResponse{
 		User: dto.PendingUserDTO{
-			UserID:   regOutput.UserID,
-			Email:    regOutput.Email,
-			CreateAt: regOutput.CreatedAt,
-			Verified: regOutput.Verified,
+			UserID:      regOutput.UserID,
+			Email:       regOutput.Email,
+			CreateAt:    regOutput.CreatedAt,
+			Verified:    regOutput.Verified,
+			VerifyToken: regOutput.VerifyToken,
 		},
 	}
 	w.Header().Set("Content-Type", "application/json")

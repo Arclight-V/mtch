@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	pb "proto"
+	"time"
 )
 
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=../usecase/mocks/ports_mock.go
@@ -14,4 +15,5 @@ type UserRepo interface {
 type TokenSigner interface {
 	SignAccess(uuid, sid string) (string, error)
 	SignRefresh(uuid, sid string) (string, string, error)
+	SignVerifyToken(uuid string, ttl time.Duration) (string, error)
 }

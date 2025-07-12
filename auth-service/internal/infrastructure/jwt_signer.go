@@ -15,11 +15,12 @@ const (
 type JWTSigner struct {
 	accessKey  []byte
 	refreshKey []byte
+	verifyKey  []byte
 	alg        jwt.SigningMethod
 }
 
-func NewJWTSigner(accessKye, refreshKey []byte) *JWTSigner {
-	return &JWTSigner{accessKey: accessKye, refreshKey: refreshKey, alg: jwt.SigningMethodHS256}
+func NewJWTSigner(accessKye, refreshKey, verifyKey []byte) *JWTSigner {
+	return &JWTSigner{accessKey: accessKye, refreshKey: refreshKey, verifyKey: verifyKey, alg: jwt.SigningMethodHS256}
 }
 
 func (s *JWTSigner) SignAccess(userId, sid string) (string, error) {
@@ -50,4 +51,16 @@ func (s *JWTSigner) SignRefresh(userId, sid string) (string, string, error) {
 	}
 	token, err := jwt.NewWithClaims(s.alg, claims).SignedString(s.refreshKey)
 	return token, jtiUUID.String(), err
+}
+
+func (s *JWTSigner) SignVerifyToken(userId string, ttl time.Duration) (string, error) {
+	claims := domain.VerifyClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userId,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+		Purpose: "verify",
+	}
+	return jwt.NewWithClaims(s.alg, claims).SignedString(s.verifyKey)
 }

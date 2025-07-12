@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"log"
 	"user-service/internal/models"
 	"user-service/internal/user"
 )
@@ -17,7 +16,10 @@ func NewUserUseCase(userRepo user.Repository) *userUseCase {
 
 func (u *userUseCase) Register(ctx context.Context, user *models.User) (*models.User, error) {
 	//TODO implement me
-	log.Println("//TODO implement me")
-	log.Println(user)
-	return user, nil
+
+	existUser, err := u.userRepo.FindByEmail(ctx, user.Email)
+	if err != nil {
+		return nil, err
+	}
+	return existUser, nil
 }

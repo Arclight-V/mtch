@@ -91,6 +91,9 @@ const docTemplate = `{
                 },
                 "verified": {
                     "type": "boolean"
+                },
+                "verify_token": {
+                    "type": "string"
                 }
             }
         },

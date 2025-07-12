@@ -37,6 +37,8 @@ func TestRegister(t *testing.T) {
 			name: "happy-path",
 			body: `{"email":"a@b.c", "password":"S3cret42"}`,
 			stub: func(reqUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase) {
+				//passwordHash := "hashed-password"
+				//hasher.EXPECT().Hash("S3cret42").Return(passwordHash, nil)
 				reqUC.
 					EXPECT().
 					Register(gomock.Any(), auth.RegisterInput{Email: "a@b.c", Password: "S3cret42"}).
