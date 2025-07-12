@@ -5,6 +5,7 @@ import (
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/crypto"
+	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/email"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"golang.org/x/crypto/bcrypt"
@@ -38,7 +39,8 @@ func main() {
 	signer := infrastructure.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 	hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
 	passwordValidator := passwd.NewUserPasswordValidator()
-	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer, Hasher: hasher, PasswordValidator: passwordValidator}
+	emailSender := email.NewNoopSender()
+	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer, Hasher: hasher, PasswordValidator: passwordValidator, EmailSender: emailSender}
 	handler = httpadapter.NewHandler(&userClient, &userClient)
 
 	log.Printf("server listening at %v", 8000)

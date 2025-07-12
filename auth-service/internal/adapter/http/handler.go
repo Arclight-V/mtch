@@ -104,8 +104,6 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO:: add logic for calling the email service
-
 	out := dto.RegisterResponse{
 		User: dto.PendingUserDTO{
 			UserID:      regOutput.UserID,

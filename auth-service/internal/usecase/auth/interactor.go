@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
 	pb "proto"
 	"time"
@@ -13,6 +14,7 @@ type Interactor struct {
 	TokenSigner       usecase.TokenSigner
 	Hasher            security.PasswordHasher
 	PasswordValidator security.PasswordValidator
+	EmailSender       notification.EmailSender
 }
 
 func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
@@ -70,5 +72,9 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 		return RegisterOutput{}, err
 	}
 	output.VerifyToken = access
+
+	if err := uc.EmailSender.SendUserRegistered(ctx, output.Email); err != nil {
+		return RegisterOutput{}, err
+	}
 	return output, nil
 }
