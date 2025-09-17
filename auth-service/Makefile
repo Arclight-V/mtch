@@ -1,4 +1,4 @@
-.PHONY: build run test clean mocks swag
+.PHONY: build run test clean mocks swag docker
 
 BIN_DIR := bin
 SERVICE := auth-service
@@ -23,3 +23,6 @@ mocks-check: mocks
 
 swag:
 	swag init -g cmd/server/main.go -o ./docs
+
+docker:
+	docker build --tag mtch-&{SERVICE}:latest -f Dockerfile

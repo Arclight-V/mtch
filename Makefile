@@ -1,4 +1,4 @@
-.PHONY: proto build  run test
+.PHONY: proto build  run test docker
 
 proto:
 	protoc	-I proto \
@@ -19,3 +19,6 @@ test:
 	$(MAKE) -C auth-service test
 	$(MAKE) -C user-service test
 
+docker:
+	$(MAKE) -C auth-service docker
+	$(MAKE) -C user-service docker

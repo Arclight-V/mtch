@@ -1,4 +1,4 @@
-.PHONY: build run test clean
+.PHONY: build run test clean docker
 
 BIN_DIR := bin
 SERVICE := user-service
@@ -14,3 +14,6 @@ test:
 
 clean:
 	rm -rf $(BIN_DIR)
+
+docker:
+	docker build --tag mtch-&{SERVICE}:latest -f Dockerfile
