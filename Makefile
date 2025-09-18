@@ -19,6 +19,7 @@ test:
 	$(MAKE) -C auth-service test
 	$(MAKE) -C user-service test
 
-docker:
-	$(MAKE) -C auth-service docker
-	$(MAKE) -C user-service docker
+
+docker-build:
+	$(MAKE) -C auth-service docker-build
+	$(MAKE) -C user-service docker-build

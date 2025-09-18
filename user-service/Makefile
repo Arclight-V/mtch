@@ -2,6 +2,8 @@
 
 BIN_DIR := bin
 SERVICE := user-service
+VERSION ?= latest
+USER_IMAGE ?= ${SERVICE}:${VERSION}
 
 build:
 	go build -o $(BIN_DIR)/$(SERVICE) cmd/server/main.go
@@ -15,5 +17,5 @@ test:
 clean:
 	rm -rf $(BIN_DIR)
 
-docker:
-	docker build --tag mtch-&{SERVICE}:latest -f Dockerfile
+docker-build:
+	docker build --tag mtch-${USER_IMAGE} -f Dockerfile .
