@@ -1,5 +1,9 @@
 .PHONY: proto build  run test docker
 
+TAG ?= latest
+PREFIX ?= mtch-
+SERVICES = auth-service user-service
+
 proto:
 	protoc	-I proto \
           	--go_out=proto	--go_opt=paths=source_relative \
@@ -19,7 +23,7 @@ test:
 	$(MAKE) -C auth-service test
 	$(MAKE) -C user-service test
 
+docker-build: $(SERVICES:%=docker-build-%)
 
-docker-build:
-	$(MAKE) -C auth-service docker-build
-	$(MAKE) -C user-service docker-build
+docker-build-%:
+	docker build -t $(PREFIX)$*:$(TAG) -f $*/Dockerfile .
