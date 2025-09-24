@@ -1,0 +1,5 @@
+client:
+  GRPC_ADDR: "localhost:50051"
+
+http:
+  HTTP_ADDR: ":8000"
