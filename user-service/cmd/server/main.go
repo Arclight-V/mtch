@@ -22,10 +22,12 @@ func main() {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	s := grpc.NewServer()
-	userRepo := repository.NewUserRepository()
+	db := repository.NewFakeDB()
+	userRepo := repository.NewUserRepository(db)
 	userUC := userUserCase.NewUserUseCase(userRepo)
 	server := userServerGRPC.NewUserServerGRPC(userUC)
+
+	s := grpc.NewServer()
 	pb.RegisterUserInfoServer(s, server)
 
 	lis, err := net.Listen("tcp", cfg.Server.Port)

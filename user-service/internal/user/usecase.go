@@ -7,5 +7,5 @@ import (
 
 // User User Case interface
 type UserUseCase interface {
-	Register(ctx context.Context, user *models.User) (*models.User, error)
+	Register(ctx context.Context, user *models.RegistrationData) (*models.User, error)
 }
