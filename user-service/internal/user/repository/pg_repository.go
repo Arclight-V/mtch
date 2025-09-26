@@ -22,15 +22,17 @@ func NewUserRepository(db *FakeDB) *UserRepository {
 func (u *UserRepository) Create(ctx context.Context, regData *models.RegistrationData) (*models.User, error) {
 	pendingUser, _ := models.NewPendingUser(regData.Email, regData.PasswordHash)
 
+	// TODO: Отказаться от StructScan
 	if err := u.db.QueryRowxContext(
 		ctx,
 		createPendingUserQuery,
 		pendingUser.Email,
 		pendingUser.PasswordHash,
 		pendingUser.UserID,
-	).StructScan(regData); err != nil {
+	).StructScan(pendingUser); err != nil {
 		return nil, errors.Wrap(err, "Create.QueryRowxContext")
 	}
+
 	return pendingUser, nil
 
 }

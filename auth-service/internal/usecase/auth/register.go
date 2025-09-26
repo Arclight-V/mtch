@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
-	"time"
 )
 
 type RegisterInput struct {
@@ -23,9 +22,8 @@ func (ri *RegisterInput) SetPassword(plain string, h security.PasswordHasher) er
 type RegisterOutput struct {
 	UserID      string
 	Email       string
-	CreatedAt   time.Time
-	Verified    bool
 	VerifyToken string
+	Verified    bool
 }
 
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=../mocks/register_mock.go

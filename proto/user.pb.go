@@ -22,6 +22,65 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type CreateUserStatus int32
+
+const (
+	CreateUserStatus_CREATE_USER_STATUS_UNSPECIFIED CreateUserStatus = 0
+	// Successfully created, but not yet verified
+	CreateUserStatus_CREATED_UNVERIFIED CreateUserStatus = 1
+	// There is already a user with this email address and it has been verified
+	CreateUserStatus_EXISTS_VERIFIED CreateUserStatus = 2
+	// Already exists, but has NOT been verified
+	CreateUserStatus_EXISTS_UNVERIFIED CreateUserStatus = 3
+	// Not created for a business reason
+	CreateUserStatus_REJECTED CreateUserStatus = 4
+)
+
+// Enum value maps for CreateUserStatus.
+var (
+	CreateUserStatus_name = map[int32]string{
+		0: "CREATE_USER_STATUS_UNSPECIFIED",
+		1: "CREATED_UNVERIFIED",
+		2: "EXISTS_VERIFIED",
+		3: "EXISTS_UNVERIFIED",
+		4: "REJECTED",
+	}
+	CreateUserStatus_value = map[string]int32{
+		"CREATE_USER_STATUS_UNSPECIFIED": 0,
+		"CREATED_UNVERIFIED":             1,
+		"EXISTS_VERIFIED":                2,
+		"EXISTS_UNVERIFIED":              3,
+		"REJECTED":                       4,
+	}
+)
+
+func (x CreateUserStatus) Enum() *CreateUserStatus {
+	p := new(CreateUserStatus)
+	*p = x
+	return p
+}
+
+func (x CreateUserStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (CreateUserStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_user_proto_enumTypes[0].Descriptor()
+}
+
+func (CreateUserStatus) Type() protoreflect.EnumType {
+	return &file_user_proto_enumTypes[0]
+}
+
+func (x CreateUserStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use CreateUserStatus.Descriptor instead.
+func (CreateUserStatus) EnumDescriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{0}
+}
+
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
@@ -29,11 +88,11 @@ type User struct {
 	FirstName     string                 `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	LastName      string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
 	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	Avatar        string                 `protobuf:"bytes,6,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Avatar        *string                `protobuf:"bytes,6,opt,name=avatar,proto3,oneof" json:"avatar,omitempty"`
 	PasswordHash  string                 `protobuf:"bytes,7,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdateAt      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=update_at,json=updateAt,proto3" json:"update_at,omitempty"`
-	Verified      bool                   `protobuf:"varint,10,opt,name=verified,proto3" json:"verified,omitempty"`
+	Verified      CreateUserStatus       `protobuf:"varint,10,opt,name=verified,proto3,enum=userService.CreateUserStatus" json:"verified,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -104,8 +163,8 @@ func (x *User) GetRole() string {
 }
 
 func (x *User) GetAvatar() string {
-	if x != nil {
-		return x.Avatar
+	if x != nil && x.Avatar != nil {
+		return *x.Avatar
 	}
 	return ""
 }
@@ -131,11 +190,11 @@ func (x *User) GetUpdateAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *User) GetVerified() bool {
+func (x *User) GetVerified() CreateUserStatus {
 	if x != nil {
 		return x.Verified
 	}
-	return false
+	return CreateUserStatus_CREATE_USER_STATUS_UNSPECIFIED
 }
 
 type RegisterRequest struct {
@@ -192,7 +251,8 @@ func (x *RegisterRequest) GetEmail() string {
 
 type RegisterResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Status        CreateUserStatus       `protobuf:"varint,2,opt,name=status,proto3,enum=userService.CreateUserStatus" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -227,11 +287,18 @@ func (*RegisterResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *RegisterResponse) GetUser() *User {
+func (x *RegisterResponse) GetUserId() string {
 	if x != nil {
-		return x.User
+		return x.UserId
 	}
-	return nil
+	return ""
+}
+
+func (x *RegisterResponse) GetStatus() CreateUserStatus {
+	if x != nil {
+		return x.Status
+	}
+	return CreateUserStatus_CREATE_USER_STATUS_UNSPECIFIED
 }
 
 type LoginRequest struct {
@@ -367,26 +434,28 @@ var File_user_proto protoreflect.FileDescriptor
 const file_user_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"user.proto\x12\vuserService\x1a\x1fgoogle/protobuf/timestamp.proto\"\xcd\x02\n" +
+	"user.proto\x12\vuserService\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfc\x02\n" +
 	"\x04User\x12\x12\n" +
 	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x04 \x01(\tR\blastName\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\x12\x16\n" +
-	"\x06avatar\x18\x06 \x01(\tR\x06avatar\x12#\n" +
+	"\x04role\x18\x05 \x01(\tR\x04role\x12\x1b\n" +
+	"\x06avatar\x18\x06 \x01(\tH\x00R\x06avatar\x88\x01\x01\x12#\n" +
 	"\rpassword_hash\x18\a \x01(\tR\fpasswordHash\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x127\n" +
-	"\tupdate_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\bupdateAt\x12\x1a\n" +
+	"\tupdate_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\bupdateAt\x129\n" +
 	"\bverified\x18\n" +
-	" \x01(\bR\bverified\"C\n" +
+	" \x01(\x0e2\x1d.userService.CreateUserStatusR\bverifiedB\t\n" +
+	"\a_avatar\"C\n" +
 	"\x0fRegisterRequest\x12\x1a\n" +
 	"\bpassword\x18\x01 \x01(\tR\bpassword\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"9\n" +
-	"\x10RegisterResponse\x12%\n" +
-	"\x04user\x18\x01 \x01(\v2\x11.userService.UserR\x04user\"@\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\"b\n" +
+	"\x10RegisterResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x125\n" +
+	"\x06status\x18\x02 \x01(\x0e2\x1d.userService.CreateUserStatusR\x06status\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xbc\x01\n" +
@@ -397,7 +466,13 @@ const file_user_proto_rawDesc = "" +
 	"\faccess_token\x18\x03 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x04 \x01(\tR\frefreshToken\x12\x1d\n" +
 	"\n" +
-	"expires_in\x18\x05 \x01(\x03R\texpiresIn2\x93\x01\n" +
+	"expires_in\x18\x05 \x01(\x03R\texpiresIn*\x88\x01\n" +
+	"\x10CreateUserStatus\x12\"\n" +
+	"\x1eCREATE_USER_STATUS_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12CREATED_UNVERIFIED\x10\x01\x12\x13\n" +
+	"\x0fEXISTS_VERIFIED\x10\x02\x12\x15\n" +
+	"\x11EXISTS_UNVERIFIED\x10\x03\x12\f\n" +
+	"\bREJECTED\x10\x042\x93\x01\n" +
 	"\bUserInfo\x12G\n" +
 	"\bRegister\x12\x1c.userService.RegisterRequest\x1a\x1d.userService.RegisterResponse\x12>\n" +
 	"\x05Login\x12\x19.userService.LoginRequest\x1a\x1a.userService.LoginResponseB\x06Z\x04.;pbb\x06proto3"
@@ -414,29 +489,32 @@ func file_user_proto_rawDescGZIP() []byte {
 	return file_user_proto_rawDescData
 }
 
+var file_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_user_proto_goTypes = []any{
-	(*User)(nil),                  // 0: userService.User
-	(*RegisterRequest)(nil),       // 1: userService.RegisterRequest
-	(*RegisterResponse)(nil),      // 2: userService.RegisterResponse
-	(*LoginRequest)(nil),          // 3: userService.LoginRequest
-	(*LoginResponse)(nil),         // 4: userService.LoginResponse
-	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(CreateUserStatus)(0),         // 0: userService.CreateUserStatus
+	(*User)(nil),                  // 1: userService.User
+	(*RegisterRequest)(nil),       // 2: userService.RegisterRequest
+	(*RegisterResponse)(nil),      // 3: userService.RegisterResponse
+	(*LoginRequest)(nil),          // 4: userService.LoginRequest
+	(*LoginResponse)(nil),         // 5: userService.LoginResponse
+	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
 }
 var file_user_proto_depIdxs = []int32{
-	5, // 0: userService.User.created_at:type_name -> google.protobuf.Timestamp
-	5, // 1: userService.User.update_at:type_name -> google.protobuf.Timestamp
-	0, // 2: userService.RegisterResponse.user:type_name -> userService.User
-	0, // 3: userService.LoginResponse.user:type_name -> userService.User
-	1, // 4: userService.UserInfo.Register:input_type -> userService.RegisterRequest
-	3, // 5: userService.UserInfo.Login:input_type -> userService.LoginRequest
-	2, // 6: userService.UserInfo.Register:output_type -> userService.RegisterResponse
-	4, // 7: userService.UserInfo.Login:output_type -> userService.LoginResponse
-	6, // [6:8] is the sub-list for method output_type
-	4, // [4:6] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	6, // 0: userService.User.created_at:type_name -> google.protobuf.Timestamp
+	6, // 1: userService.User.update_at:type_name -> google.protobuf.Timestamp
+	0, // 2: userService.User.verified:type_name -> userService.CreateUserStatus
+	0, // 3: userService.RegisterResponse.status:type_name -> userService.CreateUserStatus
+	1, // 4: userService.LoginResponse.user:type_name -> userService.User
+	2, // 5: userService.UserInfo.Register:input_type -> userService.RegisterRequest
+	4, // 6: userService.UserInfo.Login:input_type -> userService.LoginRequest
+	3, // 7: userService.UserInfo.Register:output_type -> userService.RegisterResponse
+	5, // 8: userService.UserInfo.Login:output_type -> userService.LoginResponse
+	7, // [7:9] is the sub-list for method output_type
+	5, // [5:7] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }
@@ -444,18 +522,20 @@ func file_user_proto_init() {
 	if File_user_proto != nil {
 		return
 	}
+	file_user_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_proto_rawDesc), len(file_user_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_user_proto_goTypes,
 		DependencyIndexes: file_user_proto_depIdxs,
+		EnumInfos:         file_user_proto_enumTypes,
 		MessageInfos:      file_user_proto_msgTypes,
 	}.Build()
 	File_user_proto = out.File
