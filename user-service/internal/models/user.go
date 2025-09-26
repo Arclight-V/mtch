@@ -21,13 +21,12 @@ type User struct {
 	Verified     bool      `json:"verified" db:"verified"`
 }
 
-// Create new pending User
+// NewPendingUser Create new pending User
 func NewPendingUser(email, hash string) (*User, error) {
 	return &User{
 		UserID:       uuid.New(),
 		Email:        email,
 		PasswordHash: hash,
-		CreatedAt:    time.Now(),
 		Verified:     false,
 	}, nil
 }
@@ -39,4 +38,10 @@ func (u *User) GetAvatar() string {
 		return ""
 	}
 	return *u.Avatar
+}
+
+// RegistrationData data for registration
+type RegistrationData struct {
+	Email        string
+	PasswordHash string
 }

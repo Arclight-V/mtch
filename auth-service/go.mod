@@ -73,4 +73,4 @@ require (
 
 replace proto => ../proto
 
-replace config => ../shared/platform/config
+replace config => ./../pkg/platform/config
