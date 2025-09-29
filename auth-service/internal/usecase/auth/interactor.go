@@ -61,10 +61,8 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 	}
 
 	output := RegisterOutput{
-		UserID:    resp.User.Uuid,
-		Email:     resp.User.Email,
-		CreatedAt: resp.User.CreatedAt.AsTime(),
-		Verified:  resp.User.Verified,
+		UserID: resp.UserId,
+		Email:  input.Email,
 	}
 
 	access, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)

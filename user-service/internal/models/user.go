@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/google/uuid"
 	"time"
 )
@@ -44,4 +45,47 @@ func (u *User) GetAvatar() string {
 type RegistrationData struct {
 	Email        string
 	PasswordHash string
+}
+
+type CreateUserStatus int
+
+const (
+	CreateUserStatusUnspecified = iota
+
+	//CreatedUnverified Successfully created, but not yet verified
+	CreatedUnverified
+
+	//ExistsVerified There is already a user with this email address and it has been verified
+	ExistsVerified
+
+	//ExistsUnverified Already exists, but has NOT been verified
+	ExistsUnverified
+
+	//Rejected Not created for a business reason
+	Rejected
+)
+
+func (c CreateUserStatus) String() string {
+	switch c {
+	case CreateUserStatusUnspecified:
+		return "CREATE_USER_STATUS_UNSPECIFIED"
+	case CreatedUnverified:
+		return "CREATED_UNVERIFIED"
+	case ExistsVerified:
+		return "EXISTS_VERIFIED"
+	case ExistsUnverified:
+		return "EXISTS_UNVERIFIED"
+	case Rejected:
+		return "REJECTED"
+	}
+	return ""
+}
+
+func (c CreateUserStatus) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.String())
+}
+
+type RegistrationOutput struct {
+	UserID uuid.UUID
+	Status CreateUserStatus
 }

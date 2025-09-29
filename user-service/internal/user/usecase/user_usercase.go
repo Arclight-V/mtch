@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"user-service/internal/models"
 	"user-service/internal/user"
 )
@@ -15,19 +14,21 @@ func NewUserUseCase(userRepo user.Repository) *userUseCase {
 	return &userUseCase{userRepo: userRepo}
 }
 
-func (u *userUseCase) Register(ctx context.Context, user *models.RegistrationData) (*models.User, error) {
-	//TODO implement me
-
+func (u *userUseCase) Register(ctx context.Context, user *models.RegistrationData) (*models.RegistrationOutput, error) {
 	existUser, err := u.userRepo.FindByEmail(ctx, user.Email)
+
 	// a User was not found
 	if err != nil {
-		return u.userRepo.Create(ctx, user)
+		usr, err2 := u.userRepo.Create(ctx, user)
+		if err2 != nil {
+			return nil, err2
+		}
+		return &models.RegistrationOutput{UserID: usr.UserID, Status: models.CreatedUnverified}, nil
 	}
 	if existUser.Verified {
-		return nil, errors.New("User already registered.")
-	} else {
-		// TODO: add logic for re-verification by email change pashHas, etc.
+		return &models.RegistrationOutput{UserID: existUser.UserID, Status: models.ExistsVerified}, nil
 	}
 
-	return u.userRepo.Create(ctx, user)
+	return &models.RegistrationOutput{UserID: existUser.UserID, Status: models.ExistsUnverified}, nil
+
 }

@@ -10,6 +10,22 @@ service UserInfo {
   rpc Login(LoginRequest) returns (LoginResponse);
 }
 
+enum CreateUserStatus {
+  CREATE_USER_STATUS_UNSPECIFIED = 0;
+
+  // Successfully created, but not yet verified
+  CREATED_UNVERIFIED = 1;
+
+  // There is already a user with this email address and it has been verified
+  EXISTS_VERIFIED = 2;
+
+  // Already exists, but has NOT been verified
+  EXISTS_UNVERIFIED = 3;
+
+  // Not created for a business reason
+  REJECTED = 4;
+}
+
 message User {
   string uuid = 1;
   string email = 2;
@@ -20,7 +36,7 @@ message User {
   string password_hash = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp update_at = 9;
-  bool verified = 10;
+  CreateUserStatus verified = 10;
 }
 
 message RegisterRequest {
@@ -29,7 +45,8 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-  User user = 1;
+  string user_id = 1;
+  CreateUserStatus status = 2;
 }
 
 message LoginRequest {

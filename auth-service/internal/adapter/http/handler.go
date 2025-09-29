@@ -108,9 +108,8 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		User: dto.PendingUserDTO{
 			UserID:      regOutput.UserID,
 			Email:       regOutput.Email,
-			CreateAt:    regOutput.CreatedAt,
-			Verified:    regOutput.Verified,
 			VerifyToken: regOutput.VerifyToken,
+			Verified:    false,
 		},
 	}
 	w.Header().Set("Content-Type", "application/json")
