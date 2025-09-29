@@ -44,7 +44,7 @@ func main() {
 	signer := infrastructure.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 	hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
 	passwordValidator := passwd.NewUserPasswordValidator()
-	emailSender := email.NewNoopSender()
+	emailSender := email.NewSMTPClient(cfg)
 	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer, Hasher: hasher, PasswordValidator: passwordValidator, EmailSender: emailSender}
 	handler = httpadapter.NewHandler(&userClient, &userClient)
 

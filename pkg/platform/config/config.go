@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	Server *ServerCfg `mapstructure:"server"`
-	Client *ClientCfg `mapstructure:"client"`
-	Http   *HTTPCfg   `mapstructure:"http"`
+	Server     *ServerCfg  `mapstructure:"server"`
+	Client     *ClientCfg  `mapstructure:"client"`
+	Http       *HTTPCfg    `mapstructure:"http"`
+	SMTPClient *SMTPClient `mapstructure:"smtp_client"`
 }
 
 type ServerCfg struct {
@@ -23,6 +24,14 @@ type ClientCfg struct {
 
 type HTTPCfg struct {
 	HTTPAddr string `mapstructure:"http_addr"`
+}
+
+type SMTPClient struct {
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
+	User string `mapstructure:"user"`
+	Pass string `mapstructure:"pass"`
+	From string `mapstructure:"from"`
 }
 
 // LoadConfig Load config file from given path
