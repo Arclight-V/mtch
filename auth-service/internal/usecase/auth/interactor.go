@@ -5,6 +5,7 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
+	"log"
 	pb "proto"
 	"time"
 )
@@ -64,6 +65,7 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 		UserID: resp.UserId,
 		Email:  input.Email,
 	}
+	log.Printf("user registered to: %v", output)
 
 	access, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
 	if err != nil {

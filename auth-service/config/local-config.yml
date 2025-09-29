@@ -3,3 +3,10 @@ client:
 
 http:
   HTTP_ADDR: ":8000"
+
+smtp_client:
+  HOST: "127.0.0.1"
+  PORT: "1025"
+  USER: "..."
+  PASS: "..."
+  FROM: "no-reply@match.com"
