@@ -67,13 +67,17 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 	}
 	log.Printf("user registered to: %v", output)
 
-	access, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
+	token, _, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
 	if err != nil {
 		return RegisterOutput{}, err
 	}
-	output.VerifyToken = access
 
-	if err := uc.EmailSender.SendUserRegistered(ctx, output.Email); err != nil {
+	vd := notification.VerifyData{
+		Email:       input.Email,
+		VerifyToken: token,
+	}
+
+	if err := uc.EmailSender.SendUserRegistered(ctx, vd); err != nil {
 		return RegisterOutput{}, err
 	}
 	return output, nil

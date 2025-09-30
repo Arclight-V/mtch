@@ -1,20 +1,28 @@
 package email
 
 import (
+	"bytes"
 	"config"
 	"context"
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
 	"github.com/go-gomail/gomail"
+	"html/template"
 	"log"
+	"net/url"
 )
 
-const htmpl = `<!doctype html>
-<title>Email verified</title>
+const emailTpl = `<!doctype html>
+<title>Подтверждение email</title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <body>
-  <h1>Email подтвержден ✅</h1>
-  <p>Теперь вы можете заполнить профиль через API <code>PUT /v1/users/me/profile</code>.</p>
+  <h1>Подтвердите email</h1>
+  <p>Перейдите по ссылке:</p>
+  <p><a href="{{.VerifyURL}}">{{.VerifyURL}}</a></p>
+  <p>Ссылка действует 24 часа.</p>
 </body>`
+
+// TODO: move it
+const verifyEmailURL = "http://localhost:8000/api/v1/verify-email"
 
 type SMTPClient struct {
 	Host string
@@ -42,11 +50,49 @@ func (s *SMTPClient) send(ctx context.Context, to, subject, html string) error {
 	return d.DialAndSend(m)
 }
 
-func (s *SMTPClient) SendUserRegistered(ctx context.Context, to string) error {
-	log.Printf("sending user registered to: %v", to)
-	err := s.send(ctx, to, "subject", htmpl)
+type EmailData struct {
+	VerifyURL string
+}
+
+func makeVerifyURL(base string, token string) (string, error) {
+	u, err := url.Parse(base) // например: https://auth.example.com/v1/auth/verify-email
+	if err != nil {
+		return "", err
+	}
+	q := u.Query()
+	q.Set("token", token) // аккуратно добавляем токен как query-параметр
+	u.RawQuery = q.Encode()
+	return u.String(), nil
+}
+
+func renderEmailHTML(baseVerifyURL, token string) (string, error) {
+	verifyURL, err := makeVerifyURL(baseVerifyURL, token)
+	if err != nil {
+		return "", err
+	}
+
+	t := template.Must(template.New("email").Parse(emailTpl))
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, EmailData{VerifyURL: verifyURL}); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func (s *SMTPClient) SendUserRegistered(ctx context.Context, vd notification.VerifyData) error {
+	log.Printf("sending user registered to: %v", vd.Email)
+	u, err := makeVerifyURL(verifyEmailURL, vd.VerifyToken)
 	if err != nil {
 		return err
+	}
+	htmpl, err := renderEmailHTML(u, vd.VerifyToken)
+	if err != nil {
+		return err
+	}
+
+	errSend := s.send(ctx, vd.Email, "subject", htmpl)
+	if errSend != nil {
+		return errSend
 	}
 	return nil
 }

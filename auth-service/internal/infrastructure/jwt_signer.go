@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"errors"
 	"github.com/Arclight-V/mtch/auth-service/internal/domain"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -10,6 +11,11 @@ import (
 const (
 	accessTTl  = 15 * time.Minute
 	refreshTTl = 30 * 24 * time.Hour
+)
+
+var (
+	ErrInvalidToken = errors.New("invalid or expired token")
+	ErrWrongPurpose = errors.New("wrong token purpose")
 )
 
 type JWTSigner struct {
@@ -53,14 +59,44 @@ func (s *JWTSigner) SignRefresh(userId, sid string) (string, string, error) {
 	return token, jtiUUID.String(), err
 }
 
-func (s *JWTSigner) SignVerifyToken(userId string, ttl time.Duration) (string, error) {
+// SignVerifyToken sign verify token. Return token, jti, error
+func (s *JWTSigner) SignVerifyToken(userId string, ttl time.Duration) (string, string, error) {
+	jti := uuid.NewString()
 	claims := domain.VerifyClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userId,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "auth-service",
+			ID:        jti,
 		},
 		Purpose: "verify",
 	}
-	return jwt.NewWithClaims(s.alg, claims).SignedString(s.verifyKey)
+	tok, err := jwt.NewWithClaims(s.alg, claims).SignedString(s.verifyKey)
+	return tok, jti, err
+}
+
+func (s *JWTSigner) ParseVerifyToken(tokenStr string) (string, string, error) {
+	var claims domain.VerifyClaims
+
+	parser := jwt.NewParser(
+		jwt.WithValidMethods([]string{s.alg.Alg()}),
+		jwt.WithIssuedAt(),
+		jwt.WithLeeway(2*time.Second),
+	)
+
+	tok, err := parser.ParseWithClaims(tokenStr, &claims, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrInvalidToken
+		}
+		return s.verifyKey, nil
+	})
+	if err != nil || !tok.Valid {
+		return "", "", ErrInvalidToken
+	}
+	if claims.Purpose != "verify" {
+		return "", "", ErrWrongPurpose
+	}
+
+	return claims.Subject, claims.ID, nil
 }
