@@ -20,10 +20,9 @@ func (ri *RegisterInput) SetPassword(plain string, h security.PasswordHasher) er
 }
 
 type RegisterOutput struct {
-	UserID      string
-	Email       string
-	VerifyToken string
-	Verified    bool
+	UserID   string
+	Email    string
+	Verified bool
 }
 
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=../mocks/register_mock.go
