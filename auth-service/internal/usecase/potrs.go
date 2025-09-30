@@ -16,4 +16,5 @@ type TokenSigner interface {
 	SignAccess(uuid, sid string) (string, error)
 	SignRefresh(uuid, sid string) (string, string, error)
 	SignVerifyToken(uuid string, ttl time.Duration) (string, string, error)
+	ParseVerifyToken(tokenStr string) (string, string, error)
 }
