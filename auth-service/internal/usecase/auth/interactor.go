@@ -16,6 +16,7 @@ type Interactor struct {
 	Hasher            security.PasswordHasher
 	PasswordValidator security.PasswordValidator
 	EmailSender       notification.EmailSender
+	VerifyTokenRepo   usecase.VerifyTokenRepo
 }
 
 func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
@@ -67,7 +68,7 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 	}
 	log.Printf("user registered to: %v", output)
 
-	token, _, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
+	verifyTokenIssue, token, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
 	if err != nil {
 		return RegisterOutput{}, err
 	}
@@ -78,6 +79,9 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 	}
 
 	if err := uc.EmailSender.SendUserRegistered(ctx, vd); err != nil {
+		return RegisterOutput{}, err
+	}
+	if err := uc.VerifyTokenRepo.InsertIssue(ctx, verifyTokenIssue); err != nil {
 		return RegisterOutput{}, err
 	}
 	return output, nil
