@@ -1,4 +1,4 @@
-package infrastructure
+package jwt_signer
 
 import (
 	"errors"
@@ -60,20 +60,24 @@ func (s *JWTSigner) SignRefresh(userId, sid string) (string, string, error) {
 }
 
 // SignVerifyToken sign verify token. Return token, jti, error
-func (s *JWTSigner) SignVerifyToken(userId string, ttl time.Duration) (string, string, error) {
+func (s *JWTSigner) SignVerifyToken(userId string, ttl time.Duration) (domain.VerifyTokenIssue, string, error) {
 	jti := uuid.NewString()
+	expiresAt := jwt.NewNumericDate(time.Now().Add(ttl))
+
 	claims := domain.VerifyClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userId,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
+			ExpiresAt: expiresAt,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    "auth-service",
 			ID:        jti,
 		},
 		Purpose: "verify",
 	}
+
 	tok, err := jwt.NewWithClaims(s.alg, claims).SignedString(s.verifyKey)
-	return tok, jti, err
+	verifyTokenIssue := domain.VerifyTokenIssue{JTI: jti, UserID: userId, ExpiresAt: expiresAt.Time}
+	return verifyTokenIssue, tok, err
 }
 
 func (s *JWTSigner) ParseVerifyToken(tokenStr string) (string, string, error) {

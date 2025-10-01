@@ -4,11 +4,12 @@ import (
 	"config"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
-	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/crypto"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/email"
+	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/repository"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -41,11 +42,19 @@ func main() {
 	defer conn.Close()
 
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
-	signer := infrastructure.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
+	signer := jwt_signer.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 	hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
 	passwordValidator := passwd.NewUserPasswordValidator()
 	emailSender := email.NewSMTPClient(cfg)
-	userClient := auth.Interactor{UserRepo: repo, TokenSigner: signer, Hasher: hasher, PasswordValidator: passwordValidator, EmailSender: emailSender}
+	verifyTokenRepo := repository.NewVerifyTokensMem()
+	userClient := auth.Interactor{
+		UserRepo:          repo,
+		TokenSigner:       signer,
+		Hasher:            hasher,
+		PasswordValidator: passwordValidator,
+		EmailSender:       emailSender,
+		VerifyTokenRepo:   verifyTokenRepo,
+	}
 	handler = httpadapter.NewHandler(&userClient, &userClient)
 
 	log.Printf("server listening at %v", cfg.Http.HTTPAddr)
