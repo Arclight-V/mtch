@@ -10,3 +10,6 @@ smtp_client:
   USER: "..."
   PASS: "..."
   FROM: "no-reply@match.com"
+
+# "postgres", "memory"
+db_kind: "memory"

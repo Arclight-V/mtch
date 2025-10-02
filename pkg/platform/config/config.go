@@ -11,6 +11,7 @@ type Config struct {
 	Client     *ClientCfg  `mapstructure:"client"`
 	Http       *HTTPCfg    `mapstructure:"http"`
 	SMTPClient *SMTPClient `mapstructure:"smtp_client"`
+	DBKind     string      `mapstructure:"db_kind"`
 }
 
 type ServerCfg struct {
