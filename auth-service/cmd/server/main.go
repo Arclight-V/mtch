@@ -58,5 +58,7 @@ func main() {
 	handler = httpadapter.NewHandler(&userClient, &userClient)
 
 	log.Printf("server listening at %v", cfg.Http.HTTPAddr)
-	http.ListenAndServe(cfg.Http.HTTPAddr, httpadapter.NewRouter(handler))
+	if err := http.ListenAndServe(cfg.Http.HTTPAddr, httpadapter.NewRouter(handler)); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }
