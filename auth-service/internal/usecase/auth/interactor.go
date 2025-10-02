@@ -86,3 +86,22 @@ func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (Regist
 	}
 	return output, nil
 }
+
+func (uc *Interactor) VerifyEmail(ctx context.Context, in VerifyEmailInput) (VerifyEmailOutput, error) {
+	v, err := uc.TokenSigner.ParseVerifyToken(in.Token)
+	if err != nil {
+		return VerifyEmailOutput{}, err
+	}
+
+	if err := uc.VerifyTokenRepo.TryConsumeJTI(ctx, v); err != nil {
+		return VerifyEmailOutput{}, err
+	}
+
+	output := VerifyEmailOutput{
+		UserID: v.UserID,
+		//TODO:: get the ActivateAt, Activated from the user-service response
+		ActivateAt: time.Now(),
+		Verified:   true,
+	}
+	return output, nil
+}

@@ -22,7 +22,7 @@ const emailTpl = `<!doctype html>
 </body>`
 
 // TODO: move it
-const verifyEmailURL = "http://localhost:8000/api/v1/verify-email"
+const verifyEmailURL = "https://localhost:8000/api/v1/auth/verify-email"
 
 type SMTPClient struct {
 	Host string
@@ -55,12 +55,12 @@ type EmailData struct {
 }
 
 func makeVerifyURL(base string, token string) (string, error) {
-	u, err := url.Parse(base) // например: https://auth.example.com/v1/auth/verify-email
+	u, err := url.Parse(base)
 	if err != nil {
 		return "", err
 	}
 	q := u.Query()
-	q.Set("token", token) // аккуратно добавляем токен как query-параметр
+	q.Set("token", token)
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
