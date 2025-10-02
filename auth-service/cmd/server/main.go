@@ -55,7 +55,7 @@ func main() {
 		EmailSender:       emailSender,
 		VerifyTokenRepo:   verifyTokenRepo,
 	}
-	handler = httpadapter.NewHandler(&userClient, &userClient)
+	handler = httpadapter.NewHandler(&userClient, &userClient, &userClient)
 
 	log.Printf("server listening at %v", cfg.Http.HTTPAddr)
 	if err := http.ListenAndServe(cfg.Http.HTTPAddr, httpadapter.NewRouter(handler)); err != nil {

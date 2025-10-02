@@ -33,6 +33,7 @@ func NewRouter(h *Handler) http.Handler {
 	api.Handle(pat.New("/auth/*"), auth)
 
 	auth.HandleFunc(pat.Post("/register"), h.Register)
+	auth.HandleFunc(pat.Get("/verify-email"), h.VerifyEmail)
 	auth.HandleFunc(pat.Post("/login"), h.Login)
 
 	return root

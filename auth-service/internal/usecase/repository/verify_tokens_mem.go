@@ -29,3 +29,17 @@ func (m *VerifyTokensMem) InsertIssue(_ context.Context, v domain.VerifyTokenIss
 
 	return nil
 }
+
+func (m *VerifyTokensMem) TryConsumeJTI(ctx context.Context, v domain.VerifyEmailToken) error {
+	log.Println("TryConsumeJTI: ", v)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if _, ok := m.byJTI[v.JTI]; ok {
+		delete(m.byJTI, v.JTI)
+	} else {
+		return errors.New("verify token jti not found")
+	}
+
+	return nil
+}

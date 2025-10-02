@@ -80,7 +80,7 @@ func (s *JWTSigner) SignVerifyToken(userId string, ttl time.Duration) (domain.Ve
 	return verifyTokenIssue, tok, err
 }
 
-func (s *JWTSigner) ParseVerifyToken(tokenStr string) (string, string, error) {
+func (s *JWTSigner) ParseVerifyToken(tokenStr string) (domain.VerifyEmailToken, error) {
 	var claims domain.VerifyClaims
 
 	parser := jwt.NewParser(
@@ -96,11 +96,11 @@ func (s *JWTSigner) ParseVerifyToken(tokenStr string) (string, string, error) {
 		return s.verifyKey, nil
 	})
 	if err != nil || !tok.Valid {
-		return "", "", ErrInvalidToken
+		return domain.VerifyEmailToken{}, ErrInvalidToken
 	}
 	if claims.Purpose != "verify" {
-		return "", "", ErrWrongPurpose
+		return domain.VerifyEmailToken{}, ErrWrongPurpose
 	}
 
-	return claims.Subject, claims.ID, nil
+	return domain.VerifyEmailToken{JTI: claims.ID, UserID: claims.Subject}, nil
 }
