@@ -7,3 +7,8 @@ type VerifyTokenIssue struct {
 	UserID    string
 	ExpiresAt time.Time
 }
+
+type VerifyEmailToken struct {
+	JTI    string
+	UserID string
+}

@@ -28,3 +28,12 @@ func (r *GrpcUserRepo) Register(ctx context.Context, request *pb.RegisterRequest
 	}
 	return resp, nil
 }
+
+func (r *GrpcUserRepo) VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {
+	//TODO implement me
+	resp, err := r.cli.VerifyEmail(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}

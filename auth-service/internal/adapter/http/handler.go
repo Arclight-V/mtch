@@ -3,6 +3,7 @@ package httpadapter
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/dto"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"github.com/go-playground/validator/v10"
@@ -12,13 +13,22 @@ import (
 )
 
 type Handler struct {
-	regUC    auth.RegisterUseCase
-	loginUC  auth.LoginUseCase
-	validate *validator.Validate
+	regUC         auth.RegisterUseCase
+	loginUC       auth.LoginUseCase
+	verifyEmailUC auth.VerifyEmailUseCase
+	validate      *validator.Validate
 }
 
-func NewHandler(regUC auth.RegisterUseCase, loginUC auth.LoginUseCase) *Handler {
-	return &Handler{regUC: regUC, loginUC: loginUC, validate: validator.New()}
+func NewHandler(
+	regUC auth.RegisterUseCase,
+	loginUC auth.LoginUseCase,
+	verifyEmailUC auth.VerifyEmailUseCase) *Handler {
+	return &Handler{
+		regUC:         regUC,
+		loginUC:       loginUC,
+		verifyEmailUC: verifyEmailUC,
+		validate:      validator.New(),
+	}
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +124,36 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(&out)
+}
+
+func (h *Handler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	log.Println("Verify email called")
+
+	//token := pat.Param(r, "token")
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		writeJSONError(w, http.StatusBadRequest, "token is required")
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	defer cancel()
+
+	verifyOut, err := h.verifyEmailUC.VerifyEmail(ctx, auth.VerifyEmailInput{Token: token})
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+	}
+
+	out := dto.VerifyEmailResponse{
+		User: dto.ActivatedUserDTO{
+			UserID:     verifyOut.UserID,
+			ActivateAt: verifyOut.VerifiedAt,
+			Verified:   verifyOut.Verified,
+		},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(&out)
+	fmt.Println(token)
 }
 
 func writeJSONError(w http.ResponseWriter, status int, message string) {

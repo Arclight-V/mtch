@@ -429,6 +429,102 @@ func (x *LoginResponse) GetExpiresIn() int64 {
 	return 0
 }
 
+type VerifyEmailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyEmailRequest) Reset() {
+	*x = VerifyEmailRequest{}
+	mi := &file_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyEmailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyEmailRequest) ProtoMessage() {}
+
+func (x *VerifyEmailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyEmailRequest.ProtoReflect.Descriptor instead.
+func (*VerifyEmailRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *VerifyEmailRequest) GetUuid() string {
+	if x != nil {
+		return x.Uuid
+	}
+	return ""
+}
+
+type VerifyEmailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Verified      bool                   `protobuf:"varint,1,opt,name=verified,proto3" json:"verified,omitempty"`
+	VerifiedAt    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=verified_at,json=verifiedAt,proto3" json:"verified_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyEmailResponse) Reset() {
+	*x = VerifyEmailResponse{}
+	mi := &file_user_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyEmailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyEmailResponse) ProtoMessage() {}
+
+func (x *VerifyEmailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyEmailResponse.ProtoReflect.Descriptor instead.
+func (*VerifyEmailResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *VerifyEmailResponse) GetVerified() bool {
+	if x != nil {
+		return x.Verified
+	}
+	return false
+}
+
+func (x *VerifyEmailResponse) GetVerifiedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.VerifiedAt
+	}
+	return nil
+}
+
 var File_user_proto protoreflect.FileDescriptor
 
 const file_user_proto_rawDesc = "" +
@@ -466,16 +562,23 @@ const file_user_proto_rawDesc = "" +
 	"\faccess_token\x18\x03 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x04 \x01(\tR\frefreshToken\x12\x1d\n" +
 	"\n" +
-	"expires_in\x18\x05 \x01(\x03R\texpiresIn*\x88\x01\n" +
+	"expires_in\x18\x05 \x01(\x03R\texpiresIn\"(\n" +
+	"\x12VerifyEmailRequest\x12\x12\n" +
+	"\x04uuid\x18\x01 \x01(\tR\x04uuid\"n\n" +
+	"\x13VerifyEmailResponse\x12\x1a\n" +
+	"\bverified\x18\x01 \x01(\bR\bverified\x12;\n" +
+	"\vverified_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"verifiedAt*\x88\x01\n" +
 	"\x10CreateUserStatus\x12\"\n" +
 	"\x1eCREATE_USER_STATUS_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12CREATED_UNVERIFIED\x10\x01\x12\x13\n" +
 	"\x0fEXISTS_VERIFIED\x10\x02\x12\x15\n" +
 	"\x11EXISTS_UNVERIFIED\x10\x03\x12\f\n" +
-	"\bREJECTED\x10\x042\x93\x01\n" +
+	"\bREJECTED\x10\x042\xe5\x01\n" +
 	"\bUserInfo\x12G\n" +
 	"\bRegister\x12\x1c.userService.RegisterRequest\x1a\x1d.userService.RegisterResponse\x12>\n" +
-	"\x05Login\x12\x19.userService.LoginRequest\x1a\x1a.userService.LoginResponseB\x06Z\x04.;pbb\x06proto3"
+	"\x05Login\x12\x19.userService.LoginRequest\x1a\x1a.userService.LoginResponse\x12P\n" +
+	"\vVerifyEmail\x12\x1f.userService.VerifyEmailRequest\x1a .userService.VerifyEmailResponseB\x06Z\x04.;pbb\x06proto3"
 
 var (
 	file_user_proto_rawDescOnce sync.Once
@@ -490,7 +593,7 @@ func file_user_proto_rawDescGZIP() []byte {
 }
 
 var file_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_user_proto_goTypes = []any{
 	(CreateUserStatus)(0),         // 0: userService.CreateUserStatus
 	(*User)(nil),                  // 1: userService.User
@@ -498,23 +601,28 @@ var file_user_proto_goTypes = []any{
 	(*RegisterResponse)(nil),      // 3: userService.RegisterResponse
 	(*LoginRequest)(nil),          // 4: userService.LoginRequest
 	(*LoginResponse)(nil),         // 5: userService.LoginResponse
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*VerifyEmailRequest)(nil),    // 6: userService.VerifyEmailRequest
+	(*VerifyEmailResponse)(nil),   // 7: userService.VerifyEmailResponse
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 }
 var file_user_proto_depIdxs = []int32{
-	6, // 0: userService.User.created_at:type_name -> google.protobuf.Timestamp
-	6, // 1: userService.User.update_at:type_name -> google.protobuf.Timestamp
+	8, // 0: userService.User.created_at:type_name -> google.protobuf.Timestamp
+	8, // 1: userService.User.update_at:type_name -> google.protobuf.Timestamp
 	0, // 2: userService.User.verified:type_name -> userService.CreateUserStatus
 	0, // 3: userService.RegisterResponse.status:type_name -> userService.CreateUserStatus
 	1, // 4: userService.LoginResponse.user:type_name -> userService.User
-	2, // 5: userService.UserInfo.Register:input_type -> userService.RegisterRequest
-	4, // 6: userService.UserInfo.Login:input_type -> userService.LoginRequest
-	3, // 7: userService.UserInfo.Register:output_type -> userService.RegisterResponse
-	5, // 8: userService.UserInfo.Login:output_type -> userService.LoginResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	8, // 5: userService.VerifyEmailResponse.verified_at:type_name -> google.protobuf.Timestamp
+	2, // 6: userService.UserInfo.Register:input_type -> userService.RegisterRequest
+	4, // 7: userService.UserInfo.Login:input_type -> userService.LoginRequest
+	6, // 8: userService.UserInfo.VerifyEmail:input_type -> userService.VerifyEmailRequest
+	3, // 9: userService.UserInfo.Register:output_type -> userService.RegisterResponse
+	5, // 10: userService.UserInfo.Login:output_type -> userService.LoginResponse
+	7, // 11: userService.UserInfo.VerifyEmail:output_type -> userService.VerifyEmailResponse
+	9, // [9:12] is the sub-list for method output_type
+	6, // [6:9] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }
@@ -529,7 +637,7 @@ func file_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_proto_rawDesc), len(file_user_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

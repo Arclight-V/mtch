@@ -89,3 +89,12 @@ type RegistrationOutput struct {
 	UserID uuid.UUID
 	Status CreateUserStatus
 }
+
+type VerifyEmailInput struct {
+	UserID string
+}
+
+type VerifyEmailOutput struct {
+	VerifiedAt time.Time
+	Verified   bool
+}
