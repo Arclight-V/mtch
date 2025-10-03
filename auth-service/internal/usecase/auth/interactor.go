@@ -97,11 +97,19 @@ func (uc *Interactor) VerifyEmail(ctx context.Context, in VerifyEmailInput) (Ver
 		return VerifyEmailOutput{}, err
 	}
 
+	pbResp := &pb.VerifyEmailRequest{
+		Uuid: v.UserID,
+	}
+
+	resp, err := uc.UserRepo.VerifyEmail(ctx, pbResp)
+	if err != nil {
+		return VerifyEmailOutput{}, err
+	}
+
 	output := VerifyEmailOutput{
-		UserID: v.UserID,
-		//TODO:: get the ActivateAt, Activated from the user-service response
-		ActivateAt: time.Now(),
-		Verified:   true,
+		UserID:     v.UserID,
+		VerifiedAt: resp.VerifiedAt.AsTime(),
+		Verified:   resp.Verified,
 	}
 	return output, nil
 }

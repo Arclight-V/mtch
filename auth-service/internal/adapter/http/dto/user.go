@@ -11,8 +11,8 @@ type PendingUserDTO struct {
 	Verified bool      `json:"verified"`
 }
 
-type ActivatedUserDTO struct {
+type VerifiedEmailUserDTO struct {
 	UserID     string    `json:"userid"`
-	ActivateAt time.Time `json:"activate_at"`
+	VerifiedAt time.Time `json:"activate_at"`
 	Verified   bool      `json:"verified"`
 }

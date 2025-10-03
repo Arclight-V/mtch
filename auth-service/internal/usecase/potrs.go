@@ -11,7 +11,7 @@ import (
 type UserRepo interface {
 	Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error)
 	Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error)
-	VerifyEmail(ctx context.Context, token string) error
+	VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error)
 }
 
 type TokenSigner interface {

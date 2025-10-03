@@ -2,7 +2,6 @@ package grpcclient
 
 import (
 	"context"
-	"log"
 	pb "proto"
 )
 
@@ -30,8 +29,11 @@ func (r *GrpcUserRepo) Register(ctx context.Context, request *pb.RegisterRequest
 	return resp, nil
 }
 
-func (r *GrpcUserRepo) VerifyEmail(ctx context.Context, token string) error {
+func (r *GrpcUserRepo) VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {
 	//TODO implement me
-	log.Println("TODO implement me Verify email called")
-	return nil
+	resp, err := r.cli.VerifyEmail(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }

@@ -5,5 +5,5 @@ type VerifyEmailRequest struct {
 }
 
 type VerifyEmailResponse struct {
-	User ActivatedUserDTO
+	User VerifiedEmailUserDTO
 }

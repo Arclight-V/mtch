@@ -11,7 +11,7 @@ type VerifyEmailInput struct {
 
 type VerifyEmailOutput struct {
 	UserID     string
-	ActivateAt time.Time
+	VerifiedAt time.Time
 	Verified   bool
 }
 

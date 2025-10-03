@@ -144,9 +144,9 @@ func (h *Handler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	out := dto.VerifyEmailResponse{
-		User: dto.ActivatedUserDTO{
+		User: dto.VerifiedEmailUserDTO{
 			UserID:     verifyOut.UserID,
-			ActivateAt: verifyOut.ActivateAt,
+			VerifiedAt: verifyOut.VerifiedAt,
 			Verified:   verifyOut.Verified,
 		},
 	}

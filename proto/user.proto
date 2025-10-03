@@ -8,6 +8,7 @@ option go_package = ".;pb";
 service UserInfo {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
 }
 
 enum CreateUserStatus {
@@ -60,4 +61,13 @@ message LoginResponse {
   string access_token = 3;
   string refresh_token = 4;
   int64 expires_in = 5;
+}
+
+message VerifyEmailRequest {
+  string uuid = 1;
+}
+
+message VerifyEmailResponse {
+  bool verified = 1;
+  google.protobuf.Timestamp verified_at = 2;
 }
