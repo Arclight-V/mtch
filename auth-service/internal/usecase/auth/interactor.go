@@ -44,46 +44,60 @@ func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput,
 	return LoginOutput{}, nil
 }
 
-func (uc *Interactor) Register(ctx context.Context, input RegisterInput) (RegisterOutput, error) {
-	if err := uc.PasswordValidator.Validate(input.Password); err != nil {
-		return RegisterOutput{}, err
+func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*RegisterOutput, error) {
+	if err := uc.PasswordValidator.Validate(in.Password); err != nil {
+		return nil, err
 	}
 
-	if err := input.SetPassword(input.Password, uc.Hasher); err != nil {
-		return RegisterOutput{}, err
+	if err := in.SetPassword(in.Password, uc.Hasher); err != nil {
+		return nil, err
+	}
+	if err := in.SetEmailOrPhone(); err != nil {
+		return nil, err
 	}
 
 	pbRegReq := &pb.RegisterRequest{
-		Email:    input.Email,
-		Password: input.Password,
-	}
-	resp, err := uc.UserRepo.Register(ctx, pbRegReq)
-	if err != nil {
-		return RegisterOutput{}, err
+		PersonalData: &pb.PersonalData{
+			FirstName: in.FirstName,
+			LastName:  in.LastName,
+			Contact:   in.Contact,
+			Password:  in.Password,
+			BirthDate: &pb.Date{
+				BirthDay:   in.Date.BirthDay,
+				BirthMonth: in.Date.BirthMonth,
+				BirthYear:  in.Date.BirthYear,
+			},
+		},
 	}
 
-	output := RegisterOutput{
+	resp, err := uc.UserRepo.Register(ctx, pbRegReq)
+	if err != nil {
+		return nil, err
+	}
+
+	output := &RegisterOutput{
 		UserID: resp.UserId,
-		Email:  input.Email,
+		Email:  in.Contact,
 	}
 	log.Printf("user registered to: %v", output)
 
 	verifyTokenIssue, token, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
 	if err != nil {
-		return RegisterOutput{}, err
+		return nil, err
 	}
 
 	vd := notification.VerifyData{
-		Email:       input.Email,
+		Email:       in.Contact,
 		VerifyToken: token,
 	}
 
 	if err := uc.EmailSender.SendUserRegistered(ctx, vd); err != nil {
-		return RegisterOutput{}, err
+		return nil, err
 	}
 	if err := uc.VerifyTokenRepo.InsertIssue(ctx, verifyTokenIssue); err != nil {
-		return RegisterOutput{}, err
+		return nil, err
 	}
+
 	return output, nil
 }
 

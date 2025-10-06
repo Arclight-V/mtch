@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterRequest"
+                            "$ref": "#/definitions/models.RegisterRequest"
                         }
                     }
                 ],
@@ -43,25 +43,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterResponse"
+                            "$ref": "#/definitions/models.RegisterResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "415": {
                         "description": "Unsupported Media Type",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -69,7 +69,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.ErrorResponse": {
+        "models.ErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -77,7 +77,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.PendingUserDTO": {
+        "models.PendingUserDTO": {
             "type": "object",
             "properties": {
                 "create_at": {
@@ -94,14 +94,37 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterRequest": {
+        "models.RegisterRequest": {
             "type": "object",
             "required": [
-                "email",
+                "birth_day",
+                "birth_month",
+                "birth_year",
+                "contact",
+                "first_name",
+                "last_name",
                 "password"
             ],
             "properties": {
-                "email": {
+                "birth_day": {
+                    "type": "string"
+                },
+                "birth_month": {
+                    "type": "string"
+                },
+                "birth_year": {
+                    "type": "string"
+                },
+                "contact": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "last_name": {
                     "type": "string"
                 },
                 "password": {
@@ -110,11 +133,11 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterResponse": {
+        "models.RegisterResponse": {
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/dto.PendingUserDTO"
+                    "$ref": "#/definitions/models.PendingUserDTO"
                 }
             }
         }
