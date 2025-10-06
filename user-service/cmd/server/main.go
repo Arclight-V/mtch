@@ -22,8 +22,7 @@ func main() {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	db := repository.NewFakeDB()
-	userRepo := repository.NewUserRepository(db)
+	userRepo := repository.NewUsersDBMemory()
 	userUC := userUserCase.NewUserUseCase(userRepo)
 	server := userServerGRPC.NewUserServerGRPC(userUC)
 

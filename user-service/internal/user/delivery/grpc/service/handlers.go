@@ -11,13 +11,28 @@ import (
 )
 
 func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	log.Println("Register called:", req.Email)
+	log.Println("Register called:", req.PersonalData.Contact)
 
-	user, err := s.userUC.Register(ctx, &models.RegistrationData{Email: req.GetEmail(), PasswordHash: req.GetPassword()})
+	pd := &models.PersonalData{
+		FirstName: req.PersonalData.FirstName,
+		LastName:  req.PersonalData.LastName,
+		Contact:   req.PersonalData.Contact,
+		Password:  req.PersonalData.Password,
+	}
+	pd.SetDateBirthday(
+		int(req.PersonalData.BirthDate.BirthYear),
+		int(req.PersonalData.BirthDate.BirthMonth),
+		int(req.PersonalData.BirthDate.BirthDay))
+
+	in := &models.RegisterInput{PersonalDate: pd}
+
+	user, err := s.userUC.Register(ctx, in)
 	if err != nil {
 		return &pb.RegisterResponse{}, err
 	}
-	return &pb.RegisterResponse{UserId: user.UserID.String(), Status: pb.CreateUserStatus(user.Status)}, nil
+	resp := &pb.RegisterResponse{UserId: user.UserID.String(), Status: pb.CreateUserStatus(user.Status)}
+
+	return resp, nil
 }
 
 func (s *usersService) VerifyEmail(ctx context.Context, req *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {

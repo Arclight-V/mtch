@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MATCH Sign Up · WebAssembly demo</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="fb-body">
+<noscript>You need to enable JavaScript to run this experience.</noscript>
+<script src="wasm_exec.js"></script>
+<script>
+    const go = new Go();
+
+    if (!WebAssembly.instantiateStreaming) {
+        WebAssembly.instantiateStreaming = async (response, importObject) => {
+            const source = await response.arrayBuffer();
+            return await WebAssembly.instantiate(source, importObject);
+        };
+    }
+
+    WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
+        .then((result) => go.run(result.instance))
+        .catch((error) => {
+            console.error("Unable to start WebAssembly application", error);
+            const fallback = document.createElement("div");
+            fallback.className = "page wasm-error";
+            fallback.textContent = "The WebAssembly bundle could not be loaded.";
+            document.body.appendChild(fallback);
+        });
+</script>
+</body>

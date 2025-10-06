@@ -1,4 +1,4 @@
-package dto
+package models
 
 type VerifyEmailRequest struct {
 	Token string `json:"token"`

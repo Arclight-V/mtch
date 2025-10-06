@@ -6,47 +6,6 @@ import (
 	"time"
 )
 
-// User base model
-type User struct {
-	UserID    uuid.UUID `json:"user_id" db:"user_id" validate:"omitempty"`
-	Email     string    `json:"email" db:"email" validate:"omitempty,lte=60,email"`
-	FirstName string    `json:"first_name" db:"first_name" validate:"required,lte=30"`
-	LastName  string    `json:"last_name" db:"last_name" validate:"required,lte=30"`
-	Role      string    `json:"role" db:"role" validate:"required"`
-	// String?
-	Avatar *string `json:"avatar" db:"avatar"`
-	// String?
-	PasswordHash string    `json:"password,omitempty" db:"password"`
-	CreatedAt    time.Time `json:"created_at,omitempty" db:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at,omitempty" db:"updated_at"`
-	Verified     bool      `json:"verified" db:"verified"`
-}
-
-// NewPendingUser Create new pending User
-func NewPendingUser(email, hash string) (*User, error) {
-	return &User{
-		UserID:       uuid.New(),
-		Email:        email,
-		PasswordHash: hash,
-		Verified:     false,
-	}, nil
-}
-
-// Get avatar string
-// TODO:: Use string?
-func (u *User) GetAvatar() string {
-	if u.Avatar == nil {
-		return ""
-	}
-	return *u.Avatar
-}
-
-// RegistrationData data for registration
-type RegistrationData struct {
-	Email        string
-	PasswordHash string
-}
-
 type CreateUserStatus int
 
 const (
@@ -64,6 +23,57 @@ const (
 	//Rejected Not created for a business reason
 	Rejected
 )
+
+type User struct {
+	PersonalData *PersonalData
+	UserID       uuid.UUID
+	Role         string
+	Avatar       *string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Activated    bool
+}
+
+// NewPendingUser Create new pending User
+func NewPendingUser(data *PersonalData) (*User, error) {
+	return &User{
+		PersonalData: data,
+		Role:         "pending",
+		Activated:    false,
+
+		//TODO: move to db
+		UserID: uuid.New(),
+	}, nil
+}
+
+type PersonalData struct {
+	FirstName    string
+	LastName     string
+	Contact      string
+	Phone        string
+	Email        string
+	Password     string
+	DateBirthday time.Time
+	Gender       string
+}
+
+func (p *PersonalData) SetDateBirthday(year, month, day int) {
+	p.DateBirthday = time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+}
+
+// Get avatar string
+// TODO:: Use string?
+func (u *User) GetAvatar() string {
+	if u.Avatar == nil {
+		return ""
+	}
+	return *u.Avatar
+}
+
+// RegisterInput
+type RegisterInput struct {
+	PersonalDate *PersonalData
+}
 
 func (c CreateUserStatus) String() string {
 	switch c {
@@ -85,7 +95,7 @@ func (c CreateUserStatus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.String())
 }
 
-type RegistrationOutput struct {
+type RegisterOutput struct {
 	UserID uuid.UUID
 	Status CreateUserStatus
 }

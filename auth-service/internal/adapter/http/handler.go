@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/dto"
+	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/models"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -23,11 +24,15 @@ func NewHandler(
 	regUC auth.RegisterUseCase,
 	loginUC auth.LoginUseCase,
 	verifyEmailUC auth.VerifyEmailUseCase) *Handler {
+
+	validate := validator.New()
+	validate.RegisterAlias("contact", "email|e164")
+
 	return &Handler{
 		regUC:         regUC,
 		loginUC:       loginUC,
 		verifyEmailUC: verifyEmailUC,
-		validate:      validator.New(),
+		validate:      validate,
 	}
 }
 
@@ -79,31 +84,53 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        RegisterRequest  body  dto.RegisterRequest  true "registration payload"
-// @Success      201 {object}     dto.RegisterResponse
-// @Failure      400 {object} 	  dto.ErrorResponse
-// @Failure      409 {object} 	  dto.ErrorResponse
-// @Failure      415 {object} 	  dto.ErrorResponse
+// @Param        RegisterRequest  body  models.RegisterRequest  true "registration payload"
+// @Success      201 {object}     models.RegisterResponse
+// @Failure      400 {object} 	  models.ErrorResponse
+// @Failure      409 {object} 	  models.ErrorResponse
+// @Failure      415 {object} 	  models.ErrorResponse
 // @Router       /api/v1/auth/register [post]
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	log.Println("Register called")
+
 	if r.Header.Get("Content-Type") != "application/json" {
 		writeJSONError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
 		return
 	}
-	var in dto.RegisterRequest
+	var in models.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	fmt.Println(in)
 	if err := h.validate.Struct(in); err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	regInput := auth.RegisterInput{
-		Email:    in.Email,
-		Password: in.Password,
+	birthDay, err := strconv.Atoi(in.BirthDay)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+	}
+	birthMonth, err := strconv.Atoi(in.BirthMonth)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+	}
+	birthEarth, err := strconv.Atoi(in.BirthYear)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+	}
+
+	regInput := &auth.RegisterInput{
+		FirstName: in.FirstName,
+		LastName:  in.LastName,
+		Contact:   in.Contact,
+		Password:  in.Password,
+		Date: &auth.Date{
+			BirthDay:   int32(birthDay),
+			BirthMonth: int32(birthMonth),
+			BirthYear:  int32(birthEarth),
+		},
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
@@ -114,8 +141,8 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out := dto.RegisterResponse{
-		User: dto.PendingUserDTO{
+	out := models.RegisterResponse{
+		User: models.PendingUserDTO{
 			UserID:   regOutput.UserID,
 			Email:    regOutput.Email,
 			Verified: false,
@@ -143,8 +170,8 @@ func (h *Handler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 	}
 
-	out := dto.VerifyEmailResponse{
-		User: dto.VerifiedEmailUserDTO{
+	out := models.VerifyEmailResponse{
+		User: models.VerifiedEmailUserDTO{
 			UserID:     verifyOut.UserID,
 			VerifiedAt: verifyOut.VerifiedAt,
 			Verified:   verifyOut.Verified,
@@ -159,5 +186,5 @@ func (h *Handler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(dto.ErrorResponse{Error: message})
+	_ = json.NewEncoder(w).Encode(models.ErrorResponse{Error: message})
 }

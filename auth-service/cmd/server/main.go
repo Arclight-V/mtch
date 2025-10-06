@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	pb "proto"
@@ -56,6 +57,8 @@ func main() {
 		VerifyTokenRepo:   verifyTokenRepo,
 	}
 	handler = httpadapter.NewHandler(&userClient, &userClient, &userClient)
+
+	_ = mime.AddExtensionType(".wasm", "application/wasm")
 
 	log.Printf("server listening at %v", cfg.Http.HTTPAddr)
 	if err := http.ListenAndServe(cfg.Http.HTTPAddr, httpadapter.NewRouter(handler)); err != nil {
