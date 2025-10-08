@@ -1,12 +1,15 @@
 package httpadapter
 
 import (
+	tech "github.com/Arclight-V/mtch/auth-service/internal/adapter/http/tech"
+	apphealth "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/health"
 	limiter "github.com/ulule/limiter/v3"
 	goji "goji.io"
 	"goji.io/pat"
 	"log"
 	"mime"
 	"net/http"
+	"time"
 
 	_ "github.com/Arclight-V/mtch/auth-service/docs"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -41,6 +44,16 @@ func NewRouter(h *Handler) http.Handler {
 	root.Handle(pat.Get("/app"), http.RedirectHandler("/app/", http.StatusMovedPermanently))
 	// Все файлы фронта: /app/*
 	root.Handle(pat.Get("/app/*"), static)
+
+	// Health-checks
+	g := apphealth.NewStartupGate(1 * time.Second)
+	g.MarkReady()
+	techH := tech.NewHandler(apphealth.NewLiveness(), g)
+
+	check := goji.SubMux()
+	root.Handle(pat.New(apiBase+"/health/*"), check)
+	check.HandleFunc(pat.Get("/livez"), techH.Livez)
+	check.HandleFunc(pat.Get("/readyz"), techH.Readyz)
 
 	return root
 }
