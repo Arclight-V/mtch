@@ -1,4 +1,4 @@
-.PHONY: build run test clean mocks swag docker
+ .PHONY: build run test clean mocks swag docker
 
 BIN_DIR := bin
 SERVICE := auth-service

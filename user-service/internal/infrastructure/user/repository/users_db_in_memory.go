@@ -6,22 +6,23 @@ import (
 	"log"
 	"net/mail"
 	"sync"
-	"user-service/internal/models"
+
+	domain "user-service/internal/domain/user"
 )
 
 type UsersDBMemory struct {
 	mu    sync.Mutex
-	users map[string]models.User
+	users map[string]domain.User
 }
 
 func NewUsersDBMemory() *UsersDBMemory {
-	return &UsersDBMemory{users: make(map[string]models.User)}
+	return &UsersDBMemory{users: make(map[string]domain.User)}
 }
 
-func (m *UsersDBMemory) Create(ctx context.Context, regData *models.RegisterInput) (*models.User, error) {
+func (m *UsersDBMemory) Create(ctx context.Context, regData *domain.RegisterInput) (*domain.User, error) {
 	log.Println("Create: ", regData)
 
-	pendingUser, _ := models.NewPendingUser(regData.PersonalDate)
+	pendingUser, _ := domain.NewPendingUser(regData.PersonalDate)
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -34,7 +35,7 @@ func (m *UsersDBMemory) Create(ctx context.Context, regData *models.RegisterInpu
 	return pendingUser, nil
 }
 
-func (m *UsersDBMemory) FindByContact(ctx context.Context, contact string) (*models.User, error) {
+func (m *UsersDBMemory) FindByContact(ctx context.Context, contact string) (*domain.User, error) {
 	log.Println("FindByContact: ", contact)
 
 	if _, err := mail.ParseAddress(contact); err != nil {
@@ -43,7 +44,7 @@ func (m *UsersDBMemory) FindByContact(ctx context.Context, contact string) (*mod
 	return m.FindByEmail(ctx, contact)
 }
 
-func (m *UsersDBMemory) FindByEmail(ctx context.Context, email string) (*models.User, error) {
+func (m *UsersDBMemory) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	log.Println("FindByEmail: ", email)
 
 	m.mu.Lock()
@@ -56,7 +57,7 @@ func (m *UsersDBMemory) FindByEmail(ctx context.Context, email string) (*models.
 	return &user, nil
 }
 
-func (m *UsersDBMemory) FindByPhone(ctx context.Context, phone string) (*models.User, error) {
+func (m *UsersDBMemory) FindByPhone(ctx context.Context, phone string) (*domain.User, error) {
 	log.Println("FindByPhone: ", phone)
 
 	m.mu.Lock()

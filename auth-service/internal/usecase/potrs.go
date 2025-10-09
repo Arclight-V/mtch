@@ -14,6 +14,7 @@ type UserRepo interface {
 	VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error)
 }
 
+//go:generate mockgen -source=$GOFILE -package=mocks -destination=../usecase/mocks/token_signer_mock.go
 type TokenSigner interface {
 	SignAccess(uuid, sid string) (string, error)
 	SignRefresh(uuid, sid string) (string, string, error)
@@ -21,6 +22,7 @@ type TokenSigner interface {
 	ParseVerifyToken(tokenStr string) (domain.VerifyEmailToken, error)
 }
 
+//go:generate mockgen -source=$GOFILE -package=mocks -destination=../usecase/mocks/verify_token_repo_mock.go
 type VerifyTokenRepo interface {
 	InsertIssue(ctx context.Context, v domain.VerifyTokenIssue) error
 	TryConsumeJTI(ctx context.Context, v domain.VerifyEmailToken) error

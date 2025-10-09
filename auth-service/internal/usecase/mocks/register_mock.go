@@ -39,13 +39,13 @@ func (m *MockRegisterUseCase) EXPECT() *MockRegisterUseCaseMockRecorder {
 func (m *MockRegisterUseCase) Register(ctx context.Context, in *auth.RegisterInput) (*auth.RegisterOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Register", ctx, in)
-	ret0, _ := ret[0].(auth.RegisterOutput)
+	ret0, _ := ret[0].(*auth.RegisterOutput)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Register indicates an expected call of Register.
-func (mr *MockRegisterUseCaseMockRecorder) Register(ctx, input interface{}) *gomock.Call {
+func (mr *MockRegisterUseCaseMockRecorder) Register(ctx, in interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockRegisterUseCase)(nil).Register), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockRegisterUseCase)(nil).Register), ctx, in)
 }
