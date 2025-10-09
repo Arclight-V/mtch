@@ -1,19 +1,21 @@
-package service
+package user
 
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"log"
+
 	pb "proto"
-	"user-service/internal/models"
+	domain "user-service/internal/domain/user"
 )
 
 func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	log.Println("Register called:", req.PersonalData.Contact)
 
-	pd := &models.PersonalData{
+	pd := &domain.PersonalData{
 		FirstName: req.PersonalData.FirstName,
 		LastName:  req.PersonalData.LastName,
 		Contact:   req.PersonalData.Contact,
@@ -24,7 +26,7 @@ func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*
 		int(req.PersonalData.BirthDate.BirthMonth),
 		int(req.PersonalData.BirthDate.BirthDay))
 
-	in := &models.RegisterInput{PersonalDate: pd}
+	in := &domain.RegisterInput{PersonalDate: pd}
 
 	user, err := s.userUC.Register(ctx, in)
 	if err != nil {
@@ -38,7 +40,7 @@ func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*
 func (s *usersService) VerifyEmail(ctx context.Context, req *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {
 	fmt.Println("VerifyEmail called")
 
-	in := &models.VerifyEmailInput{
+	in := &domain.VerifyEmailInput{
 		UserID: req.Uuid,
 	}
 

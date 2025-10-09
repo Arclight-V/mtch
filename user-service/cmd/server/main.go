@@ -2,14 +2,16 @@ package main
 
 import (
 	"config"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
+
+	"google.golang.org/grpc"
+
 	pb "proto"
-	userServerGRPC "user-service/internal/user/delivery/grpc/service"
-	"user-service/internal/user/repository"
-	userUserCase "user-service/internal/user/usecase"
+	grpcuser "user-service/internal/adapter/grpc/user"
+	repository "user-service/internal/infrastructure/user/repository"
+	usecase "user-service/internal/usecase/user"
 )
 
 const (
@@ -23,8 +25,8 @@ func main() {
 	}
 
 	userRepo := repository.NewUsersDBMemory()
-	userUC := userUserCase.NewUserUseCase(userRepo)
-	server := userServerGRPC.NewUserServerGRPC(userUC)
+	userUC := usecase.NewUserUseCase(userRepo)
+	server := grpcuser.NewUserServerGRPC(userUC)
 
 	s := grpc.NewServer()
 	pb.RegisterUserInfoServer(s, server)

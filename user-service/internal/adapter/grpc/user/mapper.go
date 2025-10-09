@@ -1,4 +1,4 @@
-package service
+package user
 
 // userModeToProto convert models.User to pb.User without passwordHash
 //func userModelToProto(user *models.User) *pb.User {

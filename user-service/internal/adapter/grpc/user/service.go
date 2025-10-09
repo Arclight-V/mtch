@@ -1,8 +1,8 @@
-package service
+package user
 
 import (
 	pb "proto"
-	"user-service/internal/user"
+	usecase "user-service/internal/usecase/user"
 )
 
 type server struct {
@@ -10,10 +10,10 @@ type server struct {
 }
 
 type usersService struct {
-	userUC user.UserUseCase
+	userUC usecase.UserUseCase
 	server
 }
 
-func NewUserServerGRPC(userUC user.UserUseCase) *usersService {
+func NewUserServerGRPC(userUC usecase.UserUseCase) *usersService {
 	return &usersService{userUC: userUC}
 }

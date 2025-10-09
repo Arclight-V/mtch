@@ -2,11 +2,13 @@ package repository
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 	"log"
 	"net/mail"
-	"user-service/internal/models"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
+
+	domain "user-service/internal/domain/user"
 )
 
 // User Repository
@@ -20,8 +22,8 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (u *UserRepository) Create(ctx context.Context, regData *models.RegisterInput) (*models.User, error) {
-	pendingUser, _ := models.NewPendingUser(regData.PersonalDate)
+func (u *UserRepository) Create(ctx context.Context, regData *domain.RegisterInput) (*domain.User, error) {
+	pendingUser, _ := domain.NewPendingUser(regData.PersonalDate)
 
 	// TODO: Отказаться от StructScan
 	if err := u.db.QueryRowxContext(
@@ -43,7 +45,7 @@ func (u *UserRepository) Create(ctx context.Context, regData *models.RegisterInp
 
 }
 
-func (u *UserRepository) FindByContact(ctx context.Context, contact string) (*models.User, error) {
+func (u *UserRepository) FindByContact(ctx context.Context, contact string) (*domain.User, error) {
 	log.Println("FindByContact: ", contact)
 
 	if _, err := mail.ParseAddress(contact); err != nil {
@@ -52,16 +54,16 @@ func (u *UserRepository) FindByContact(ctx context.Context, contact string) (*mo
 	return u.FindByEmail(ctx, contact)
 }
 
-func (u *UserRepository) FindByPhone(ctx context.Context, phone string) (*models.User, error) {
+func (u *UserRepository) FindByPhone(ctx context.Context, phone string) (*domain.User, error) {
 	log.Println("FindByPhone: ", phone)
 
 	panic("implement me")
 }
 
-func (u *UserRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
+func (u *UserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	log.Println("FindByEmail: ", email)
 
-	user := &models.User{PersonalData: &models.PersonalData{
+	user := &domain.User{PersonalData: &domain.PersonalData{
 		Email: email,
 	}}
 	if err := u.db.GetContext(ctx, user, findByEmailQuery, email); err != nil {

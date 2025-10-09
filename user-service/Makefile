@@ -17,5 +17,8 @@ test:
 clean:
 	rm -rf $(BIN_DIR)
 
+mocks:
+	go generate ./...
+
 docker-build:
 	docker build --tag mtch-${USER_IMAGE} -f Dockerfile .
