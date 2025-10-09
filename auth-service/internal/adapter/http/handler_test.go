@@ -16,10 +16,15 @@ import (
 	"testing"
 )
 
-func routerWithMock(regUC *mocks.MockRegisterUseCase, logUC *mocks.MockLoginUseCase) http.Handler {
+func routerWithMock(
+	regUC *mocks.MockRegisterUseCase,
+	logUC *mocks.MockLoginUseCase,
+	verifyEmailUC *mocks.MockVerifyEmailUseCase) http.Handler {
+
 	m := goji.NewMux()
-	h := NewHandler(regUC, logUC)
+	h := NewHandler(regUC, logUC, verifyEmailUC)
 	m.HandleFunc(pat.Post(apiBase+"auth/register"), h.Register)
+
 	return m
 }
 
@@ -55,8 +60,9 @@ func TestRegister(t *testing.T) {
 
 			regUC := mocks.NewMockRegisterUseCase(ctrl)
 			logUC := mocks.NewMockLoginUseCase(ctrl)
+			verifyEmailUC := mocks.NewMockVerifyEmailUseCase(ctrl)
 			tt.stub(regUC, logUC)
-			router := routerWithMock(regUC, logUC)
+			router := routerWithMock(regUC, logUC, verifyEmailUC)
 
 			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
@@ -116,7 +122,8 @@ func TestRegister_InvalidJSON(t *testing.T) {
 
 			regUC := mocks.NewMockRegisterUseCase(ctrl)
 			logUC := mocks.NewMockLoginUseCase(ctrl)
-			router := NewRouter(NewHandler(regUC, logUC))
+			verifyEmailUC := mocks.NewMockVerifyEmailUseCase(ctrl)
+			router := NewRouter(NewHandler(regUC, logUC, verifyEmailUC))
 
 			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
