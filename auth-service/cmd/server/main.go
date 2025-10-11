@@ -1,6 +1,17 @@
 package main
 
 import (
+	"log"
+	"mime"
+	"net/http"
+	"os"
+
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/repository"
+	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"config"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
@@ -8,16 +19,9 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/email"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/repository"
-	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"mime"
-	"net/http"
-	"os"
 	pb "proto"
+
+	signaler "github.com/Arclight-V/mtch/pkg/signaler"
 )
 
 const (
@@ -42,6 +46,7 @@ func main() {
 	}
 	defer conn.Close()
 
+	shutdown := make(chan struct{})
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
 	signer := jwt_signer.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 	hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
@@ -60,8 +65,20 @@ func main() {
 
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
 
-	log.Printf("server listening at %v", cfg.Http.HTTPAddr)
-	if err := http.ListenAndServe(cfg.Http.HTTPAddr, httpadapter.NewRouter(handler)); err != nil {
-		log.Fatalf("failed to start server: %v", err)
-	}
+	go func() {
+		log.Printf("server listening at %v", cfg.Http.HTTPAddr)
+		if err := http.ListenAndServe(cfg.Http.HTTPAddr, httpadapter.NewRouter(handler)); err != nil {
+			log.Fatalf("failed to start server: %v", err)
+		}
+	}()
+
+	go waitForInterrupt(shutdown)
+	<-shutdown
+
+}
+
+func waitForInterrupt(waiter chan<- struct{}) {
+	interrupt := signaler.WaitForInterrupt()
+	log.Printf("Captured %v, shutdown requested.\n", interrupt)
+	waiter <- struct{}{}
 }
