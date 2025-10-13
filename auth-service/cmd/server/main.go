@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
+	"github.com/pkg/errors"
 	"log"
 	"mime"
 	"net/http"
@@ -16,6 +18,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/prober"
 	"github.com/Arclight-V/mtch/pkg/signaler"
 
@@ -47,6 +50,8 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
+	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
+
 	var g run.Group
 
 	conn, err := grpc.NewClient(
@@ -55,7 +60,7 @@ func main() {
 		grpc.WithChainUnaryInterceptor(grpcserver.NewUnaryClientRequestIDInterceptor()),
 	)
 	if err != nil {
-		log.Fatalf("could not create grpc connection: %v", err)
+		level.Error(logger).Log("msg", errors.Wrapf(err, "failed to create gRPC client: %v", err))
 	}
 	defer conn.Close()
 
@@ -102,7 +107,8 @@ func main() {
 		statusProber.Healthy()
 		statusProber.Ready()
 
-		log.Printf("server listening at %v", cfg.Http.HTTPAddr)
+		level.Info(logger).Log("msg", "http server started")
+		//log.Printf("server listening at %v", cfg.Http.HTTPAddr)
 		return srv.ListenAndServe()
 
 	}, func(err error) {

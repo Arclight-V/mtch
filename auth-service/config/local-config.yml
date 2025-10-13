@@ -10,3 +10,9 @@ smtp_client:
   USER: "..."
   PASS: "..."
   FROM: "no-reply@match.com"
+
+logging:
+  LEVEL: "info"
+  FORMAT: "json"
+  DEBUG_NAME: ""
+
