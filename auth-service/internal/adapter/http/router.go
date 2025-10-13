@@ -1,20 +1,19 @@
 package httpadapter
 
 import (
-	tech "github.com/Arclight-V/mtch/auth-service/internal/adapter/http/tech"
-	apphealth "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/health"
-	limiter "github.com/ulule/limiter/v3"
+	httpSwagger "github.com/swaggo/http-swagger"
+	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	mem "github.com/ulule/limiter/v3/drivers/store/memory"
 	goji "goji.io"
 	"goji.io/pat"
 	"log"
 	"mime"
 	"net/http"
-	"time"
+
+	"github.com/Arclight-V/mtch/pkg/prober"
 
 	_ "github.com/Arclight-V/mtch/auth-service/docs"
-	httpSwagger "github.com/swaggo/http-swagger"
-	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
-	mem "github.com/ulule/limiter/v3/drivers/store/memory"
+	limiter "github.com/ulule/limiter/v3"
 )
 
 const (
@@ -24,10 +23,13 @@ const (
 	rateFormatted = "5-M"
 )
 
-func NewRouter(h *Handler) http.Handler {
+// TODO: Transform to server and add logger
+func NewRouter(h *Handler, p *prober.HTTPProbe) http.Handler {
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
 	root := goji.NewMux()
 	root.Use(rateLimiter())
+
+	registerProber(root, p)
 
 	api := goji.SubMux()
 	root.Handle(pat.New("/swagger/*"), httpSwagger.WrapHandler)
@@ -44,16 +46,6 @@ func NewRouter(h *Handler) http.Handler {
 	root.Handle(pat.Get("/app"), http.RedirectHandler("/app/", http.StatusMovedPermanently))
 	// Все файлы фронта: /app/*
 	root.Handle(pat.Get("/app/*"), static)
-
-	// Health-checks
-	g := apphealth.NewStartupGate(1 * time.Second)
-	g.MarkReady()
-	techH := tech.NewHandler(apphealth.NewLiveness(), g)
-
-	check := goji.SubMux()
-	root.Handle(pat.New(apiBase+"/health/*"), check)
-	check.HandleFunc(pat.Get("/livez"), techH.Livez)
-	check.HandleFunc(pat.Get("/readyz"), techH.Readyz)
 
 	return root
 }
@@ -72,4 +64,10 @@ func rateLimiter() func(http.Handler) http.Handler {
 	// Create a new middleware with the limiter instance.
 	middleware := mhttp.NewMiddleware(limiter.New(store, rate, limiter.WithTrustForwardHeader(true)))
 	return middleware.Handler
+}
+
+// TODO:ADD logger
+func registerProber(mux *goji.Mux, p *prober.HTTPProbe) {
+	mux.Handle(pat.New("/-/healthy"), p.HealthyHandler(nil))
+	mux.Handle(pat.New("/-/readyz"), p.ReadyHandler(nil))
 }
