@@ -19,13 +19,13 @@ import (
 	"github.com/Arclight-V/mtch/pkg/prober"
 	"github.com/Arclight-V/mtch/pkg/signaler"
 
-	"config"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/crypto"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/email"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
+	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	pb "proto"
 )
 

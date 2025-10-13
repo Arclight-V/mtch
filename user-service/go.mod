@@ -24,9 +24,7 @@ require (
 )
 
 require (
-	config v0.0.0
-	github.com/Arclight-V/mtch/pkg/prober v0.0.0-00010101000000-000000000000
-	github.com/Arclight-V/mtch/pkg/signaler v0.0.0-00010101000000-000000000000
+	github.com/Arclight-V/mtch v0.0.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/jmoiron/sqlx v1.4.0
@@ -39,8 +37,4 @@ require (
 
 replace proto => ../proto
 
-replace config => ./../pkg/platform/config
-
-replace github.com/Arclight-V/mtch/pkg/signaler => ./../pkg/signaler
-
-replace github.com/Arclight-V/mtch/pkg/prober => ./../pkg/prober
+replace github.com/Arclight-V/mtch => ..
