@@ -65,9 +65,7 @@ require (
 )
 
 require (
-	config v0.0.0
-	github.com/Arclight-V/mtch/pkg/prober v0.0.0-00010101000000-000000000000
-	github.com/Arclight-V/mtch/pkg/signaler v0.0.0-00010101000000-000000000000
+	github.com/Arclight-V/mtch v0.0.0
 	github.com/go-gomail/gomail v0.0.0-20160411212932-81ebce5c23df
 	github.com/go-passwd/validator v0.0.0-20250407044832-c284a2f4d990
 	github.com/go-playground/validator/v10 v10.27.0
@@ -87,8 +85,4 @@ require (
 
 replace proto => ../proto
 
-replace config => ./../pkg/platform/config
-
-replace github.com/Arclight-V/mtch/pkg/signaler => ./../pkg/signaler
-
-replace github.com/Arclight-V/mtch/pkg/prober => ./../pkg/prober
+replace github.com/Arclight-V/mtch => ..

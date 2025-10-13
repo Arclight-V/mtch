@@ -2,13 +2,15 @@ package email
 
 import (
 	"bytes"
-	"config"
 	"context"
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
-	"github.com/go-gomail/gomail"
 	"html/template"
 	"log"
 	"net/url"
+
+	"github.com/go-gomail/gomail"
+
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
+	config "github.com/Arclight-V/mtch/pkg/platform/config"
 )
 
 const emailTpl = `<!doctype html>

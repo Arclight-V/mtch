@@ -1,7 +1,6 @@
 package main
 
 import (
-	"config"
 	"fmt"
 	"log"
 	"net"
@@ -14,6 +13,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/prober"
 	"github.com/Arclight-V/mtch/pkg/signaler"
 
+	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	pb "proto"
 	grpcuser "user-service/internal/adapter/grpc/user"
 	"user-service/internal/infrastructure/user/repository"
