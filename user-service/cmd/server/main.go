@@ -14,6 +14,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/signaler"
 
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
+	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	pb "proto"
 	grpcuser "user-service/internal/adapter/grpc/user"
 	"user-service/internal/infrastructure/user/repository"
@@ -36,7 +37,9 @@ func main() {
 	userUC := usecase.NewUserUseCase(userRepo)
 	server := grpcuser.NewUserServerGRPC(userUC)
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(grpcserver.NewUnaryServerRequestIDInterceptor()),
+	)
 	grpcProbe := prober.NewGRPC()
 	statusProber := prober.Combine(grpcProbe)
 

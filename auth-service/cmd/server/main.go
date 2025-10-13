@@ -26,6 +26,7 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
+	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	pb "proto"
 )
 
@@ -48,7 +49,11 @@ func main() {
 
 	var g run.Group
 
-	conn, err := grpc.NewClient(cfg.Client.GRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		cfg.Client.GRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithChainUnaryInterceptor(grpcserver.NewUnaryClientRequestIDInterceptor()),
+	)
 	if err != nil {
 		log.Fatalf("could not create grpc connection: %v", err)
 	}
