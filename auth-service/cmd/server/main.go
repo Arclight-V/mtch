@@ -1,16 +1,23 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"github.com/oklog/run"
 	"log"
 	"mime"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/repository"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/Arclight-V/mtch/pkg/prober"
+	"github.com/Arclight-V/mtch/pkg/signaler"
 
 	"config"
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
@@ -20,8 +27,6 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	pb "proto"
-
-	signaler "github.com/Arclight-V/mtch/pkg/signaler"
 )
 
 const (
@@ -40,13 +45,29 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
+
+	var g run.Group
+
 	conn, err := grpc.NewClient(cfg.Client.GRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("could not create grpc connection: %v", err)
 	}
 	defer conn.Close()
 
-	shutdown := make(chan struct{})
+	grpcProbe := prober.NewGRPC()
+	httpProbe := prober.NewHTTP()
+	statusProber := prober.Combine(grpcProbe, httpProbe)
+
+	// Listen for reload signals
+	{
+		shutdown := make(chan struct{})
+		g.Add(func() error {
+			return WaitForInterrupt(shutdown)
+		}, func(err error) {
+			close(shutdown)
+		})
+	}
+
 	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
 	signer := jwt_signer.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 	hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
@@ -62,23 +83,48 @@ func main() {
 		VerifyTokenRepo:   verifyTokenRepo,
 	}
 	handler = httpadapter.NewHandler(&userClient, &userClient, &userClient)
+	router := httpadapter.NewRouter(handler, httpProbe)
 
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
 
-	go func() {
-		log.Printf("server listening at %v", cfg.Http.HTTPAddr)
-		if err := http.ListenAndServe(cfg.Http.HTTPAddr, httpadapter.NewRouter(handler)); err != nil {
-			log.Fatalf("failed to start server: %v", err)
-		}
-	}()
+	// TODO: change this
+	srv := &http.Server{
+		Addr:    cfg.Http.HTTPAddr,
+		Handler: router,
+	}
 
-	go waitForInterrupt(shutdown)
-	<-shutdown
+	g.Add(func() error {
+		statusProber.Healthy()
+		statusProber.Ready()
+
+		log.Printf("server listening at %v", cfg.Http.HTTPAddr)
+		return srv.ListenAndServe()
+
+	}, func(err error) {
+		statusProber.NotReady(err)
+		defer statusProber.NotHealthy(err)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
+		srv.Shutdown(ctx)
+	})
+
+	if err := g.Run(); err != nil {
+		log.Fatalf("failed to run: %v", err)
+		os.Exit(1)
+	}
+	log.Println("Shutting down")
 
 }
 
-func waitForInterrupt(waiter chan<- struct{}) {
+func WaitForInterrupt(cancel <-chan struct{}) error {
 	interrupt := signaler.WaitForInterrupt()
-	log.Printf("Captured %v, shutdown requested.\n", interrupt)
-	waiter <- struct{}{}
+	select {
+	case s := <-interrupt:
+		log.Printf("received signal: %v", s)
+		return nil
+	case <-cancel:
+		return fmt.Errorf("Captured %v, shutdown requested.\n", interrupt)
+	}
 }

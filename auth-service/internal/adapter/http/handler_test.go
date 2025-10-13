@@ -123,7 +123,7 @@ func TestRegister_InvalidJSON(t *testing.T) {
 			regUC := mocks.NewMockRegisterUseCase(ctrl)
 			logUC := mocks.NewMockLoginUseCase(ctrl)
 			verifyEmailUC := mocks.NewMockVerifyEmailUseCase(ctrl)
-			router := NewRouter(NewHandler(regUC, logUC, verifyEmailUC))
+			router := NewRouter(NewHandler(regUC, logUC, verifyEmailUC), nil)
 
 			req := httptest.NewRequest("POST", apiBase+"auth/register", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")

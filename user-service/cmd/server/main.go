@@ -53,6 +53,7 @@ func main() {
 	}
 
 	g.Add(func() error {
+		statusProber.Healthy()
 		statusProber.Ready()
 		lis, err := net.Listen("tcp", cfg.Server.Port)
 		if err != nil {
@@ -64,6 +65,8 @@ func main() {
 
 	}, func(err error) {
 		statusProber.NotReady(err)
+		defer statusProber.NotHealthy(err)
+
 		s.GracefulStop()
 	})
 
