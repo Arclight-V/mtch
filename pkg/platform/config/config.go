@@ -11,6 +11,7 @@ type Config struct {
 	Client     *ClientCfg  `mapstructure:"client"`
 	Http       *HTTPCfg    `mapstructure:"http"`
 	SMTPClient *SMTPClient `mapstructure:"smtp_client"`
+	LogCfg     *LogCfg     `mapstructure:"logging"`
 }
 
 type ServerCfg struct {
@@ -32,6 +33,12 @@ type SMTPClient struct {
 	User string `mapstructure:"user"`
 	Pass string `mapstructure:"pass"`
 	From string `mapstructure:"from"`
+}
+
+type LogCfg struct {
+	Level     string `mapstructure:"level"`
+	Format    string `mapstructure:"format"`
+	DebugName string `mapstructure:"debug_name"`
 }
 
 // LoadConfig Load config file from given path
