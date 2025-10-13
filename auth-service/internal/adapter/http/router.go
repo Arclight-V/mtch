@@ -1,19 +1,21 @@
 package httpadapter
 
 import (
-	httpSwagger "github.com/swaggo/http-swagger"
-	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
-	mem "github.com/ulule/limiter/v3/drivers/store/memory"
 	goji "goji.io"
 	"goji.io/pat"
 	"log"
 	"mime"
 	"net/http"
 
+	httpSwagger "github.com/swaggo/http-swagger"
+	limiter "github.com/ulule/limiter/v3"
+	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	mem "github.com/ulule/limiter/v3/drivers/store/memory"
+
 	"github.com/Arclight-V/mtch/pkg/prober"
+	"github.com/Arclight-V/mtch/pkg/server/http/middleware"
 
 	_ "github.com/Arclight-V/mtch/auth-service/docs"
-	limiter "github.com/ulule/limiter/v3"
 )
 
 const (
@@ -28,6 +30,7 @@ func NewRouter(h *Handler, p *prober.HTTPProbe) http.Handler {
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
 	root := goji.NewMux()
 	root.Use(rateLimiter())
+	root.Use(requestID)
 
 	registerProber(root, p)
 
@@ -64,6 +67,10 @@ func rateLimiter() func(http.Handler) http.Handler {
 	// Create a new middleware with the limiter instance.
 	middleware := mhttp.NewMiddleware(limiter.New(store, rate, limiter.WithTrustForwardHeader(true)))
 	return middleware.Handler
+}
+
+func requestID(next http.Handler) http.Handler {
+	return middleware.RequestID(next)
 }
 
 // TODO:ADD logger
