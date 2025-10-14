@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
 	"github.com/pkg/errors"
 	"log"
 	"mime"
-	"net/http"
 	"os"
-	"time"
 
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/repository"
@@ -30,6 +27,7 @@ import (
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
+	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
 	pb "proto"
 )
 
@@ -72,7 +70,7 @@ func main() {
 	{
 		shutdown := make(chan struct{})
 		g.Add(func() error {
-			return WaitForInterrupt(shutdown)
+			return waitForInterrupt(shutdown)
 		}, func(err error) {
 			close(shutdown)
 		})
@@ -93,48 +91,40 @@ func main() {
 		VerifyTokenRepo:   verifyTokenRepo,
 	}
 	handler = httpadapter.NewHandler(&userClient, &userClient, &userClient)
-	router := httpadapter.NewRouter(handler, httpProbe)
+	router := httpadapter.NewRouter(handler)
 
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
 
-	// TODO: change this
-	srv := &http.Server{
-		Addr:    cfg.Http.HTTPAddr,
-		Handler: router,
-	}
+	srv := httpserver.NewServer(logger, httpProbe,
+		httpserver.WithListen(cfg.Http.HTTPAddr),
+		httpserver.WithHandler(router))
 
 	g.Add(func() error {
 		statusProber.Healthy()
 		statusProber.Ready()
 
-		level.Info(logger).Log("msg", "http server started")
-		//log.Printf("server listening at %v", cfg.Http.HTTPAddr)
 		return srv.ListenAndServe()
 
 	}, func(err error) {
 		statusProber.NotReady(err)
 		defer statusProber.NotHealthy(err)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
-
-		srv.Shutdown(ctx)
+		srv.Shutdown(err)
 	})
 
 	if err := g.Run(); err != nil {
-		log.Fatalf("failed to run: %v", err)
+		level.Error(logger).Log("err", err)
 		os.Exit(1)
 	}
-	log.Println("Shutting down")
+	level.Info(logger).Log("msg", "exiting")
 
 }
 
-func WaitForInterrupt(cancel <-chan struct{}) error {
+func waitForInterrupt(cancel <-chan struct{}) error {
 	interrupt := signaler.WaitForInterrupt()
 	select {
 	case s := <-interrupt:
-		log.Printf("received signal: %v", s)
-		return nil
+		return fmt.Errorf("received signal: %s", s)
 	case <-cancel:
 		return fmt.Errorf("Captured %v, shutdown requested.\n", interrupt)
 	}

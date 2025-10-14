@@ -12,7 +12,6 @@ import (
 	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	mem "github.com/ulule/limiter/v3/drivers/store/memory"
 
-	"github.com/Arclight-V/mtch/pkg/prober"
 	"github.com/Arclight-V/mtch/pkg/server/http/middleware"
 
 	_ "github.com/Arclight-V/mtch/auth-service/docs"
@@ -26,13 +25,11 @@ const (
 )
 
 // TODO: Transform to server and add logger
-func NewRouter(h *Handler, p *prober.HTTPProbe) http.Handler {
+func NewRouter(h *Handler) http.Handler {
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
 	root := goji.NewMux()
 	root.Use(rateLimiter())
 	root.Use(requestID)
-
-	registerProber(root, p)
 
 	api := goji.SubMux()
 	root.Handle(pat.New("/swagger/*"), httpSwagger.WrapHandler)
@@ -71,10 +68,4 @@ func rateLimiter() func(http.Handler) http.Handler {
 
 func requestID(next http.Handler) http.Handler {
 	return middleware.RequestID(next)
-}
-
-// TODO:ADD logger
-func registerProber(mux *goji.Mux, p *prober.HTTPProbe) {
-	mux.Handle(pat.New("/-/healthy"), p.HealthyHandler(nil))
-	mux.Handle(pat.New("/-/readyz"), p.ReadyHandler(nil))
 }
