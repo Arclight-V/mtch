@@ -2,22 +2,46 @@ package httpadapter
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/go-kit/log/level"
+	goji "goji.io"
+	"goji.io/pat"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/go-playground/validator/v10"
+	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/ulule/limiter/v3"
+	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	mem "github.com/ulule/limiter/v3/drivers/store/memory"
 
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/models"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
+	"github.com/Arclight-V/mtch/pkg/server/http/middleware"
 )
 
+const (
+	apiBase = "/api/v1/"
+
+	// rateFormatted - a temporary solution (read from config)
+	rateFormatted = "5-M"
+)
+
+// Options for the web Handler
+type Options struct {
+	ListenAddress string
+	TLSConfig     *tls.Config
+}
 type Handler struct {
-	logger log.Logger
+	logger  log.Logger
+	router  http.Handler
+	options *Options
+	httpSrv *http.Server
 
 	regUC         auth.RegisterUseCase
 	loginUC       auth.LoginUseCase
@@ -27,6 +51,8 @@ type Handler struct {
 
 func NewHandler(
 	logger log.Logger,
+	o *Options,
+
 	regUC auth.RegisterUseCase,
 	loginUC auth.LoginUseCase,
 	verifyEmailUC auth.VerifyEmailUseCase) *Handler {
@@ -34,13 +60,76 @@ func NewHandler(
 	validate := validator.New()
 	validate.RegisterAlias("contact", "email|e164")
 
-	return &Handler{
-		logger:        logger,
+	h := &Handler{
+		logger:  logger,
+		options: o,
+
 		regUC:         regUC,
 		loginUC:       loginUC,
 		verifyEmailUC: verifyEmailUC,
 		validate:      validate,
 	}
+
+	router := goji.NewMux()
+	router.Use(rateLimiter())
+	router.Use(requestID)
+	router.Use(logging(logger))
+
+	router.Handle(pat.New("/swagger/*"), httpSwagger.WrapHandler)
+
+	api := goji.SubMux()
+	router.Handle(pat.New(apiBase+"*"), api)
+
+	authMux := goji.SubMux()
+	api.Handle(pat.New("/auth/*"), authMux)
+	authMux.HandleFunc(pat.Post("/register"), h.Register)
+	authMux.HandleFunc(pat.Get("/verify-email"), h.VerifyEmail)
+	authMux.HandleFunc(pat.Post("/login"), h.Login)
+
+	static := http.StripPrefix("/app/", http.FileServer(http.Dir("./../webwasm")))
+	// Redirect /app -> /app/
+	router.Handle(pat.Get("/app"), http.RedirectHandler("/app/", http.StatusMovedPermanently))
+	// All files front: /app/*
+	router.Handle(pat.Get("/app/*"), static)
+
+	h.router = router
+
+	h.httpSrv = &http.Server{
+		Handler:   router,
+		TLSConfig: h.options.TLSConfig,
+	}
+
+	return h
+}
+
+func (h *Handler) Run() error {
+	level.Info(h.logger).Log("msg", "Start listening for connections", "address", h.options.ListenAddress)
+
+	listener, err := net.Listen("tcp", h.options.ListenAddress)
+	if err != nil {
+		return err
+	}
+
+	//TODO: Add
+	// Monitor incoming connections with conntrack.
+	//listener = conntrack.NewListener(listener,
+	//	conntrack.TrackWithName("http"),
+	//	conntrack.TrackWithTracing())
+
+	if h.options.TLSConfig != nil {
+		level.Info(h.logger).Log("msg", "Serving HTTPS", "address", h.options.ListenAddress)
+		return h.httpSrv.ServeTLS(listener, "", "")
+	}
+
+	level.Info(h.logger).Log("msg", "Serving plain HTTP", "address", h.options.ListenAddress)
+	return h.httpSrv.Serve(listener)
+
+}
+
+func (h *Handler) Shutdown() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_ = h.httpSrv.Shutdown(ctx)
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -193,4 +282,28 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(models.ErrorResponse{Error: message})
+}
+
+func requestID(next http.Handler) http.Handler {
+	return middleware.RequestID(next)
+}
+
+func logging(logger log.Logger) func(http.Handler) http.Handler {
+	return middleware.Logging(logger)
+}
+
+// rateLimiter() - move to config?
+func rateLimiter() func(http.Handler) http.Handler {
+	// Define a limit rate to 4 requests per hour.
+	rate, err := limiter.NewRateFromFormatted(rateFormatted)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	store := mem.NewStore()
+
+	// Create a new middleware with the limiter instance.
+	middleware := mhttp.NewMiddleware(limiter.New(store, rate, limiter.WithTrustForwardHeader(true)))
+	return middleware.Handler
 }

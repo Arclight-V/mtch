@@ -31,9 +31,3 @@ func WithMux(mux *http.ServeMux) Option {
 		o.mux = mux
 	})
 }
-
-func WithHandler(h http.Handler) Option {
-	return optionFunc(func(o *options) {
-		o.handler = h
-	})
-}
