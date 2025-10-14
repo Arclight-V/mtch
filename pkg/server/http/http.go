@@ -34,8 +34,11 @@ func NewServer(logger log.Logger, probe *prober.HTTPProbe, opts ...Option) *Serv
 
 	registerProber(mux, probe)
 
-	var h http.Handler
-	h = mux
+	if options.handler != nil {
+		mux.Handle("/", options.handler)
+	}
+
+	var h http.Handler = mux
 
 	return &Server{
 		logger: logger,
