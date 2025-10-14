@@ -1,12 +1,13 @@
 package httpadapter
 
 import (
+	"fmt"
 	goji "goji.io"
 	"goji.io/pat"
-	"log"
 	"mime"
 	"net/http"
 
+	"github.com/go-kit/log"
 	httpSwagger "github.com/swaggo/http-swagger"
 	limiter "github.com/ulule/limiter/v3"
 	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
@@ -27,9 +28,11 @@ const (
 // TODO: Transform to server and add logger
 func NewRouter(h *Handler) http.Handler {
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
+
 	root := goji.NewMux()
 	root.Use(rateLimiter())
 	root.Use(requestID)
+	root.Use(logging(h.logger))
 
 	api := goji.SubMux()
 	root.Handle(pat.New("/swagger/*"), httpSwagger.WrapHandler)
@@ -55,7 +58,7 @@ func rateLimiter() func(http.Handler) http.Handler {
 	// Define a limit rate to 4 requests per hour.
 	rate, err := limiter.NewRateFromFormatted(rateFormatted)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return nil
 	}
 
@@ -68,4 +71,8 @@ func rateLimiter() func(http.Handler) http.Handler {
 
 func requestID(next http.Handler) http.Handler {
 	return middleware.RequestID(next)
+}
+
+func logging(logger log.Logger) func(http.Handler) http.Handler {
+	return middleware.Logging(logger)
 }

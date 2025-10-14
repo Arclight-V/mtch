@@ -90,7 +90,7 @@ func main() {
 		EmailSender:       emailSender,
 		VerifyTokenRepo:   verifyTokenRepo,
 	}
-	handler = httpadapter.NewHandler(&userClient, &userClient, &userClient)
+	handler = httpadapter.NewHandler(logger, &userClient, &userClient, &userClient)
 	router := httpadapter.NewRouter(handler)
 
 	_ = mime.AddExtensionType(".wasm", "application/wasm")

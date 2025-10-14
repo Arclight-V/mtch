@@ -4,16 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/models"
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
-	"github.com/go-playground/validator/v10"
-	"log"
+	"github.com/go-kit/log/level"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/go-kit/log"
+	"github.com/go-playground/validator/v10"
+
+	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/models"
+	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 )
 
 type Handler struct {
+	logger log.Logger
+
 	regUC         auth.RegisterUseCase
 	loginUC       auth.LoginUseCase
 	verifyEmailUC auth.VerifyEmailUseCase
@@ -21,6 +26,7 @@ type Handler struct {
 }
 
 func NewHandler(
+	logger log.Logger,
 	regUC auth.RegisterUseCase,
 	loginUC auth.LoginUseCase,
 	verifyEmailUC auth.VerifyEmailUseCase) *Handler {
@@ -29,6 +35,7 @@ func NewHandler(
 	validate.RegisterAlias("contact", "email|e164")
 
 	return &Handler{
+		logger:        logger,
 		regUC:         regUC,
 		loginUC:       loginUC,
 		verifyEmailUC: verifyEmailUC,
@@ -37,7 +44,6 @@ func NewHandler(
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	log.Println("Login called")
 	//if r.Header.Get("Content-Type") != "application/json" {
 	//	http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
 	//	return
@@ -91,7 +97,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure      415 {object} 	  models.ErrorResponse
 // @Router       /api/v1/auth/register [post]
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	log.Println("Register called")
+	level.Info(h.logger).Log("msg", "Register called")
 
 	if r.Header.Get("Content-Type") != "application/json" {
 		writeJSONError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
@@ -154,7 +160,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
-	log.Println("Verify email called")
+	level.Info(h.logger).Log("msg", "VerifyEmail called")
 
 	//token := pat.Param(r, "token")
 	token := r.URL.Query().Get("token")
