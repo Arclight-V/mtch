@@ -32,7 +32,7 @@ func NewRouter(h *Handler) http.Handler {
 	root := goji.NewMux()
 	root.Use(rateLimiter())
 	root.Use(requestID)
-	//root.Use(logging(h.logger))
+	root.Use(logging(h.logger))
 
 	api := goji.SubMux()
 	root.Handle(pat.New("/swagger/*"), httpSwagger.WrapHandler)
