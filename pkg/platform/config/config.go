@@ -24,7 +24,8 @@ type ClientCfg struct {
 }
 
 type HTTPCfg struct {
-	HTTPAddr string `mapstructure:"http_addr"`
+	ListenAddr        string `mapstructure:"listen_addr"`
+	MetricsListenAddr string `mapstructure:"metrics_listen_addr"`
 }
 
 type SMTPClient struct {

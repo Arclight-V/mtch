@@ -2,7 +2,8 @@ client:
   GRPC_ADDR: "localhost:50051"
 
 http:
-  HTTP_ADDR: ":8000"
+  LISTEN_ADDR: ":8000"
+  METRICS_LISTEN_ADDR: ":10902"
 
 smtp_client:
   HOST: "127.0.0.1"

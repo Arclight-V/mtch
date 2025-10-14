@@ -14,12 +14,12 @@ func Logging(logger log.Logger) func(http.Handler) http.Handler {
 			start := time.Now()
 			next.ServeHTTP(w, r)
 			rid, _ := RequestIDFromContext(r.Context())
-			level.Info(logger).Log("http_request",
-				"method", r.Method,
+			level.Info(logger).Log(
 				"path", r.URL.Path,
-				"request_id", rid,
-				"duration", time.Since(start),
+				"method", r.Method,
 				"remote", r.RemoteAddr,
+				"duration", time.Since(start),
+				"request_id", rid,
 			)
 		})
 	}

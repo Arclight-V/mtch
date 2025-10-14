@@ -90,32 +90,50 @@ func main() {
 		EmailSender:       emailSender,
 		VerifyTokenRepo:   verifyTokenRepo,
 	}
-	handler = httpadapter.NewHandler(logger, &userClient, &userClient, &userClient)
-	router := httpadapter.NewRouter(handler)
+
+	webHandler := httpadapter.NewHandler(logger,
+		&httpadapter.Options{ListenAddress: cfg.Http.ListenAddr},
+
+		&userClient,
+		&userClient,
+		&userClient)
 
 	_ = mime.AddExtensionType(".wasm", "application/wasm")
 
-	srv := httpserver.NewServer(logger, httpProbe,
-		httpserver.WithListen(cfg.Http.HTTPAddr),
-		httpserver.WithHandler(router))
+	level.Debug(logger).Log("msg", "starting HTTP server")
+	{
+		srv := httpserver.NewServer(logger, httpProbe,
+			httpserver.WithListen(cfg.Http.MetricsListenAddr))
 
-	g.Add(func() error {
-		statusProber.Healthy()
-		statusProber.Ready()
+		g.Add(func() error {
+			statusProber.Healthy()
+			statusProber.Ready()
 
-		return srv.ListenAndServe()
+			return srv.ListenAndServe()
 
-	}, func(err error) {
-		statusProber.NotReady(err)
-		defer statusProber.NotHealthy(err)
+		}, func(err error) {
+			statusProber.NotReady(err)
+			defer statusProber.NotHealthy(err)
 
-		srv.Shutdown(err)
-	})
+			srv.Shutdown(err)
+		})
+
+	}
+
+	level.Debug(logger).Log("msg", "setting up receive HTTP handler")
+	{
+		g.Add(func() error {
+			return errors.Wrap(webHandler.Run(), "error starting web server")
+		}, func(err error) {
+			webHandler.Shutdown()
+		})
+	}
 
 	if err := g.Run(); err != nil {
 		level.Error(logger).Log("err", err)
 		os.Exit(1)
 	}
+
 	level.Info(logger).Log("msg", "exiting")
 
 }
