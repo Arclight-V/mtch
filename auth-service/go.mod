@@ -80,9 +80,6 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/ulule/limiter/v3 v3.11.2
 	golang.org/x/crypto v0.43.0
-	proto v0.0.0
 )
-
-replace proto => ../proto
 
 replace github.com/Arclight-V/mtch => ..

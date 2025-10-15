@@ -15,7 +15,7 @@ const (
 	//CreatedUnverified Successfully created, but not yet verified
 	CreatedUnverified
 
-	//ExistsVerified There is already a user with this email address and it has been verified
+	//ExistsVerified There is already a userservice with this email address and it has been verified
 	ExistsVerified
 
 	//ExistsUnverified Already exists, but has NOT been verified

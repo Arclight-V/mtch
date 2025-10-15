@@ -82,7 +82,7 @@ func renderEmailHTML(baseVerifyURL, token string) (string, error) {
 }
 
 func (s *SMTPClient) SendUserRegistered(ctx context.Context, vd notification.VerifyData) error {
-	log.Printf("sending user registered to: %v", vd.Email)
+	log.Printf("sending userservice registered to: %v", vd.Email)
 	u, err := makeVerifyURL(verifyEmailURL, vd.VerifyToken)
 	if err != nil {
 		return err

@@ -1,19 +1,16 @@
 package user
 
 import (
-	pb "proto"
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 	usecase "user-service/internal/usecase/user"
 )
 
-type server struct {
-	pb.UnimplementedUserInfoServer
-}
+type usersServiceServer struct {
+	userservicepb.UnimplementedUserServiceServer
 
-type usersService struct {
 	userUC usecase.UserUseCase
-	server
 }
 
-func NewUserServerGRPC(userUC usecase.UserUseCase) *usersService {
-	return &usersService{userUC: userUC}
+func NewUserServiceServer(userUC usecase.UserUseCase) *usersServiceServer {
+	return &usersServiceServer{userUC: userUC}
 }

@@ -1,4 +1,4 @@
-client:
+user_service_client:
   GRPC_ADDR: "localhost:50051"
 
 http:

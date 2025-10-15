@@ -1,19 +1,19 @@
 package user
 
 // userModeToProto convert models.User to pb.User without passwordHash
-//func userModelToProto(user *models.User) *pb.User {
+//func userModelToProto(userservice *models.User) *pb.User {
 //	out := &pb.User{
-//		Uuid:      user.UserID.String(),
-//		Email:     user.Email,
-//		FirstName: user.FirstName,
-//		LastName:  user.LastName,
-//		Role:      user.Role,
-//		CreatedAt: timestamppb.New(user.CreatedAt),
-//		UpdateAt:  timestamppb.New(user.UpdatedAt),
-//		Verified:  user.Verified,
+//		Uuid:      userservice.UserID.String(),
+//		Email:     userservice.Email,
+//		FirstName: userservice.FirstName,
+//		LastName:  userservice.LastName,
+//		Role:      userservice.Role,
+//		CreatedAt: timestamppb.New(userservice.CreatedAt),
+//		UpdateAt:  timestamppb.New(userservice.UpdatedAt),
+//		Verified:  userservice.Verified,
 //	}
-//	if user.Avatar != nil {
-//		out.Avatar = *user.Avatar
+//	if userservice.Avatar != nil {
+//		out.Avatar = *userservice.Avatar
 //	}
 //	return out
 //}

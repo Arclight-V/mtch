@@ -160,7 +160,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	//})
 	//
 	//out := struct {
-	//	User        *pb.User `json:"user"`
+	//	User        *pb.User `json:"userservice"`
 	//	AccessToken string   `json:"access_token"`
 	//	ExpiresIn   int64    `json:"expires_in"`
 	//}{
@@ -175,7 +175,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 // Register
 // @Summary User Registration
-// @Description Creates an account, returns an unverified user
+// @Description Creates an account, returns an unverified userservice
 // @Tags         auth
 // @Accept       json
 // @Produce      json

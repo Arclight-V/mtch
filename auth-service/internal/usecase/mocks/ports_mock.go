@@ -6,9 +6,9 @@ package mocks
 
 import (
 	context "context"
-	pb "proto"
 	reflect "reflect"
 	time "time"
+
 
 	domain "github.com/Arclight-V/mtch/auth-service/internal/domain"
 	gomock "github.com/golang/mock/gomock"
