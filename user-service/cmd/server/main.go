@@ -15,9 +15,9 @@ import (
 	"github.com/Arclight-V/mtch/pkg/signaler"
 	"github.com/Arclight-V/mtch/pkg/userservice"
 
-	grpcuser "user-service/internal/adapter/grpc/user"
-	"user-service/internal/infrastructure/user/repository"
-	usecase "user-service/internal/usecase/user"
+	grpcuser "github.com/Arclight-V/mtch/user-service/internal/adapter/grpc/user"
+	"github.com/Arclight-V/mtch/user-service/internal/infrastructure/user/repository"
+	usecase "github.com/Arclight-V/mtch/user-service/internal/usecase/user"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 )
 
 func main() {
-	cfg, err := config.GetConfig(os.Getenv("userservice-config"))
+	cfg, err := config.GetConfig(os.Getenv("user-config"))
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}

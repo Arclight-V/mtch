@@ -1,12 +1,11 @@
-module user-service
+module github.com/Arclight-V/mtch/user-service
 
 go 1.24.0
 
-require google.golang.org/grpc v1.76.0
+require google.golang.org/grpc v1.76.0 // indirect
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
@@ -25,6 +24,7 @@ require (
 
 require (
 	github.com/Arclight-V/mtch v0.0.0
+	github.com/go-kit/log v0.2.1
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/jmoiron/sqlx v1.4.0
