@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	domain "user-service/internal/domain/user"
+	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 )
 
 // User Repository

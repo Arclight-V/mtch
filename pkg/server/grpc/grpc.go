@@ -47,6 +47,11 @@ func NewServer(logger log.Logger, probe *prober.GRPCProbe, opts ...Option) *Serv
 
 	s := grpc.NewServer(options.grpcOpts...)
 
+	// Register all configured servers.
+	for _, f := range options.registerServerFuncs {
+		f(s)
+	}
+
 	grpc_health.RegisterHealthServer(s, probe.HealthServer())
 
 	return &Server{

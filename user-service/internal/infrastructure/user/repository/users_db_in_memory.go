@@ -7,7 +7,7 @@ import (
 	"net/mail"
 	"sync"
 
-	domain "user-service/internal/domain/user"
+	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 )
 
 type UsersDBMemory struct {

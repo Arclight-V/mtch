@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	domain "user-service/internal/domain/user"
+	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 )
 
 // User User Case interface

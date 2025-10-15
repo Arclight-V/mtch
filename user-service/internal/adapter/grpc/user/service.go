@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
-	usecase "user-service/internal/usecase/user"
+	usecase "github.com/Arclight-V/mtch/user-service/internal/usecase/user"
 )
 
 type usersServiceServer struct {

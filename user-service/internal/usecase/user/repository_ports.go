@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	domain "user-service/internal/domain/user"
+	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 )
 
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=./mocks/repository_mock.go
