@@ -1,2 +1,10 @@
 server:
   port: ":50051"
+
+http:
+  METRICS_LISTEN_ADDR: ":10903"
+
+logging:
+  LEVEL: "info"
+  FORMAT: "json"
+  DEBUG_NAME: ""

@@ -2,19 +2,21 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-kit/log/level"
 	"log"
 	"net"
 	"os"
 
+	"github.com/oklog/run"
 	"google.golang.org/grpc"
 
-	"github.com/oklog/run"
-
+	"github.com/Arclight-V/mtch/pkg/logging"
+	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	"github.com/Arclight-V/mtch/pkg/prober"
+	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
+	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
 	"github.com/Arclight-V/mtch/pkg/signaler"
 
-	config "github.com/Arclight-V/mtch/pkg/platform/config"
-	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	pb "proto"
 	grpcuser "user-service/internal/adapter/grpc/user"
 	"user-service/internal/infrastructure/user/repository"
@@ -31,19 +33,9 @@ func main() {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
+	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
+
 	var g run.Group
-
-	userRepo := repository.NewUsersDBMemory()
-	userUC := usecase.NewUserUseCase(userRepo)
-	server := grpcuser.NewUserServerGRPC(userUC)
-
-	s := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(grpcserver.NewUnaryServerRequestIDInterceptor()),
-	)
-	grpcProbe := prober.NewGRPC()
-	statusProber := prober.Combine(grpcProbe)
-
-	pb.RegisterUserInfoServer(s, server)
 
 	// Listen for reload signals.
 	{
@@ -54,6 +46,37 @@ func main() {
 			close(shutdown)
 		})
 	}
+
+	grpcProbe := prober.NewGRPC()
+	httpProbe := prober.NewHTTP()
+	statusProber := prober.Combine(grpcProbe, httpProbe)
+
+	level.Debug(logger).Log("msg", "starting HTTP server")
+	{
+		srv := httpserver.NewServer(logger, httpProbe,
+			httpserver.WithListen(cfg.Http.MetricsListenAddr))
+
+		g.Add(func() error {
+			statusProber.Healthy()
+			statusProber.Ready()
+
+			return srv.ListenAndServe()
+
+		}, func(err error) {
+			statusProber.NotReady(err)
+			defer statusProber.NotHealthy(err)
+
+			srv.Shutdown(err)
+		})
+	}
+
+	s := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(grpcserver.NewUnaryServerRequestIDInterceptor()),
+	)
+	userRepo := repository.NewUsersDBMemory()
+	userUC := usecase.NewUserUseCase(userRepo)
+	server := grpcuser.NewUserServerGRPC(userUC)
+	pb.RegisterUserInfoServer(s, server)
 
 	g.Add(func() error {
 		statusProber.Healthy()
