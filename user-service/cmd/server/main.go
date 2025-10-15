@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-kit/log/level"
 	"log"
 	"net"
@@ -41,7 +40,7 @@ func main() {
 	{
 		shutdown := make(chan struct{})
 		g.Add(func() error {
-			return WaitForInterrupt(shutdown)
+			return signaler.WaitForInterrupt(shutdown)
 		}, func(err error) {
 			close(shutdown)
 		})
@@ -101,15 +100,4 @@ func main() {
 		os.Exit(1)
 	}
 	log.Println("Shutting down")
-}
-
-func WaitForInterrupt(cancel <-chan struct{}) error {
-	interrupt := signaler.WaitForInterrupt()
-	select {
-	case s := <-interrupt:
-		log.Printf("received signal: %v", s)
-		return nil
-	case <-cancel:
-		return fmt.Errorf("Captured %v, shutdown requested.\n", interrupt)
-	}
 }
