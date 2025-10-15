@@ -2,16 +2,17 @@ package usecase
 
 import (
 	"context"
-	"github.com/Arclight-V/mtch/auth-service/internal/domain"
-	pb "proto"
 	"time"
+
+	"github.com/Arclight-V/mtch/auth-service/internal/domain"
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
 
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=../usecase/mocks/ports_mock.go
 type UserRepo interface {
-	Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error)
-	Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error)
-	VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error)
+	Login(ctx context.Context, request *userservicepb.LoginRequest) (*userservicepb.LoginResponse, error)
+	Register(ctx context.Context, request *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error)
+	VerifyEmail(ctx context.Context, request *userservicepb.VerifyEmailRequest) (*userservicepb.VerifyEmailResponse, error)
 }
 
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=../usecase/mocks/token_signer_mock.go

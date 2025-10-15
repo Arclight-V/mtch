@@ -27,7 +27,7 @@ import (
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
-	pb "proto"
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
 
 const (
@@ -38,8 +38,6 @@ const (
 var secretAccessKey = []byte("secret-access-key")
 var secretRefreshKey = []byte("secret-refresh-key")
 var secretVerifyKey = []byte("secret-verify-key")
-
-var handler *httpadapter.Handler
 
 func main() {
 	cfg, err := config.GetConfig(os.Getenv("auth-config"))
@@ -75,7 +73,7 @@ func main() {
 		})
 	}
 
-	repo := grpcclient.NewGRPCUserRepo(pb.NewUserInfoClient(conn))
+	repo := grpcclient.NewGRPCUserRepo(userservicepb.NewUserServiceClient(conn))
 	signer := jwt_signer.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 	hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
 	passwordValidator := passwd.NewUserPasswordValidator()

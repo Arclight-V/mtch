@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/api/v1/auth/register": {
             "post": {
-                "description": "Creates an account, returns an unverified user",
+                "description": "Creates an account, returns an unverified userservice",
                 "consumes": [
                     "application/json"
                 ],

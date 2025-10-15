@@ -27,10 +27,10 @@ func (u *userUseCase) Register(ctx context.Context, in *domain.RegisterInput) (*
 		return &domain.RegisterOutput{UserID: usr.UserID, Status: domain.CreatedUnverified}, nil
 	}
 	if existUser.Activated {
-		return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, errors.New("user is activated")
+		return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, errors.New("userservice is activated")
 	}
 
-	return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, errors.New("user exist, but not activated")
+	return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, errors.New("userservice exist, but not activated")
 
 }
 

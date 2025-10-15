@@ -2,18 +2,18 @@ package grpcclient
 
 import (
 	"context"
-	pb "proto"
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
 
 type GrpcUserRepo struct {
-	cli pb.UserInfoClient
+	cli userservicepb.UserServiceClient
 }
 
-func NewGRPCUserRepo(cli pb.UserInfoClient) *GrpcUserRepo {
+func NewGRPCUserRepo(cli userservicepb.UserServiceClient) *GrpcUserRepo {
 	return &GrpcUserRepo{cli: cli}
 }
 
-func (r *GrpcUserRepo) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (r *GrpcUserRepo) Login(ctx context.Context, request *userservicepb.LoginRequest) (*userservicepb.LoginResponse, error) {
 	resp, err := r.cli.Login(ctx, request)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func (r *GrpcUserRepo) Login(ctx context.Context, request *pb.LoginRequest) (*pb
 	return resp, nil
 }
 
-func (r *GrpcUserRepo) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (r *GrpcUserRepo) Register(ctx context.Context, request *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error) {
 	resp, err := r.cli.Register(ctx, request)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (r *GrpcUserRepo) Register(ctx context.Context, request *pb.RegisterRequest
 	return resp, nil
 }
 
-func (r *GrpcUserRepo) VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {
+func (r *GrpcUserRepo) VerifyEmail(ctx context.Context, request *userservicepb.VerifyEmailRequest) (*userservicepb.VerifyEmailResponse, error) {
 	//TODO implement me
 	resp, err := r.cli.VerifyEmail(ctx, request)
 	if err != nil {

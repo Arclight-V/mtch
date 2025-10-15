@@ -1,5 +1,7 @@
-server:
-  port: ":50051"
+user_service_server:
+  PORT: ":50051"
+  GRACE_PERIOD: "3s"
+
 
 http:
   METRICS_LISTEN_ADDR: ":10903"

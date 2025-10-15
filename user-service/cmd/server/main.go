@@ -1,22 +1,20 @@
 package main
 
 import (
-	"github.com/go-kit/log/level"
 	"log"
-	"net"
 	"os"
 
+	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
-	"google.golang.org/grpc"
 
 	"github.com/Arclight-V/mtch/pkg/logging"
-	config "github.com/Arclight-V/mtch/pkg/platform/config"
+	"github.com/Arclight-V/mtch/pkg/platform/config"
 	"github.com/Arclight-V/mtch/pkg/prober"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
 	"github.com/Arclight-V/mtch/pkg/signaler"
+	"github.com/Arclight-V/mtch/pkg/userservice"
 
-	pb "proto"
 	grpcuser "user-service/internal/adapter/grpc/user"
 	"user-service/internal/infrastructure/user/repository"
 	usecase "user-service/internal/usecase/user"
@@ -27,7 +25,7 @@ const (
 )
 
 func main() {
-	cfg, err := config.GetConfig(os.Getenv("user-config"))
+	cfg, err := config.GetConfig(os.Getenv("userservice-config"))
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
@@ -57,10 +55,8 @@ func main() {
 
 		g.Add(func() error {
 			statusProber.Healthy()
-			statusProber.Ready()
 
 			return srv.ListenAndServe()
-
 		}, func(err error) {
 			statusProber.NotReady(err)
 			defer statusProber.NotHealthy(err)
@@ -69,31 +65,28 @@ func main() {
 		})
 	}
 
-	s := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(grpcserver.NewUnaryServerRequestIDInterceptor()),
-	)
 	userRepo := repository.NewUsersDBMemory()
 	userUC := usecase.NewUserUseCase(userRepo)
-	server := grpcuser.NewUserServerGRPC(userUC)
-	pb.RegisterUserInfoServer(s, server)
+	server := grpcuser.NewUserServiceServer(userUC)
 
-	g.Add(func() error {
-		statusProber.Healthy()
-		statusProber.Ready()
-		lis, err := net.Listen("tcp", cfg.Server.Port)
-		if err != nil {
-			log.Printf("failed to listen: %v", err)
-		}
+	level.Debug(logger).Log("msg", "starting GRPC server")
+	{
+		s := grpcserver.NewServer(logger, grpcProbe,
+			grpcserver.WithServer(userservice.RegisterUserServer(server)),
+			grpcserver.WithListen(cfg.UserServiceServer.Port),
+			grpcserver.WithGracePeriod(cfg.UserServiceServer.GracePeriod),
+		)
 
-		log.Printf("server listening at %v", lis.Addr())
-		return s.Serve(lis)
+		g.Add(func() error {
+			statusProber.Ready()
 
-	}, func(err error) {
-		statusProber.NotReady(err)
-		defer statusProber.NotHealthy(err)
+			return s.ListenAndServe()
+		}, func(err error) {
+			statusProber.NotReady(err)
 
-		s.GracefulStop()
-	})
+			s.Shutdown(err)
+		})
+	}
 
 	if err := g.Run(); err != nil {
 		log.Fatalf("failed to run: %v", err)

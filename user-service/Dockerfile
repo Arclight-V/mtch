@@ -12,7 +12,7 @@ RUN go mod download
 
 COPY user-service/. ./
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/user-service ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/userservice-service ./cmd/server
 
 FROM gcr.io/distroless/static-debian12:nonroot
 

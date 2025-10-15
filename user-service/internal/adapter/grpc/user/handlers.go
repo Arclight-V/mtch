@@ -8,8 +8,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "proto"
 	domain "user-service/internal/domain/user"
+	pb "userservicepb"
 )
 
 func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {

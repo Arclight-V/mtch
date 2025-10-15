@@ -4,8 +4,7 @@ import "net/http"
 
 type options struct {
 	listen string
-
-	mux *http.ServeMux
+	mux    *http.ServeMux
 
 	handler http.Handler
 }

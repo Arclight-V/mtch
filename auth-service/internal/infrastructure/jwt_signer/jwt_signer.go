@@ -32,7 +32,7 @@ func NewJWTSigner(accessKye, refreshKey, verifyKey []byte) *JWTSigner {
 func (s *JWTSigner) SignAccess(userId, sid string) (string, error) {
 	claims := domain.AccessClaims{
 		BaseClaims: domain.BaseClaims{UserId: userId, Sid: sid},
-		Roles:      []string{"user"},
+		Roles:      []string{"userservice"},
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTTl)),
 			Issuer:    "auth-service",

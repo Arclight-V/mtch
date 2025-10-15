@@ -2,12 +2,13 @@ package auth
 
 import (
 	"context"
+	"log"
+	"time"
+
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
-	"log"
-	pb "proto"
-	"time"
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
 
 type Interactor struct {
@@ -20,7 +21,7 @@ type Interactor struct {
 }
 
 func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
-	request := &pb.LoginRequest{
+	request := &userservicepb.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	}
@@ -56,13 +57,13 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 		return nil, err
 	}
 
-	pbRegReq := &pb.RegisterRequest{
-		PersonalData: &pb.PersonalData{
+	pbRegReq := &userservicepb.RegisterRequest{
+		PersonalData: &userservicepb.PersonalData{
 			FirstName: in.FirstName,
 			LastName:  in.LastName,
 			Contact:   in.Contact,
 			Password:  in.Password,
-			BirthDate: &pb.Date{
+			BirthDate: &userservicepb.Date{
 				BirthDay:   in.Date.BirthDay,
 				BirthMonth: in.Date.BirthMonth,
 				BirthYear:  in.Date.BirthYear,
@@ -79,7 +80,7 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 		UserID: resp.UserId,
 		Email:  in.Contact,
 	}
-	log.Printf("user registered to: %v", output)
+	log.Printf("userservice registered to: %v", output)
 
 	verifyTokenIssue, token, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
 	if err != nil {
@@ -111,7 +112,7 @@ func (uc *Interactor) VerifyEmail(ctx context.Context, in VerifyEmailInput) (Ver
 		return VerifyEmailOutput{}, err
 	}
 
-	pbResp := &pb.VerifyEmailRequest{
+	pbResp := &userservicepb.VerifyEmailRequest{
 		Uuid: v.UserID,
 	}
 

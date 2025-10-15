@@ -28,7 +28,7 @@ func (m *UsersDBMemory) Create(ctx context.Context, regData *domain.RegisterInpu
 
 	cnt := pendingUser.PersonalData.Contact
 	if _, ok := m.users[cnt]; ok {
-		return nil, errors.New("user with " + cnt + " already exists")
+		return nil, errors.New("userservice with " + cnt + " already exists")
 	}
 	m.users[cnt] = *pendingUser
 
@@ -52,7 +52,7 @@ func (m *UsersDBMemory) FindByEmail(ctx context.Context, email string) (*domain.
 
 	user, ok := m.users[email]
 	if !ok {
-		return nil, errors.New("user not found")
+		return nil, errors.New("userservice not found")
 	}
 	return &user, nil
 }
@@ -65,7 +65,7 @@ func (m *UsersDBMemory) FindByPhone(ctx context.Context, phone string) (*domain.
 
 	user, ok := m.users[phone]
 	if !ok {
-		return nil, errors.New("user not found")
+		return nil, errors.New("userservice not found")
 	}
 	return &user, nil
 }

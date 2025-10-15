@@ -32,9 +32,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	golang.org/x/crypto v0.43.0
 	google.golang.org/protobuf v1.36.10
-	proto v0.0.0
 )
-
-replace proto => ../proto
 
 replace github.com/Arclight-V/mtch => ..

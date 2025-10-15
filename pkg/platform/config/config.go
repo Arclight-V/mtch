@@ -4,14 +4,16 @@ import (
 	"errors"
 	"github.com/spf13/viper"
 	"log"
+	"time"
 )
 
 type Config struct {
-	Server     *ServerCfg  `mapstructure:"server"`
-	Client     *ClientCfg  `mapstructure:"client"`
-	Http       *HTTPCfg    `mapstructure:"http"`
-	SMTPClient *SMTPClient `mapstructure:"smtp_client"`
-	LogCfg     *LogCfg     `mapstructure:"logging"`
+	Server            *ServerCfg            `mapstructure:"server"`
+	Client            *UserServiceClientCfg `mapstructure:"user_service_client"`
+	Http              *HTTPCfg              `mapstructure:"http"`
+	SMTPClient        *SMTPClient           `mapstructure:"smtp_client"`
+	LogCfg            *LogCfg               `mapstructure:"logging"`
+	UserServiceServer *UserServiceServerCfg `mapstructure:"user_service_server"`
 }
 
 type ServerCfg struct {
@@ -19,8 +21,13 @@ type ServerCfg struct {
 	Port       string `mapstructure:"port"`
 }
 
-type ClientCfg struct {
+type UserServiceClientCfg struct {
 	GRPCAddr string `mapstructure:"grpc_addr"`
+}
+
+type UserServiceServerCfg struct {
+	Port        string        `mapstructure:"port"`
+	GracePeriod time.Duration `mapstructure:"grace_period"`
 }
 
 type HTTPCfg struct {
@@ -31,7 +38,7 @@ type HTTPCfg struct {
 type SMTPClient struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
-	User string `mapstructure:"user"`
+	User string `mapstructure:"userservice"`
 	Pass string `mapstructure:"pass"`
 	From string `mapstructure:"from"`
 }
