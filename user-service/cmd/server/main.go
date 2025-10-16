@@ -3,9 +3,13 @@ package main
 import (
 	"log"
 	"os"
+	"regexp"
 
 	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/platform/config"
@@ -25,12 +29,23 @@ const (
 )
 
 func main() {
-	cfg, err := config.GetConfig(os.Getenv("userservice-config"))
+	cfg, err := config.GetConfig(os.Getenv("user-config"))
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
 	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
+
+	metrics := prometheus.NewRegistry()
+	metrics.MustRegister(
+		versioncollector.NewCollector("mtch-auth-service"),
+		collectors.NewGoCollector(
+			collectors.WithGoCollectorRuntimeMetrics(collectors.GoRuntimeMetricsRule{Matcher: regexp.MustCompile("/.*")}),
+		),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+	)
+
+	prometheus.DefaultRegisterer = metrics
 
 	var g run.Group
 
@@ -50,7 +65,7 @@ func main() {
 
 	level.Debug(logger).Log("msg", "starting HTTP server")
 	{
-		srv := httpserver.NewServer(logger, httpProbe,
+		srv := httpserver.NewServer(logger, metrics, httpProbe,
 			httpserver.WithListen(cfg.Http.MetricsListenAddr))
 
 		g.Add(func() error {

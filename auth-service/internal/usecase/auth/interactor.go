@@ -12,7 +12,8 @@ import (
 )
 
 type Interactor struct {
-	UserRepo          usecase.UserRepo
+	UserRepo usecase.UserRepo
+	//Metrics           *prometheus.Registry
 	TokenSigner       usecase.TokenSigner
 	Hasher            security.PasswordHasher
 	PasswordValidator security.PasswordValidator

@@ -8,11 +8,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 	domain "user-service/internal/domain/user"
-	pb "userservicepb"
 )
 
-func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (s *usersServiceServer) Register(ctx context.Context, req *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error) {
 	log.Println("Register called:", req.PersonalData.Contact)
 
 	pd := &domain.PersonalData{
@@ -30,14 +30,14 @@ func (s *usersService) Register(ctx context.Context, req *pb.RegisterRequest) (*
 
 	user, err := s.userUC.Register(ctx, in)
 	if err != nil {
-		return &pb.RegisterResponse{}, err
+		return &userservicepb.RegisterResponse{}, err
 	}
-	resp := &pb.RegisterResponse{UserId: user.UserID.String(), Status: pb.CreateUserStatus(user.Status)}
+	resp := &userservicepb.RegisterResponse{UserId: user.UserID.String(), Status: userservicepb.CreateUserStatus(user.Status)}
 
 	return resp, nil
 }
 
-func (s *usersService) VerifyEmail(ctx context.Context, req *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {
+func (s *usersServiceServer) VerifyEmail(ctx context.Context, req *userservicepb.VerifyEmailRequest) (*userservicepb.VerifyEmailResponse, error) {
 	fmt.Println("VerifyEmail called")
 
 	in := &domain.VerifyEmailInput{
@@ -46,18 +46,18 @@ func (s *usersService) VerifyEmail(ctx context.Context, req *pb.VerifyEmailReque
 
 	out, err := s.userUC.VerifyEmail(ctx, in)
 	if err != nil {
-		return &pb.VerifyEmailResponse{}, err
+		return &userservicepb.VerifyEmailResponse{}, err
 	}
 
-	response := &pb.VerifyEmailResponse{VerifiedAt: timestamppb.New(out.VerifiedAt), Verified: out.Verified}
+	response := &userservicepb.VerifyEmailResponse{VerifiedAt: timestamppb.New(out.VerifiedAt), Verified: out.Verified}
 	return response, nil
 }
 
-func (s *usersService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (s *usersServiceServer) Login(ctx context.Context, req *userservicepb.LoginRequest) (*userservicepb.LoginResponse, error) {
 	log.Println("Login called", req.Email, req.Password)
 
-	resp := &pb.LoginResponse{
-		User: &pb.User{
+	resp := &userservicepb.LoginResponse{
+		User: &userservicepb.User{
 			Uuid:      "uuid",
 			FirstName: "first_name",
 			LastName:  "last_name",

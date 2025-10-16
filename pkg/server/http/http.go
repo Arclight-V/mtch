@@ -7,6 +7,8 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/Arclight-V/mtch/pkg/prober"
 )
@@ -20,7 +22,7 @@ type Server struct {
 	opts options
 }
 
-func NewServer(logger log.Logger, probe *prober.HTTPProbe, opts ...Option) *Server {
+func NewServer(logger log.Logger, reg *prometheus.Registry, probe *prober.HTTPProbe, opts ...Option) *Server {
 	options := options{}
 
 	for _, o := range opts {
@@ -33,6 +35,7 @@ func NewServer(logger log.Logger, probe *prober.HTTPProbe, opts ...Option) *Serv
 	}
 
 	registerProber(mux, probe)
+	registerMetrics(mux, reg)
 
 	var h http.Handler = mux
 
@@ -71,4 +74,10 @@ func (s *Server) Shutdown(err error) {
 func registerProber(mux *http.ServeMux, p *prober.HTTPProbe) {
 	mux.Handle("/-/healthy", p.HealthyHandler(nil))
 	mux.Handle("/-/readyz", p.ReadyHandler(nil))
+}
+
+func registerMetrics(mux *http.ServeMux, g prometheus.Gatherer) {
+	mux.Handle("/metrics", promhttp.HandlerFor(g, promhttp.HandlerOpts{
+		EnableOpenMetrics: true,
+	}))
 }
