@@ -15,6 +15,9 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/go-playground/validator/v10"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/ulule/limiter/v3"
 	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
@@ -36,6 +39,7 @@ const (
 type Options struct {
 	ListenAddress string
 	TLSConfig     *tls.Config
+	Registry      *prometheus.Registry
 }
 type Handler struct {
 	logger  log.Logger
@@ -47,6 +51,9 @@ type Handler struct {
 	loginUC       auth.LoginUseCase
 	verifyEmailUC auth.VerifyEmailUseCase
 	validate      *validator.Validate
+
+	requestsTotal   *prometheus.CounterVec
+	requestDuration *prometheus.HistogramVec
 }
 
 func NewHandler(
@@ -56,6 +63,14 @@ func NewHandler(
 	regUC auth.RegisterUseCase,
 	loginUC auth.LoginUseCase,
 	verifyEmailUC auth.VerifyEmailUseCase) *Handler {
+	if logger == nil {
+		logger = log.NewNopLogger()
+	}
+
+	var registerer prometheus.Registerer = nil
+	if o.Registry != nil {
+		registerer = o.Registry
+	}
 
 	validate := validator.New()
 	validate.RegisterAlias("contact", "email|e164")
@@ -68,6 +83,20 @@ func NewHandler(
 		loginUC:       loginUC,
 		verifyEmailUC: verifyEmailUC,
 		validate:      validate,
+
+		requestsTotal: promauto.With(registerer).NewCounterVec(
+			prometheus.CounterOpts{
+				Name: "auth_http_requests_total",
+				Help: "Total number of HTTP requests",
+			}, []string{"code", "method"},
+		),
+		requestDuration: promauto.With(registerer).NewHistogramVec(
+			prometheus.HistogramOpts{
+				Name:    "http_request_duration_seconds",
+				Help:    "Duration of HTTP requests",
+				Buckets: prometheus.DefBuckets,
+			}, []string{"handler"},
+		),
 	}
 
 	router := goji.NewMux()
@@ -82,9 +111,33 @@ func NewHandler(
 
 	authMux := goji.SubMux()
 	api.Handle(pat.New("/auth/*"), authMux)
-	authMux.HandleFunc(pat.Post("/register"), h.Register)
-	authMux.HandleFunc(pat.Get("/verify-email"), h.VerifyEmail)
-	authMux.HandleFunc(pat.Post("/login"), h.Login)
+
+	instrf := func(route string, next http.Handler) http.HandlerFunc {
+		return promhttp.InstrumentHandlerDuration(
+			h.requestDuration.MustCurryWith(prometheus.Labels{"handler": route}),
+			promhttp.InstrumentHandlerCounter(h.requestsTotal, next),
+		)
+	}
+
+	authMux.HandleFunc(
+		pat.Post("/register"),
+		instrf("POST "+apiBase+"/auth/register",
+			http.HandlerFunc(h.Register),
+		),
+	)
+
+	authMux.HandleFunc(
+		pat.Get("/verify-email"),
+		instrf("GET "+apiBase+"/auth/verify-email",
+			http.HandlerFunc(h.VerifyEmail),
+		),
+	)
+
+	authMux.HandleFunc(pat.Post("/login"),
+		instrf("POST "+apiBase+"/auth/verify-email",
+			http.HandlerFunc(h.Login),
+		),
+	)
 
 	static := http.StripPrefix("/app/", http.FileServer(http.Dir("./../webwasm")))
 	// Redirect /app -> /app/
