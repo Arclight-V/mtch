@@ -28,3 +28,8 @@ type VerifyTokenRepo interface {
 	InsertIssue(ctx context.Context, v domain.VerifyTokenIssue) error
 	TryConsumeJTI(ctx context.Context, v domain.VerifyEmailToken) error
 }
+
+type Metrics interface {
+	IncLoginAttempts(status string)
+	ObserveLoginDuration(status string, s float64)
+}

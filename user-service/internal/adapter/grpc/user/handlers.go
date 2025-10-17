@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
-	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
+	domain "user-service/internal/domain/user"
 )
 
 func (s *usersServiceServer) Register(ctx context.Context, req *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error) {
