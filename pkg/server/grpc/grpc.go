@@ -67,6 +67,7 @@ func NewServer(logger log.Logger, reg prometheus.Registerer, probe *prober.GRPCP
 		grpc.ChainUnaryInterceptor(
 			NewUnaryServerRequestIDInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
+			met.UnaryServerInterceptor(),
 		),
 	}...)
 
