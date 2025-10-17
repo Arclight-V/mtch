@@ -38,7 +38,7 @@ func main() {
 
 	metrics := prometheus.NewRegistry()
 	metrics.MustRegister(
-		versioncollector.NewCollector("mtch-auth-service"),
+		versioncollector.NewCollector("mtch-user-service"),
 		collectors.NewGoCollector(
 			collectors.WithGoCollectorRuntimeMetrics(collectors.GoRuntimeMetricsRule{Matcher: regexp.MustCompile("/.*")}),
 		),
@@ -86,7 +86,7 @@ func main() {
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{
-		s := grpcserver.NewServer(logger, grpcProbe,
+		s := grpcserver.NewServer(logger, metrics, grpcProbe,
 			grpcserver.WithServer(userservice.RegisterUserServer(server)),
 			grpcserver.WithListen(cfg.UserServiceServer.Port),
 			grpcserver.WithGracePeriod(cfg.UserServiceServer.GracePeriod),

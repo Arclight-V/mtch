@@ -3,11 +3,18 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"math"
 	"net"
+	"runtime/debug"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	grpc_health "google.golang.org/grpc/health/grpc_health_v1"
@@ -24,7 +31,7 @@ type Server struct {
 	opts options
 }
 
-func NewServer(logger log.Logger, probe *prober.GRPCProbe, opts ...Option) *Server {
+func NewServer(logger log.Logger, reg prometheus.Registerer, probe *prober.GRPCProbe, opts ...Option) *Server {
 	logger = log.With(logger, "service", "gRPC/server")
 	options := options{
 		network: "tcp",
@@ -33,11 +40,33 @@ func NewServer(logger log.Logger, probe *prober.GRPCProbe, opts ...Option) *Serv
 		o.apply(&options)
 	}
 
+	met := grpc_prometheus.NewServerMetrics(
+		grpc_prometheus.WithServerHandlingTimeHistogram(
+			grpc_prometheus.WithHistogramOpts(&prometheus.HistogramOpts{
+				Buckets:                        []float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120},
+				NativeHistogramMaxBucketNumber: 256,
+				NativeHistogramBucketFactor:    1.1,
+			}),
+		),
+	)
+
+	panicsTotal := promauto.With(reg).NewCounter(prometheus.CounterOpts{
+		Name: "grpc_req_panics_recovered_total",
+		Help: "Total number of gRPC requests recovered from internal panic.",
+	})
+
+	grpcPanicRecoveryHandler := func(p any) (err error) {
+		panicsTotal.Inc()
+		level.Error(logger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
+		return status.Errorf(codes.Internal, "%s", p)
+	}
+
 	options.grpcOpts = append(options.grpcOpts, []grpc.ServerOption{
 		grpc.MaxSendMsgSize(math.MaxInt32),
 		grpc.MaxRecvMsgSize(math.MaxInt32),
 		grpc.ChainUnaryInterceptor(
 			NewUnaryServerRequestIDInterceptor(),
+			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
 		),
 	}...)
 
@@ -51,6 +80,9 @@ func NewServer(logger log.Logger, probe *prober.GRPCProbe, opts ...Option) *Serv
 	for _, f := range options.registerServerFuncs {
 		f(s)
 	}
+
+	met.InitializeMetrics(s)
+	reg.MustRegister(met)
 
 	grpc_health.RegisterHealthServer(s, probe.HealthServer())
 
