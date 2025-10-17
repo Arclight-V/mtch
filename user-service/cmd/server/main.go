@@ -86,7 +86,10 @@ func main() {
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{
-		s := grpcserver.NewServer(logger, metrics, grpcProbe,
+		//TODO Handle err
+		grpcLogOpts, _ := logging.NewGRPCOption()
+
+		s := grpcserver.NewServer(logger, metrics, grpcLogOpts, grpcProbe,
 			grpcserver.WithServer(userservice.RegisterUserServer(server)),
 			grpcserver.WithListen(cfg.UserServiceServer.Port),
 			grpcserver.WithGracePeriod(cfg.UserServiceServer.GracePeriod),

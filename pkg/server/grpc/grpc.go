@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	grpc_logging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -10,6 +11,7 @@ import (
 	"net"
 	"runtime/debug"
 
+	logging_mw "github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
@@ -31,7 +33,7 @@ type Server struct {
 	opts options
 }
 
-func NewServer(logger log.Logger, reg prometheus.Registerer, probe *prober.GRPCProbe, opts ...Option) *Server {
+func NewServer(logger log.Logger, reg prometheus.Registerer, logOpts []grpc_logging.Option, probe *prober.GRPCProbe, opts ...Option) *Server {
 	logger = log.With(logger, "service", "gRPC/server")
 	options := options{
 		network: "tcp",
@@ -68,6 +70,7 @@ func NewServer(logger log.Logger, reg prometheus.Registerer, probe *prober.GRPCP
 			NewUnaryServerRequestIDInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
 			met.UnaryServerInterceptor(),
+			grpc_logging.UnaryServerInterceptor(logging_mw.InterceptorLogger(logger), logOpts...),
 		),
 	}...)
 
