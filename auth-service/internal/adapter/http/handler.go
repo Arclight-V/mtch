@@ -100,7 +100,7 @@ func NewHandler(
 	}
 
 	router := goji.NewMux()
-	router.Use(rateLimiter())
+	//router.Use(rateLimiter())
 	router.Use(requestID)
 	router.Use(logging(logger))
 

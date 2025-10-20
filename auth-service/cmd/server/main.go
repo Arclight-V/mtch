@@ -44,7 +44,7 @@ var secretRefreshKey = []byte("secret-refresh-key")
 var secretVerifyKey = []byte("secret-verify-key")
 
 func main() {
-	cfg, err := config.GetConfig(os.Getenv("auth-config"))
+	cfg, err := config.GetConfig(os.Getenv("AUTH_CONFIG"))
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}

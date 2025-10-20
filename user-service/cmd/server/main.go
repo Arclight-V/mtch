@@ -29,7 +29,7 @@ const (
 )
 
 func main() {
-	cfg, err := config.GetConfig(os.Getenv("user-config"))
+	cfg, err := config.GetConfig(os.Getenv("USER_CONFIG"))
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}

@@ -1,0 +1,18 @@
+user_service_client:
+  GRPC_ADDR: "user:50051"         # в докере идём по имени сервиса
+
+http:
+  LISTEN_ADDR: ":8000"
+  METRICS_LISTEN_ADDR: ":10902"   # подровняй healthcheck/Prometheus
+
+smtp_client:
+  HOST: "mailhog"                 # или host.docker.internal
+  PORT: "1025"
+  USER: "..."
+  PASS: "..."
+  FROM: "no-reply@match.com"
+
+logging:
+  LEVEL: "info"
+  FORMAT: "json"
+  DEBUG_NAME: ""
