@@ -1,0 +1,120 @@
+x-app-base: &app_base
+  restart: unless-stopped
+  environment:
+    GODEBUG: madvdontneed=1
+  expose:
+    - "10903"   # for the internal network (Prometheus )
+  healthcheck:
+    test: ["CMD-SHELL", "wget -qO- http://localhost:10903/metrics >/dev/null 2>&1 || exit 1"]
+    interval: 10s
+    timeout: 3s
+    retries: 5
+
+services:
+  auth:
+    <<: *app_base
+    build:
+      context: .         #  Dockerfile folder
+      dockerfile: auth-service/Dockerfile
+      # target: prod
+      # args:
+      #   VERSION: "1.2.3"
+    image: mtch-auth-service:latest
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:10902/metrics >/dev/null 2>&1 || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    environment:
+      SERVICE_NAME: auth
+      AUTH_CONFIG: "/config/docker-config.yml"
+    volumes:
+      - ./auth-service/config:/config:ro
+      - ./webwasm:/app/webwasm:ro
+    depends_on:
+      - user
+      - mailhog
+  user:
+    <<: *app_base
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    image: mtch-user-service:latest
+    environment:
+      SERVICE_NAME: user
+      METRICS_ADDR: ":10903"
+      USER_CONFIG: "/config/docker-config.yml"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:10903/metrics >/dev/null 2>&1 || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ./user-service/config:/config:ro
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - auth
+      - user
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  # ====== (Optional) Logs in Grafana: Loki + Promtail ======
+  # Loki — log storage
+  loki:
+    image: grafana/loki:2.9.8
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./ops/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+
+  # Promtail — collector of Docker container logs
+  promtail:
+    image: grafana/promtail:2.9.8
+    container_name: promtail
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - ./ops/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - loki
+# =============================================================
+
+volumes:
+  prom-data:
+  grafana-data:
+  loki-data:

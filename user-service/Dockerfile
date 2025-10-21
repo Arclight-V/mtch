@@ -4,15 +4,17 @@ FROM golang:1.24 AS builder
 
 WORKDIR /src
 
-COPY proto ./proto
+COPY pkg ./pkg
+COPY go.mod go.sum ./
 COPY user-service/go.mod user-service/go.sum ./user-service/
 
 WORKDIR /src/user-service
 RUN go mod download
 
-COPY user-service/. ./
+COPY user-service/. .
+RUN go mod tidy
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/userservice-service ./cmd/server
+RUN mkdir -p /out && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/user-service ./cmd/server
 
 FROM gcr.io/distroless/static-debian12:nonroot
 
