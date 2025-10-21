@@ -14,6 +14,7 @@ type Config struct {
 	SMTPClient        *SMTPClient           `mapstructure:"smtp_client"`
 	LogCfg            *LogCfg               `mapstructure:"logging"`
 	UserServiceServer *UserServiceServerCfg `mapstructure:"user_service_server"`
+	FrontEnd          *FrontEndConfig       `mapstructure:"front_end"`
 }
 
 type ServerCfg struct {
@@ -47,6 +48,10 @@ type LogCfg struct {
 	Level     string `mapstructure:"level"`
 	Format    string `mapstructure:"format"`
 	DebugName string `mapstructure:"debug_name"`
+}
+
+type FrontEndConfig struct {
+	FrontendPath string `mapstructure:"frontend_path"`
 }
 
 // LoadConfig Load config file from given path

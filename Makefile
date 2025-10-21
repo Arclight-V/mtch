@@ -83,6 +83,7 @@ SERVICES := auth user prometheus grafana loki promtail
         open-grafana open-prom targets \
         compose-reload-prom compose-prune compose-clean
 
+export DOCKER_BUILDKIT=1
 ## Build and start all services in detached mode
 compose-up:
 	$(COMPOSE) up -d --build

@@ -17,3 +17,5 @@ logging:
   FORMAT: "json"
   DEBUG_NAME: ""
 
+front_end:
+  FRONT_END_PATH: ""
