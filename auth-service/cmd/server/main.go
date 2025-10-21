@@ -130,6 +130,7 @@ func main() {
 			&httpadapter.Options{
 				ListenAddress: cfg.Http.ListenAddr,
 				Registry:      metrics,
+				FrontendPath:  cfg.FrontEnd.FrontendPath,
 			},
 
 			&userClient,

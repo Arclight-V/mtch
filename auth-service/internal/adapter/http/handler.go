@@ -9,6 +9,8 @@ import (
 	"goji.io/pat"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -40,6 +42,8 @@ type Options struct {
 	ListenAddress string
 	TLSConfig     *tls.Config
 	Registry      *prometheus.Registry
+
+	FrontendPath string
 }
 type Handler struct {
 	logger  log.Logger
@@ -139,7 +143,7 @@ func NewHandler(
 		),
 	)
 
-	static := http.StripPrefix("/app/", http.FileServer(http.Dir("./../webwasm")))
+	static := http.StripPrefix("/app/", http.FileServer(http.Dir(resolveWebAppDir(logger, o.FrontendPath))))
 	// Redirect /app -> /app/
 	router.Handle(pat.Get("/app"), http.RedirectHandler("/app/", http.StatusMovedPermanently))
 	// All files front: /app/*
@@ -359,4 +363,29 @@ func rateLimiter() func(http.Handler) http.Handler {
 	// Create a new middleware with the limiter instance.
 	middleware := mhttp.NewMiddleware(limiter.New(store, rate, limiter.WithTrustForwardHeader(true)))
 	return middleware.Handler
+}
+
+func resolveWebAppDir(logger log.Logger, path string) string {
+	if override := path; override != "" {
+		if stat, err := os.Stat(override); err == nil && stat.IsDir() {
+			return override
+		} else {
+			level.Warn(logger).Log("msg", "WEBWASM_DIR does not exist or is not a directory", "path", override, "err", err)
+		}
+	}
+
+	candidates := []string{
+		"./webwasm",
+		filepath.Clean("../webwasm"),
+		filepath.Clean("./../webwasm"),
+	}
+
+	for _, candidate := range candidates {
+		if stat, err := os.Stat(candidate); err == nil && stat.IsDir() {
+			return candidate
+		}
+	}
+
+	level.Warn(logger).Log("msg", "webwasm assets directory not found, serving empty handler")
+	return "./webwasm"
 }
