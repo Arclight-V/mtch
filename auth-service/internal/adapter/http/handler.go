@@ -24,6 +24,8 @@ import (
 	"github.com/ulule/limiter/v3"
 	mhttp "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	mem "github.com/ulule/limiter/v3/drivers/store/memory"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
 
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/models"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
@@ -105,6 +107,8 @@ func NewHandler(
 
 	router := goji.NewMux()
 	//router.Use(rateLimiter())
+	//TODO:: name from config
+	router.Use(otelhttp.NewMiddleware("auth-service"))
 	router.Use(requestID)
 	router.Use(logging(logger))
 
@@ -117,6 +121,7 @@ func NewHandler(
 	api.Handle(pat.New("/auth/*"), authMux)
 
 	instrf := func(route string, next http.Handler) http.HandlerFunc {
+
 		return promhttp.InstrumentHandlerDuration(
 			h.requestDuration.MustCurryWith(prometheus.Labels{"handler": route}),
 			promhttp.InstrumentHandlerCounter(h.requestsTotal, next),
@@ -243,6 +248,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure      415 {object} 	  models.ErrorResponse
 // @Router       /api/v1/auth/register [post]
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	ctx, span := otel.Tracer("auth-service").Start(r.Context(), "Register")
+	defer span.End()
+
 	level.Info(h.logger).Log("msg", "Register called")
 
 	if r.Header.Get("Content-Type") != "application/json" {

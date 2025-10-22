@@ -2,7 +2,7 @@ module github.com/Arclight-V/mtch/user-service
 
 go 1.24.0
 
-require google.golang.org/grpc v1.76.0 // indirect
+require google.golang.org/grpc v1.76.0
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -52,6 +52,7 @@ require (
 	github.com/oklog/run v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
 	go.opentelemetry.io/otel v1.38.0
 	golang.org/x/crypto v0.43.0
 	google.golang.org/protobuf v1.36.10

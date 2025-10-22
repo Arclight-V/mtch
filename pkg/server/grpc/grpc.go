@@ -5,6 +5,7 @@ import (
 	"fmt"
 	grpc_logging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"math"
@@ -72,6 +73,7 @@ func NewServer(logger log.Logger, reg prometheus.Registerer, logOpts []grpc_logg
 			met.UnaryServerInterceptor(),
 			grpc_logging.UnaryServerInterceptor(logging_mw.InterceptorLogger(logger), logOpts...),
 		),
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	}...)
 
 	if options.tlsConfig != nil {
