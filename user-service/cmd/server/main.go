@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"regexp"
@@ -10,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
+	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/platform/config"
@@ -17,6 +19,7 @@ import (
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
 	"github.com/Arclight-V/mtch/pkg/signaler"
+	"github.com/Arclight-V/mtch/pkg/tracing/otel"
 	"github.com/Arclight-V/mtch/pkg/userservice"
 
 	grpcuser "github.com/Arclight-V/mtch/user-service/internal/adapter/grpc/user"
@@ -48,6 +51,40 @@ func main() {
 	prometheus.DefaultRegisterer = metrics
 
 	var g run.Group
+
+	// Setup optional tracing.
+	{
+		var (
+			baseCtx = context.Background()
+		)
+
+		otelShutdown, err := otel.SetupOTelSDK(
+			baseCtx,
+			// TODO:: config - taking values from config.yml
+			otel.WithServiceName("auth-service"),
+			otel.WithAttributes(
+				attribute.String("env", "dev"),
+				attribute.String("version", "1.0.0"),
+			),
+		)
+		if err != nil {
+			log.Fatalf("failed to setup OTel SDK: %v", err)
+		}
+
+		ctx, cancel := context.WithCancel(baseCtx)
+		g.Add(func() error {
+			<-ctx.Done()
+			return ctx.Err()
+		}, func(error) {
+			if otelShutdown != nil {
+				if err := otelShutdown(ctx); err != nil {
+					level.Warn(logger).Log("msg", "OTel SDK shutdown failed", "err", err)
+				}
+			}
+			cancel()
+		})
+
+	}
 
 	// Listen for reload signals.
 	{
