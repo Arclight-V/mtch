@@ -73,6 +73,11 @@ func main() {
 			baseCtx = context.Background()
 		)
 
+		traceExporter, err := otel.NewTraceExporterGRPC(baseCtx /*TODO: add an endpoint*/)
+		if err != nil {
+			log.Fatalf("failed to create trace exporter: %v", err)
+		}
+
 		otelShutdown, err := otel.SetupOTelSDK(
 			baseCtx,
 			// TODO:: config - taking values from config.yml
@@ -81,6 +86,7 @@ func main() {
 				attribute.String("env", "dev"),
 				attribute.String("version", "1.0.0"),
 			),
+			otel.WithExporter(traceExporter),
 		)
 		if err != nil {
 			log.Fatalf("failed to setup OTel SDK: %v", err)
