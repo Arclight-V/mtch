@@ -11,14 +11,50 @@ x-app-base: &app_base
     retries: 5
 
 services:
+  # ====== Kafka (KRaft) ======
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Create topics
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on: [kafka]
+    entrypoint: ["/bin/bash","-lc"]
+    command: >
+      until kafka-topics --bootstrap-server kafka:9092 --list >/dev/null 2>&1; do sleep 1; done;
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists
+        --topic users.events --partitions 3 --replication-factor 1
+        --config retention.ms=604800000 --config cleanup.policy=delete;
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists
+        --topic users.dlq --partitions 3 --replication-factor 1
+        --config retention.ms=1209600000 --config cleanup.policy=delete;
+
   auth:
     <<: *app_base
     build:
       context: .         #  Dockerfile folder
       dockerfile: auth-service/Dockerfile
-      # target: prod
-      # args:
-      #   VERSION: "1.2.3"
     image: mtch-auth-service:latest
     ports:
       - "8000:8000"
@@ -30,12 +66,16 @@ services:
     environment:
       SERVICE_NAME: auth
       AUTH_CONFIG: "/config/docker-config.yml"
+      KAFKA_BOOTSTRAP: "kafka:9092"
     volumes:
       - ./auth-service/config:/config:ro
       - ./webwasm:/app/webwasm:ro
     depends_on:
       - user
       - mailhog
+      - kafka
+      - kafka-init
+
   user:
     <<: *app_base
     build:
@@ -46,6 +86,7 @@ services:
       SERVICE_NAME: user
       METRICS_ADDR: ":10903"
       USER_CONFIG: "/config/docker-config.yml"
+      KAFKA_BOOTSTRAP: "kafka:9092"
     healthcheck:
       test: [ "CMD-SHELL", "wget -qO- http://localhost:10903/metrics >/dev/null 2>&1 || exit 1" ]
       interval: 10s
@@ -53,6 +94,9 @@ services:
       retries: 5
     volumes:
       - ./user-service/config:/config:ro
+    depends_on:
+      - kafka
+      - kafka-init
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -89,7 +133,6 @@ services:
       - prometheus
 
   # ====== (Optional) Logs in Grafana: Loki + Promtail ======
-  # Loki — log storage
   loki:
     image: grafana/loki:2.9.8
     container_name: loki
@@ -100,7 +143,6 @@ services:
     ports:
       - "3100:3100"
 
-  # Promtail — collector of Docker container logs
   promtail:
     image: grafana/promtail:2.9.8
     container_name: promtail
@@ -112,7 +154,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - loki
-# =============================================================
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.138.0
@@ -126,7 +167,9 @@ services:
     image: jaegertracing/all-in-one:1.60
     ports:
       - 16686:16686
+
 volumes:
   prom-data:
   grafana-data:
   loki-data:
+  kafka-data:
