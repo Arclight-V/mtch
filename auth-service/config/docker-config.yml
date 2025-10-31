@@ -19,3 +19,19 @@ logging:
 
 front_end:
   FRONT_END_PATH: "/app/webwasm"
+
+kafka:
+  producer:
+    brokers: ["kafka:9092"]
+    client_id: "auth-svc-consumer"
+    flush_timeout_ms : 10000
+
+  consumer:
+    brokers: ["kafka:9092"]
+    client_id: "auth-svc-consumer"
+    broker_address_family: "v4"
+    group_id: "notification"
+    session_timeout_ms: 6000
+    auto_offset_reset: "earliest"
+    max_poll_interval_ms: 600000
+

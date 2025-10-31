@@ -2,9 +2,10 @@ package config
 
 import (
 	"errors"
-	"github.com/spf13/viper"
 	"log"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -15,6 +16,7 @@ type Config struct {
 	LogCfg            *LogCfg               `mapstructure:"logging"`
 	UserServiceServer *UserServiceServerCfg `mapstructure:"user_service_server"`
 	FrontEnd          *FrontEndConfig       `mapstructure:"front_end"`
+	Kafka             *KafkaConfig          `mapstructure:"kafka"`
 }
 
 type ServerCfg struct {
@@ -54,6 +56,33 @@ type FrontEndConfig struct {
 	FrontendPath string `mapstructure:"frontend_path"`
 }
 
+type KafkaConfig struct {
+	Producer ProducerConfig `mapstructure:"producer"`
+	Consumer ConsumerConfig `mapstructure:"consumer"`
+}
+
+type CommonKafkaConfig struct {
+	Brokers  []string `mapstructure:"brokers"`
+	ClientID string   `mapstructure:"client_id"`
+}
+type ProducerConfig struct {
+	CommonKafkaConfig `mapstructure:",squash"`
+	CompressionType   string `mapstructure:"compression_type"`
+	Acks              int    `mapstructure:"acks"`
+	LingerMS          int    `mapstructure:"linger_ms"`
+	FlushTimeoutMS    int    `mapstructure:"flush_timeout_ms"`
+	EnableIdempotence bool   `mapstructure:"enable_idempotence"`
+}
+
+type ConsumerConfig struct {
+	CommonKafkaConfig   `mapstructure:",squash"`
+	BrokerAddressFamily string `mapstructure:"broker_address_family"`
+	GroupID             string `mapstructure:"group_id"`
+	SessionTimeoutMS    int64  `mapstructure:"session_timeout_ms"`
+	MaxPollIntervalMs   int64  `mapstructure:"max_poll_interval_ms"`
+	AutoOffsetReset     string `mapstructure:"auto_offset_reset"`
+}
+
 // LoadConfig Load config file from given path
 func LoadConfig(filename string) (*viper.Viper, error) {
 	v := viper.New()
@@ -61,6 +90,15 @@ func LoadConfig(filename string) (*viper.Viper, error) {
 	v.SetConfigFile(filename)
 	v.AddConfigPath(".")
 	v.AutomaticEnv()
+
+	//Kafka default values
+	// https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md
+	// producer
+	_ = v.BindEnv("kafka.producer.brokers", "KAFKA_BOOTSTRAP")
+
+	//consumer
+	_ = v.BindEnv("kafka.consumer.brokers", "KAFKA_BOOTSTRAP")
+
 	if err := v.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
 		if errors.As(err, &configFileNotFoundError) {

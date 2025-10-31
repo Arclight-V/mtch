@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/Arclight-V/mtch/pkg/messagebroker/kafka/producer"
 	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
 	"github.com/pkg/errors"
@@ -161,6 +162,18 @@ func main() {
 		passwordValidator := passwd.NewUserPasswordValidator()
 		emailSender := email.NewSMTPClient(cfg)
 		verifyTokenRepo := repository.NewVerifyTokensMem()
+		publisher, err := producer.NewProducer(cfg.Kafka.Producer, logger,
+			producer.WithCompressionType(cfg.Kafka.Producer.CompressionType),
+			producer.WithAcks(cfg.Kafka.Producer.Acks),
+			producer.WithLingerMS(cfg.Kafka.Producer.LingerMS),
+			producer.WithFlushTimeoutMS(cfg.Kafka.Producer.FlushTimeoutMS),
+			producer.WithEnableIdempotence(cfg.Kafka.Producer.EnableIdempotence),
+		)
+		_ = publisher
+		if err != nil {
+			level.Error(logger).Log("msg", "failed to create kafka publisher", "err", err)
+			os.Exit(1)
+		}
 		userClient := auth.Interactor{
 			UserRepo:          repo,
 			TokenSigner:       signer,
@@ -187,6 +200,7 @@ func main() {
 			return errors.Wrap(webHandler.Run(), "error starting web server")
 		}, func(err error) {
 			webHandler.Shutdown()
+			_ = publisher.Close()
 		})
 	}
 
