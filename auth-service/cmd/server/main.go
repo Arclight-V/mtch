@@ -162,7 +162,7 @@ func main() {
 		passwordValidator := passwd.NewUserPasswordValidator()
 		emailSender := email.NewSMTPClient(cfg)
 		verifyTokenRepo := repository.NewVerifyTokensMem()
-		publisher, err := producer.NewProducer(cfg.Kafka.Producer, logger,
+		publisher, err := producer.New(cfg.Kafka.Producer, logger,
 			producer.WithCompressionType(cfg.Kafka.Producer.CompressionType),
 			producer.WithAcks(cfg.Kafka.Producer.Acks),
 			producer.WithLingerMS(cfg.Kafka.Producer.LingerMS),
