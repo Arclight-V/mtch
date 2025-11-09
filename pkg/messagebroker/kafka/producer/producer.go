@@ -14,6 +14,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/platform/config"
 )
 
+// A Producer defines parameters for kafka.Producer, a wrapper around kafka.Producer.
 type Producer struct {
 	p *kafka.Producer
 
@@ -22,7 +23,8 @@ type Producer struct {
 	opts options
 }
 
-func NewProducer(cfg config.ProducerConfig, logger log.Logger, opts ...Option) (*Producer, error) {
+// New creates a new Producer.
+func New(cfg config.ProducerConfig, logger log.Logger, opts ...Option) (*Producer, error) {
 	level.Info(logger).Log("msg", "creating kafka producer")
 	configMap := cfgToProducerConfigMap(cfg)
 
@@ -46,6 +48,7 @@ func NewProducer(cfg config.ProducerConfig, logger log.Logger, opts ...Option) (
 	return &Producer{p: p, logger: logger}, nil
 }
 
+// Publish a single message.
 func (p *Producer) Publish(ctx context.Context, event *messagebroker.Event) error {
 	headers := make([]kafka.Header, 0, len(event.Headers))
 	for k, v := range event.Headers {
@@ -77,6 +80,7 @@ func (p *Producer) Publish(ctx context.Context, event *messagebroker.Event) erro
 	return nil
 }
 
+// Close a Producer instance.
 func (p *Producer) Close() error {
 	for p.p.Flush(p.opts.flushTimeoutMS) > 0 {
 		level.Info(p.logger).Log("msg", "Waiting for messages to flush")
@@ -86,6 +90,8 @@ func (p *Producer) Close() error {
 	return nil
 }
 
+// cfgToProducerConfigMap converts a ProducerConfig struct into a *kafka.ConfigMap
+// suitable for initializing a Kafka producer.
 func cfgToProducerConfigMap(cfg config.ProducerConfig) *kafka.ConfigMap {
 	configMap := &kafka.ConfigMap{
 		kafkaCfg.BootstrapServers: cfg.Brokers,
@@ -95,6 +101,7 @@ func cfgToProducerConfigMap(cfg config.ProducerConfig) *kafka.ConfigMap {
 	return configMap
 }
 
+// setKeyFromOpts set optional parameters into a *kafka.ConfigMap
 func setKeyFromOpts(configMap *kafka.ConfigMap, options *options) {
 	if options.acks != kafkaCfg.DefaultAcks {
 		_ = configMap.SetKey(kafkaCfg.Acks, options.acks)
