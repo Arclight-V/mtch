@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/Arclight-V/mtch/pkg/messagebroker/kafka/producer"
 	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
 	"github.com/pkg/errors"
@@ -21,6 +20,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/Arclight-V/mtch/pkg/logging"
+	"github.com/Arclight-V/mtch/pkg/messagebroker/kafka/producer"
+	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	"github.com/Arclight-V/mtch/pkg/prober"
 	"github.com/Arclight-V/mtch/pkg/signaler"
 	"github.com/Arclight-V/mtch/pkg/tracing/otel"
@@ -34,7 +35,6 @@ import (
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/repository"
-	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
 )
@@ -162,6 +162,7 @@ func main() {
 		passwordValidator := passwd.NewUserPasswordValidator()
 		emailSender := email.NewSMTPClient(cfg)
 		verifyTokenRepo := repository.NewVerifyTokensMem()
+
 		publisher, err := producer.New(cfg.Kafka.Producer, logger,
 			producer.WithCompressionType(cfg.Kafka.Producer.CompressionType),
 			producer.WithAcks(cfg.Kafka.Producer.Acks),
@@ -169,11 +170,11 @@ func main() {
 			producer.WithFlushTimeoutMS(cfg.Kafka.Producer.FlushTimeoutMS),
 			producer.WithEnableIdempotence(cfg.Kafka.Producer.EnableIdempotence),
 		)
-		_ = publisher
 		if err != nil {
 			level.Error(logger).Log("msg", "failed to create kafka publisher", "err", err)
 			os.Exit(1)
 		}
+
 		userClient := auth.Interactor{
 			UserRepo:          repo,
 			TokenSigner:       signer,
@@ -181,6 +182,7 @@ func main() {
 			PasswordValidator: passwordValidator,
 			EmailSender:       emailSender,
 			VerifyTokenRepo:   verifyTokenRepo,
+			Publisher:         publisher,
 		}
 
 		webHandler := httpadapter.NewHandler(logger,

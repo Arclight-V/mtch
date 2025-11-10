@@ -73,10 +73,10 @@ PROJECT := mtch
 COMPOSE  := docker compose -p $(PROJECT)
 
 # Services defined in docker-compose.yml
-SERVICES := auth user prometheus grafana loki promtail
+SERVICES := auth user prometheus grafana loki promtail kafka kafka-init
 
 .PHONY: compose-up compose-down compose-build compose-restart compose-logs compose-ps \
-        compose-up-auth compose-up-user compose-up-observability \
+        compose-up-auth compose-up-user compose-up-kafka compose-up-observability \
         compose-rebuild-auth compose-rebuild-user \
         compose-logs-auth compose-logs-user compose-logs-prom compose-logs-graf \
         compose-shell-auth compose-shell-user compose-shell-net \
@@ -118,6 +118,13 @@ compose-up-auth:
 compose-up-user:
 	$(COMPOSE) up -d --build user
 
+## Start only the user service
+compose-up-user:
+	$(COMPOSE) up -d --build user
+
+## Start kakfa
+compose-up-kafka:
+	$(COMPOSE) up -d --build kafka kafka-init
 ## Start observability stack (Prometheus + Grafana + Loki + Promtail)
 compose-up-observability:
 	$(COMPOSE) up -d --build prometheus grafana loki promtail
