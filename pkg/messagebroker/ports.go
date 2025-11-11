@@ -11,7 +11,6 @@ type Event struct {
 	Key     []byte
 	Value   []byte
 	Headers map[string][]byte
-	Type    string
 }
 
 // Handler represents a function that processes an incoming Event.

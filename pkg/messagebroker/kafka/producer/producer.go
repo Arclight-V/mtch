@@ -3,6 +3,7 @@ package producer
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
@@ -81,8 +82,9 @@ func (p *Producer) Publish(ctx context.Context, event *messagebroker.Event) erro
 }
 
 // Close a Producer instance.
+// TODO:// BUG https://github.com/Arclight-V/mtch/issues/69
 func (p *Producer) Close() error {
-	for p.p.Flush(p.opts.flushTimeoutMS) > 0 {
+	for p.p.Flush(100) > 0 {
 		level.Info(p.logger).Log("msg", "Waiting for messages to flush")
 	}
 	p.p.Close()
@@ -94,7 +96,7 @@ func (p *Producer) Close() error {
 // suitable for initializing a Kafka producer.
 func cfgToProducerConfigMap(cfg config.ProducerConfig) *kafka.ConfigMap {
 	configMap := &kafka.ConfigMap{
-		kafkaCfg.BootstrapServers: cfg.Brokers,
+		kafkaCfg.BootstrapServers: strings.Join(cfg.Brokers, ","),
 		kafkaCfg.ClientID:         cfg.ClientID,
 	}
 

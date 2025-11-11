@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+
+	configkafka "github.com/Arclight-V/mtch/pkg/messagebroker/kafka"
 )
 
 type Config struct {
@@ -95,6 +97,10 @@ func LoadConfig(filename string) (*viper.Viper, error) {
 	// https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md
 	// producer
 	_ = v.BindEnv("kafka.producer.brokers", "KAFKA_BOOTSTRAP")
+	v.SetDefault("kafka.producer.acks", configkafka.DefaultAcks)
+	v.SetDefault("kafka.producer.linger_ms", configkafka.DefaultLingerMS)
+	v.SetDefault("kafka.producer.flush_timeout_ms", configkafka.DefaultFlushTimoutMS)
+	v.SetDefault("kafka.producer.compression_type", configkafka.DefaultCompressionType)
 
 	//consumer
 	_ = v.BindEnv("kafka.consumer.brokers", "KAFKA_BOOTSTRAP")
