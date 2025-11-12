@@ -44,10 +44,12 @@ func main() {
 	provider, err := flagd.NewProvider()
 	if err != nil {
 		level.Error(logger).Log("msg", "failed to initialize flagd", "err", err.Error())
+		os.Exit(1)
 	}
 	if err := openfeature.SetProviderAndWait(provider); err != nil {
 		// If a provider initialization error occurs, log it and exit
 		level.Error(logger).Log("msg", "failed to set the OpenFeature provider", "err", err.Error())
+		os.Exit(1)
 	}
 
 	// Initialize OpenFeature client

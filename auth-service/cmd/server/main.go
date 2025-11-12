@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"github.com/Arclight-V/mtch/pkg/messagebroker"
 	"log"
 	"mime"
 	"os"
@@ -56,21 +58,27 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
+	fmt.Println(os.Getwd())
+
 	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
 
 	// Use flagd as the OpenFeature provider
-	provider, err := flagd.NewProvider()
+	provider, err := flagd.NewProvider(
+		flagd.WithFileResolver(),
+		flagd.WithOfflineFilePath(cfg.FlagD.FlagsPath),
+	)
 	if err != nil {
-		level.Error(logger).Log("msg", "failed to initialize flagd", "err", err.Error())
+		level.Error(logger).Log("msg", "failed to initialize flagd", "err", err)
+		os.Exit(1)
 	}
 	if err := openfeature.SetProviderAndWait(provider); err != nil {
 		// If a provider initialization error occurs, log it and exit
-		level.Error(logger).Log("msg", "failed to set the OpenFeature provider", "err", err.Error())
+		level.Error(logger).Log("msg", "failed to set the OpenFeature provider", "err", err)
+		os.Exit(1)
 	}
 
 	// Initialize OpenFeature client
 	client := openfeature.NewClient("mtch-auth-service")
-	_ = client
 
 	metrics := prometheus.NewRegistry()
 	metrics.MustRegister(
@@ -179,16 +187,28 @@ func main() {
 		emailSender := email.NewSMTPClient(cfg)
 		verifyTokenRepo := repository.NewVerifyTokensMem()
 
-		publisher, err := producer.New(cfg.Kafka.Producer, logger,
-			producer.WithCompressionType(cfg.Kafka.Producer.CompressionType),
-			producer.WithAcks(cfg.Kafka.Producer.Acks),
-			producer.WithLingerMS(cfg.Kafka.Producer.LingerMS),
-			producer.WithFlushTimeoutMS(cfg.Kafka.Producer.FlushTimeoutMS),
-			producer.WithEnableIdempotence(cfg.Kafka.Producer.EnableIdempotence),
+		var publisher messagebroker.Publisher
+
+		kafkaEnable, err := client.BooleanValue(
+			context.Background(), "kafka-enable", false, openfeature.EvaluationContext{},
 		)
 		if err != nil {
-			level.Error(logger).Log("msg", "failed to create kafka publisher", "err", err)
-			os.Exit(1)
+			level.Error(logger).Log("msg", "failed to load kafka-enable feature state", "err", err)
+		}
+
+		if kafkaEnable {
+			p, err := producer.New(cfg.Kafka.Producer, logger,
+				producer.WithCompressionType(cfg.Kafka.Producer.CompressionType),
+				producer.WithAcks(cfg.Kafka.Producer.Acks),
+				producer.WithLingerMS(cfg.Kafka.Producer.LingerMS),
+				producer.WithFlushTimeoutMS(cfg.Kafka.Producer.FlushTimeoutMS),
+				producer.WithEnableIdempotence(cfg.Kafka.Producer.EnableIdempotence),
+			)
+			if err != nil {
+				level.Error(logger).Log("msg", "failed to create kafka publisher", "err", err)
+				os.Exit(1)
+			}
+			publisher = p
 		}
 
 		userClient := auth.Interactor{
@@ -199,6 +219,7 @@ func main() {
 			EmailSender:       emailSender,
 			VerifyTokenRepo:   verifyTokenRepo,
 			Publisher:         publisher,
+			FeatureClient:     client,
 		}
 
 		webHandler := httpadapter.NewHandler(logger,
@@ -218,7 +239,16 @@ func main() {
 			return errors.Wrap(webHandler.Run(), "error starting web server")
 		}, func(err error) {
 			webHandler.Shutdown()
-			_ = publisher.Close()
+			kEnable, err := client.BooleanValue(
+				context.Background(), "kafka-enable", false, openfeature.EvaluationContext{},
+			)
+			if err != nil {
+				level.Error(logger).Log("msg", "failed to load kafka-enable feature state", "err", err)
+			}
+			if kEnable {
+				_ = publisher.Close()
+			}
+			openfeature.Shutdown()
 		})
 	}
 

@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/open-feature/go-sdk/openfeature"
+
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
@@ -21,6 +23,7 @@ type Interactor struct {
 	EmailSender       notification.EmailSender
 	VerifyTokenRepo   usecase.VerifyTokenRepo
 	Publisher         messagebroker.Publisher
+	FeatureClient     *openfeature.Client
 }
 
 func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
@@ -85,6 +88,31 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 	}
 	log.Printf("userservice registered to: %v", output)
 
+	// Evaluate kafka-enable feature flag
+	kafkaEnable, err := uc.FeatureClient.BooleanValue(
+		ctx, "kafka-enable", false, openfeature.EvaluationContext{},
+	)
+	if err != nil {
+		return nil, err
+	}
+	if kafkaEnable {
+		event := messagebroker.Event{
+			Topic: "notifications.request.v1",
+			// TODO: when there is a practical need for orderliness or idempotence.
+			// Key:
+			Value: []byte(in.Contact),
+			Headers: map[string][]byte{
+				"event-type":    []byte("verification"),
+				"event-version": []byte("1"),
+				"content-type":  []byte("application/json"),
+			},
+		}
+		if err := uc.Publisher.Publish(context.TODO(), &event); err != nil {
+			return nil, err
+		}
+		return output, nil
+	}
+
 	verifyTokenIssue, token, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
 	if err != nil {
 		return nil, err
@@ -96,20 +124,6 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 	}
 
 	if err := uc.EmailSender.SendUserRegistered(ctx, vd); err != nil {
-		return nil, err
-	}
-	event := messagebroker.Event{
-		Topic: "notifications.request.v1",
-		// TODO: when there is a practical need for orderliness or idempotence.
-		// Key:
-		Value: []byte(vd.Email),
-		Headers: map[string][]byte{
-			"event-type":    []byte("verification"),
-			"event-version": []byte("1"),
-			"content-type":  []byte("application/json"),
-		},
-	}
-	if err := uc.Publisher.Publish(context.TODO(), &event); err != nil {
 		return nil, err
 	}
 	if err := uc.VerifyTokenRepo.InsertIssue(ctx, verifyTokenIssue); err != nil {

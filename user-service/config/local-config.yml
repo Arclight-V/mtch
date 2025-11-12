@@ -10,3 +10,6 @@ logging:
   LEVEL: "info"
   FORMAT: "json"
   DEBUG_NAME: ""
+
+flagd:
+  flags_path: "./config/flags.flagd.json"
