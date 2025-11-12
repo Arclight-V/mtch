@@ -8,6 +8,8 @@ import (
 
 	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
+	flagd "github.com/open-feature/go-sdk-contrib/providers/flagd/pkg"
+	"github.com/open-feature/go-sdk/openfeature"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
@@ -38,6 +40,19 @@ func main() {
 	}
 
 	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
+
+	provider, err := flagd.NewProvider()
+	if err != nil {
+		level.Error(logger).Log("msg", "failed to initialize flagd", "err", err.Error())
+	}
+	if err := openfeature.SetProviderAndWait(provider); err != nil {
+		// If a provider initialization error occurs, log it and exit
+		level.Error(logger).Log("msg", "failed to set the OpenFeature provider", "err", err.Error())
+	}
+
+	// Initialize OpenFeature client
+	client := openfeature.NewClient("mtch-auth-service")
+	_ = client
 
 	metrics := prometheus.NewRegistry()
 	metrics.MustRegister(
