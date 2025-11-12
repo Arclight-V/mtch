@@ -35,3 +35,5 @@ kafka:
     auto_offset_reset: "earliest"
     max_poll_interval_ms: 600000
 
+flagd:
+  flags_path: "./flags.flagd.json"

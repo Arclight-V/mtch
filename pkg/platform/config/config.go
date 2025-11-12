@@ -19,6 +19,7 @@ type Config struct {
 	UserServiceServer *UserServiceServerCfg `mapstructure:"user_service_server"`
 	FrontEnd          *FrontEndConfig       `mapstructure:"front_end"`
 	Kafka             *KafkaConfig          `mapstructure:"kafka"`
+	FlagD             *FlagDConfig          `mapstructure:"flagd"`
 }
 
 type ServerCfg struct {
@@ -83,6 +84,10 @@ type ConsumerConfig struct {
 	SessionTimeoutMS    int64  `mapstructure:"session_timeout_ms"`
 	MaxPollIntervalMs   int64  `mapstructure:"max_poll_interval_ms"`
 	AutoOffsetReset     string `mapstructure:"auto_offset_reset"`
+}
+
+type FlagDConfig struct {
+	FlagsPath string `mapstructure:"flags_path"`
 }
 
 // LoadConfig Load config file from given path

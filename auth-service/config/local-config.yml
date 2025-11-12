@@ -34,3 +34,6 @@ kafka:
     session_timeout_ms: 6000
     auto_offset_reset: "earliest"
     max_poll_interval_ms: 600000
+
+flagd:
+  flags_path: "./config/flags.flagd.json"
