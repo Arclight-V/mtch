@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/Arclight-V/mtch/auth-service/internal/features"
 	"github.com/Arclight-V/mtch/pkg/messagebroker"
 	"log"
 	"mime"
@@ -23,6 +24,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/messagebroker/kafka/producer"
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
@@ -71,14 +73,13 @@ func main() {
 		level.Error(logger).Log("msg", "failed to initialize flagd", "err", err)
 		os.Exit(1)
 	}
-	if err := openfeature.SetProviderAndWait(provider); err != nil {
-		// If a provider initialization error occurs, log it and exit
-		level.Error(logger).Log("msg", "failed to set the OpenFeature provider", "err", err)
+
+	featureList, err := feature_list.NewFeatureList(provider, "mtch-auth-service", logger, features.Features)
+	if err != nil {
+		// If a FeatureList initialization error occurs, log it and exit
+		level.Error(logger).Log("msg", "failed to create FeatureList", "err", err)
 		os.Exit(1)
 	}
-
-	// Initialize OpenFeature client
-	client := openfeature.NewClient("mtch-auth-service")
 
 	metrics := prometheus.NewRegistry()
 	metrics.MustRegister(
@@ -189,13 +190,7 @@ func main() {
 
 		var publisher messagebroker.Publisher
 
-		kafkaEnable, err := client.BooleanValue(
-			context.Background(), "kafka-enable", false, openfeature.EvaluationContext{},
-		)
-		if err != nil {
-			level.Error(logger).Log("msg", "failed to load kafka-enable feature state", "err", err)
-		}
-
+		kafkaEnable := featureList.IsEnabled(feature_list.FeatureKafka)
 		if kafkaEnable {
 			p, err := producer.New(cfg.Kafka.Producer, logger,
 				producer.WithCompressionType(cfg.Kafka.Producer.CompressionType),
@@ -219,7 +214,7 @@ func main() {
 			EmailSender:       emailSender,
 			VerifyTokenRepo:   verifyTokenRepo,
 			Publisher:         publisher,
-			FeatureClient:     client,
+			FeatureList:       featureList,
 		}
 
 		webHandler := httpadapter.NewHandler(logger,
@@ -239,13 +234,7 @@ func main() {
 			return errors.Wrap(webHandler.Run(), "error starting web server")
 		}, func(err error) {
 			webHandler.Shutdown()
-			kEnable, err := client.BooleanValue(
-				context.Background(), "kafka-enable", false, openfeature.EvaluationContext{},
-			)
-			if err != nil {
-				level.Error(logger).Log("msg", "failed to load kafka-enable feature state", "err", err)
-			}
-			if kEnable {
+			if kafkaEnable = featureList.IsEnabled(feature_list.FeatureKafka); kafkaEnable {
 				_ = publisher.Close()
 			}
 			openfeature.Shutdown()
