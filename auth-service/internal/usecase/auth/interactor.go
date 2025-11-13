@@ -5,13 +5,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/open-feature/go-sdk/openfeature"
+	"github.com/Arclight-V/mtch/pkg/feature_list"
+	"github.com/Arclight-V/mtch/pkg/messagebroker"
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
-	"github.com/Arclight-V/mtch/pkg/messagebroker"
-	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
 
 type Interactor struct {
@@ -23,7 +23,7 @@ type Interactor struct {
 	EmailSender       notification.EmailSender
 	VerifyTokenRepo   usecase.VerifyTokenRepo
 	Publisher         messagebroker.Publisher
-	FeatureClient     *openfeature.Client
+	FeatureList       *feature_list.FeatureList
 }
 
 func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
@@ -89,12 +89,7 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 	log.Printf("userservice registered to: %v", output)
 
 	// Evaluate kafka-enable feature flag
-	kafkaEnable, err := uc.FeatureClient.BooleanValue(
-		ctx, "kafka-enable", false, openfeature.EvaluationContext{},
-	)
-	if err != nil {
-		return nil, err
-	}
+	kafkaEnable := uc.FeatureList.IsEnabled(feature_list.FeatureKafka)
 	if kafkaEnable {
 		event := messagebroker.Event{
 			Topic: "notifications.request.v1",

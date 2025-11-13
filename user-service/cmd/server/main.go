@@ -9,12 +9,12 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/oklog/run"
 	flagd "github.com/open-feature/go-sdk-contrib/providers/flagd/pkg"
-	"github.com/open-feature/go-sdk/openfeature"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 	"go.opentelemetry.io/otel/attribute"
 
+	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/platform/config"
 	"github.com/Arclight-V/mtch/pkg/prober"
@@ -23,6 +23,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/signaler"
 	"github.com/Arclight-V/mtch/pkg/tracing/otel"
 	"github.com/Arclight-V/mtch/pkg/userservice"
+	"github.com/Arclight-V/mtch/user-service/internal/features"
 
 	grpcuser "github.com/Arclight-V/mtch/user-service/internal/adapter/grpc/user"
 	"github.com/Arclight-V/mtch/user-service/internal/infrastructure/user/repository"
@@ -46,15 +47,14 @@ func main() {
 		level.Error(logger).Log("msg", "failed to initialize flagd", "err", err.Error())
 		os.Exit(1)
 	}
-	if err := openfeature.SetProviderAndWait(provider); err != nil {
-		// If a provider initialization error occurs, log it and exit
-		level.Error(logger).Log("msg", "failed to set the OpenFeature provider", "err", err.Error())
+	featureList, err := feature_list.NewFeatureList(provider, "mtch-user-service", logger, features.Features)
+	if err != nil {
+		// If a FeatureList initialization error occurs, log it and exit
+		level.Error(logger).Log("msg", "failed to create FeatureList", "err", err)
 		os.Exit(1)
 	}
 
-	// Initialize OpenFeature client
-	client := openfeature.NewClient("mtch-auth-service")
-	_ = client
+	_ = featureList
 
 	metrics := prometheus.NewRegistry()
 	metrics.MustRegister(
