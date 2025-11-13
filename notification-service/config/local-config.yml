@@ -1,0 +1,33 @@
+notification_service_server:
+  PORT: ":50052"
+  GRACE_PERIOD: "3s"
+
+
+http:
+  METRICS_LISTEN_ADDR: ":10904"
+
+smtp_client:
+  HOST: "127.0.0.1"
+  PORT: "1025"
+  USER: "..."
+  PASS: "..."
+  FROM: "no-reply@match.com"
+
+logging:
+  LEVEL: "info"
+  FORMAT: "json"
+  DEBUG_NAME: ""
+
+kafka:
+
+  consumer:
+    brokers: ["localhost:9092"]
+    client_id: "auth-svc-consumer"
+    broker_address_family: "v4"
+    group_id: "notification"
+    session_timeout_ms: 6000
+    auto_offset_reset: "earliest"
+    max_poll_interval_ms: 600000
+
+flagd:
+  flags_path: "./config/flags.flagd.json"
