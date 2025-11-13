@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/Arclight-V/mtch/auth-service/internal/features"
-	"github.com/Arclight-V/mtch/pkg/messagebroker"
 	"log"
 	"mime"
 	"os"
@@ -24,8 +21,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/Arclight-V/mtch/auth-service/internal/features"
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
+	"github.com/Arclight-V/mtch/pkg/messagebroker"
 	"github.com/Arclight-V/mtch/pkg/messagebroker/kafka/producer"
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	"github.com/Arclight-V/mtch/pkg/prober"
@@ -59,8 +58,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
-
-	fmt.Println(os.Getwd())
 
 	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
 
