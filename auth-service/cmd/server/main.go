@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/Arclight-V/mtch/auth-service/internal/features"
 	"github.com/Arclight-V/mtch/pkg/messagebroker"
 	"log"
@@ -59,8 +58,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
-
-	fmt.Println(os.Getwd())
 
 	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
 
