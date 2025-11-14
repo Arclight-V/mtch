@@ -1,0 +1,13 @@
+package {{ .ServiceName }}service
+
+import (
+	"google.golang.org/grpc"
+
+	"{{ .RootModulePath }}/pkg/{{ .ServiceName}}service/{{ .ServiceName}}servicepb/v1"
+)
+
+func Register{{ capitalize .ServiceName}}Server({{ .ServiceName}}Srv {{ .ServiceName}}servicepb.{{ capitalize .ServiceName}}ServiceServer) func(*grpc.Server) {
+	return func(s *grpc.Server) {
+		{{ .ServiceName}}servicepb.Register{{ capitalize .ServiceName}}ServiceServer(s, {{ .ServiceName}}Srv)
+	}
+}
