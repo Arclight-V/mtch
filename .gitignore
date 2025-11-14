@@ -17,6 +17,7 @@
 !*.yml
 !*.html
 !*.css
+!*.tmpl
 
 !README.md
 !LICENSE
