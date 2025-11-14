@@ -1,4 +1,4 @@
-notification_service_server:
+notification_server:
   PORT: ":50052"
   GRACE_PERIOD: "3s"
 

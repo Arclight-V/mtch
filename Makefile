@@ -34,7 +34,8 @@ help:
 proto:
 	protoc	-I . --go_out=. --go_opt=paths=source_relative \
           	--go-grpc_out=. --go-grpc_opt=paths=source_relative\
-            pkg/userservice/userservicepb/v1/userservice.proto
+            pkg/userservice/userservicepb/v1/userservice.proto\
+            pkg/notificationservice/notificationservicepb/v1/notificationservice.proto
 
 # -------- Build --------
 build: $(SERVICES:%=build-%)

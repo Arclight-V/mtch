@@ -11,15 +11,16 @@ import (
 )
 
 type Config struct {
-	Server            *ServerCfg            `mapstructure:"server"`
-	Client            *UserServiceClientCfg `mapstructure:"user_service_client"`
-	Http              *HTTPCfg              `mapstructure:"http"`
-	SMTPClient        *SMTPClient           `mapstructure:"smtp_client"`
-	LogCfg            *LogCfg               `mapstructure:"logging"`
-	UserServiceServer *UserServiceServerCfg `mapstructure:"user_service_server"`
-	FrontEnd          *FrontEndConfig       `mapstructure:"front_end"`
-	Kafka             *KafkaConfig          `mapstructure:"kafka"`
-	FlagD             *FlagDConfig          `mapstructure:"flagd"`
+	Server             *ServerCfg                    `mapstructure:"server"`
+	Client             *UserServiceClientCfg         `mapstructure:"user_service_client"`
+	Http               *HTTPCfg                      `mapstructure:"http"`
+	SMTPClient         *SMTPClient                   `mapstructure:"smtp_client"`
+	LogCfg             *LogCfg                       `mapstructure:"logging"`
+	UserServiceServer  *UserServiceServerCfg         `mapstructure:"user_service_server"`
+	NotificationServer *NotificationServiceServerCfg `mapstructure:"notification_server"`
+	FrontEnd           *FrontEndConfig               `mapstructure:"front_end"`
+	Kafka              *KafkaConfig                  `mapstructure:"kafka"`
+	FlagD              *FlagDConfig                  `mapstructure:"flagd"`
 }
 
 type ServerCfg struct {
@@ -32,6 +33,12 @@ type UserServiceClientCfg struct {
 }
 
 type UserServiceServerCfg struct {
+	Port        string        `mapstructure:"port"`
+	GracePeriod time.Duration `mapstructure:"grace_period"`
+}
+
+// NotificationServiceServerCfg GRPC server configuration settings for notification service
+type NotificationServiceServerCfg struct {
 	Port        string        `mapstructure:"port"`
 	GracePeriod time.Duration `mapstructure:"grace_period"`
 }
