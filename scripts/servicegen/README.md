@@ -60,6 +60,12 @@ Each file is rendered from a corresponding `.tmpl` template located in
 `scripts/servicegen/templates`.
 
 ---
+## After generating files with the following commit, update the files:
+* {newService}/config/*.yml
+* pkg/platform/config (add fields for configurations)
+* Makefile
+* docker-compose
+---
 
 ## How Generation Works
 
@@ -71,8 +77,8 @@ Each file is rendered from a corresponding `.tmpl` template located in
 ```go
 Data{
     ServiceName:    name,
-    RootModulePath: "github.com/Arclight-V/mtch",
-    ModulePath:     "github.com/Arclight-V/mtch" + name,
+    RootModulePath: rootModulePath,
+    ModulePath:     filepath.Join(rootModulePath, name),
     GoVersion:      goVersion,
 }
 ```
@@ -81,6 +87,7 @@ Data{
 
 ```go
 {{ ToUpper .ServiceName }}
+{{ capitalize .ServiceName }}
 ```
 
 6. The generator creates output directories and writes rendered files with the `.tmpl` suffix removed.
@@ -92,7 +99,7 @@ Data{
 File:
 
 ```
-scripts/servicegen/templates/main.go.tmpl
+scripts/servicegen/templates/service/main.go.tmpl
 ```
 
 Template:

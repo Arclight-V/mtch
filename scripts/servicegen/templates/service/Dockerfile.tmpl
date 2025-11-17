@@ -1,0 +1,37 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:1.24 AS builder
+
+WORKDIR /src
+
+COPY go.mod go.sum ./
+COPY {{ .ServiceName }}/go.mod {{ .ServiceName }}/go.sum ./{{ .ServiceName }}/
+
+# Modules cachs and build-cache with BuildKit (faster second build)
+RUN --mount=type=cache,target=/go/pkg/mod \
+    cd {{ .ServiceName }} && go mod download
+
+COPY pkg ./pkg
+COPY {{ .ServiceName }}/. ./{{ .ServiceName }}
+
+WORKDIR /src/{{ .ServiceName }}
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    mkdir -p /out && \
+    CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
+    go build -trimpath -ldflags="-s -w" -o /out/{{ .ServiceName }} ./cmd/server
+
+FROM gcr.io/distroless/static-debian12:nonroot
+
+WORKDIR /app
+COPY --from=builder /config/flags.flagd.json ./flags.flagd.json
+RUN chmod +x /app/flags.flagd.json
+COPY --from=builder /out/{{ .ServiceName }} ./{{ .ServiceName }}
+RUN chmod +x /app/{{ .ServiceName }}
+
+EXPOSE 50051
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/app/{{ .ServiceName }}"]

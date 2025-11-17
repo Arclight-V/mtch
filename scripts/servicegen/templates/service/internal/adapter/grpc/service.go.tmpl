@@ -1,0 +1,14 @@
+package {{ .ServiceName }}
+
+import (
+	"{{ .RootModulePath }}/pkg/{{ .ServiceName}}service/{{ .ServiceName }}servicepb/v1"
+)
+
+type {{ .ServiceName }}ServiceServer struct {
+	{{ .ServiceName }}servicepb.Unimplemented{{ capitalize .ServiceName }}ServiceServer
+
+}
+
+func New{{ capitalize .ServiceName }}ServiceServer() *{{ .ServiceName }}ServiceServer {
+	return &{{ .ServiceName }}ServiceServer{}
+}
