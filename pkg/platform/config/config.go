@@ -20,6 +20,7 @@ type Config struct {
 	FrontEnd          *FrontEndConfig       `mapstructure:"front_end"`
 	Kafka             *KafkaConfig          `mapstructure:"kafka"`
 	FlagD             *FlagDConfig          `mapstructure:"flagd"`
+	Meta              *Meta                 `mapstructure:"meta"`
 }
 
 type ServerCfg struct {
@@ -90,6 +91,10 @@ type FlagDConfig struct {
 	FlagsPath string `mapstructure:"flags_path"`
 }
 
+type Meta struct {
+	Template bool `mapstructure:"template"`
+}
+
 // LoadConfig Load config file from given path
 func LoadConfig(filename string) (*viper.Viper, error) {
 	v := viper.New()
@@ -140,6 +145,24 @@ func GetConfig(path string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := ParseConfig(cfgFile)
+
+	var cfg *Config
+
+	if cfg, err = ParseConfig(cfgFile); err != nil {
+		return nil, err
+	}
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
+
 	return cfg, err
+}
+
+// Validate validates the structure that it is not a template.
+func (c *Config) Validate() error {
+	if c.Meta != nil && c.Meta.Template == true {
+		return errors.New("config is a template: please fill required fields (ports, etc.)")
+	}
+
+	return nil
 }

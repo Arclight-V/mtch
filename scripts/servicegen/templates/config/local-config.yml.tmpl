@@ -1,0 +1,17 @@
+meta:
+  TEMPLATE: true
+
+{{ .ServiceName }}_server:
+  PORT: ":CHANGE_ME"
+  GRACE_PERIOD: "3s"
+
+http:
+  METRICS_LISTEN_ADDR: ":CHANGE_ME"
+
+logging:
+  LEVEL: "info"
+  FORMAT: "json"
+  DEBUG_NAME: ""
+
+flagd:
+  flags_path: "./flags.flagd.json"
