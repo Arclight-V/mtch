@@ -32,10 +32,11 @@ servicegen new -n <service-name> -g <go-version>
 
 ### Flags
 
-| Flag              | Required | Description                                                                                 |
-| ----------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `-n, --name`      | yes      | Name of the microservice to generate. Available in templates as `.ServiceName`.             |
+| Flag              | Required | Description                                                                        |
+|-------------------|----------|------------------------------------------------------------------------------------|
+| `-n, --name`      | yes      | Name of the microservice to generate. Available in templates as `.ServiceName`.    |
 | `-g, --goVersion` | yes      | Go version used in generated files (`go.mod`, Dockerfile, etc.). Available as `.GoVersion`. |
+| `-s, --swag`      | no       | add a swager target for documentation generation                                   |
 
 ---
 
