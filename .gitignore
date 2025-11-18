@@ -19,6 +19,7 @@
 !*.css
 !*.tmpl
 !*.json
+!*.proto
 
 !README.md
 !LICENSE
