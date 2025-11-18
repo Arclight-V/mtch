@@ -11,16 +11,17 @@ import (
 )
 
 type Config struct {
-	Server            *ServerCfg            `mapstructure:"server"`
-	Client            *UserServiceClientCfg `mapstructure:"user_service_client"`
-	Http              *HTTPCfg              `mapstructure:"http"`
-	SMTPClient        *SMTPClient           `mapstructure:"smtp_client"`
-	LogCfg            *LogCfg               `mapstructure:"logging"`
-	UserServiceServer *UserServiceServerCfg `mapstructure:"user_service_server"`
-	FrontEnd          *FrontEndConfig       `mapstructure:"front_end"`
-	Kafka             *KafkaConfig          `mapstructure:"kafka"`
-	FlagD             *FlagDConfig          `mapstructure:"flagd"`
-	Meta              *Meta                 `mapstructure:"meta"`
+	Server                    *ServerCfg                    `mapstructure:"server"`
+	Client                    *UserServiceClientCfg         `mapstructure:"user_service_client"`
+	Http                      *HTTPCfg                      `mapstructure:"http"`
+	SMTPClient                *SMTPClient                   `mapstructure:"smtp_client"`
+	LogCfg                    *LogCfg                       `mapstructure:"logging"`
+	UserServiceServer         *UserServiceServerCfg         `mapstructure:"user_service_server"`
+	NotificationServiceServer *NotificationServiceServerCfg `mapstructure:"notification_server"`
+	FrontEnd                  *FrontEndConfig               `mapstructure:"front_end"`
+	Kafka                     *KafkaConfig                  `mapstructure:"kafka"`
+	FlagD                     *FlagDConfig                  `mapstructure:"flagd"`
+	Meta                      *Meta                         `mapstructure:"meta"`
 }
 
 type ServerCfg struct {
@@ -33,6 +34,12 @@ type UserServiceClientCfg struct {
 }
 
 type UserServiceServerCfg struct {
+	Port        string        `mapstructure:"port"`
+	GracePeriod time.Duration `mapstructure:"grace_period"`
+}
+
+// NotificationServiceServerCfg configuration parameters for the Notification service
+type NotificationServiceServerCfg struct {
 	Port        string        `mapstructure:"port"`
 	GracePeriod time.Duration `mapstructure:"grace_period"`
 }
