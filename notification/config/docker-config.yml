@@ -1,0 +1,14 @@
+notification_server:
+  PORT: ":50052"
+  GRACE_PERIOD: "3s"
+
+http:
+  METRICS_LISTEN_ADDR: ":10904"
+
+logging:
+  LEVEL: "info"
+  FORMAT: "json"
+  DEBUG_NAME: ""
+
+flagd:
+  flags_path: "./flags.flagd.json"

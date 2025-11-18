@@ -2,7 +2,7 @@
 
 TAG ?= latest
 PREFIX ?= mtch-
-SERVICES ?= auth-service user-service
+SERVICES ?= auth-service user-service notification
 
 # -------- Help --------
 .PHONY: help
@@ -34,8 +34,11 @@ help:
 proto:
 	protoc	-I . --go_out=. --go_opt=paths=source_relative \
           	--go-grpc_out=. --go-grpc_opt=paths=source_relative\
-            pkg/userservice/userservicepb/v1/userservice.proto
+            pkg/userservice/userservicepb/v1/userservice.proto\
+            pkg/notificationservice/notificationservicepb/v1/notificationservice.proto
 
+# TODO: https://github.com/Arclight-V/mtch/issues/81
+# Don't use this
 # -------- Build --------
 build: $(SERVICES:%=build-%)
 
@@ -73,13 +76,13 @@ PROJECT := mtch
 COMPOSE  := docker compose -p $(PROJECT)
 
 # Services defined in docker-compose.yml
-SERVICES := auth user prometheus grafana loki promtail kafka kafka-init
+SERVICES := auth user notification prometheus grafana loki promtail kafka kafka-init
 
 .PHONY: compose-up compose-down compose-build compose-restart compose-logs compose-ps \
-        compose-up-auth compose-up-user compose-up-kafka compose-up-observability \
-        compose-rebuild-auth compose-rebuild-user \
-        compose-logs-auth compose-logs-user compose-logs-prom compose-logs-graf \
-        compose-shell-auth compose-shell-user compose-shell-net \
+        compose-up-auth compose-up-user compose-up-notification compose-up-kafka compose-up-observability \
+        compose-rebuild-auth compose-rebuild-user compose-rebuild-notification \
+        compose-logs-auth compose-logs-user  compose-logs--notification compose-logs-prom compose-logs-graf \
+        compose-shell-auth compose-shell-user compose-shell--notification compose-shell-net \
         open-grafana open-prom targets \
         compose-reload-prom compose-prune compose-clean
 
@@ -118,9 +121,9 @@ compose-up-auth:
 compose-up-user:
 	$(COMPOSE) up -d --build user
 
-## Start only the user service
-compose-up-user:
-	$(COMPOSE) up -d --build user
+## Start only the notification service
+compose-up-notification:
+	$(COMPOSE) up -d --build notification
 
 ## Start kakfa
 compose-up-kafka:
@@ -136,12 +139,18 @@ compose-rebuild-auth:
 compose-rebuild-user:
 	$(COMPOSE) build user && $(COMPOSE) up -d user
 
+compose-rebuild-notification:
+	$(COMPOSE) build notification && $(COMPOSE) up -d notification
+
 ## View logs per service
 compose-logs-auth:
 	$(COMPOSE) logs -f --tail=200 auth
 
 compose-logs-user:
 	$(COMPOSE) logs -f --tail=200 user
+
+compose-logs-notification:
+	$(COMPOSE) logs -f --tail=200 notification
 
 compose-logs-prom:
 	$(COMPOSE) logs -f --tail=200 prometheus
@@ -158,6 +167,9 @@ compose-shell-auth:
 
 compose-shell-user:
 	@echo "user is built on distroless — no shell inside. Use 'make shell-net' and connect to user via network."
+
+compose-shell-notification:
+	@echo "notification is built on distroless — no shell inside. Use 'make shell-net' and connect to user via network."
 
 ## Run a temporary Alpine shell container inside the same network (for debugging)
 compose-shell-net:

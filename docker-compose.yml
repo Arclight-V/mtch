@@ -115,6 +115,27 @@ services:
       - kafka
       - kafka-init
 
+  notification:
+    <<: *app_base
+    build:
+      context: .
+      dockerfile: notification/Dockerfile
+    image: notification:latest
+    environment:
+      SERVICE_NAME: notification
+      METRICS_ADDR: ":10904"
+      notification_CONFIG: "/config/docker-config.yml"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:10904/metrics >/dev/null 2>&1 || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ./notification/config:/config:ro
+    depends_on:
+      - kafka
+      - kafka-init
+
   mailhog:
     image: mailhog/mailhog:latest
     container_name: mailhog
