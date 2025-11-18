@@ -30,10 +30,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=builder /config/flags.flagd.json ./flags.flagd.json
-RUN chmod +x /app/flags.flagd.json
+COPY --from=builder src/auth-service/config/flags.flagd.json ./flags.flagd.json
 COPY --from=builder /out/auth-service ./auth-service
-RUN chmod +x /app/auth-service
 
 EXPOSE 8000
 
