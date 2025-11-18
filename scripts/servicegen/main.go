@@ -21,6 +21,7 @@ type Data struct {
 	RootModulePath string
 	ModulePath     string
 	GoVersion      string
+	WithSwagger    bool
 }
 
 const (
@@ -113,12 +114,13 @@ func execCMD(dir string, name string, args ...string) error {
 
 // generateService Creates a service by traversing all the templatesPath subdir
 // and applying the generateFile function to the template file
-func generateService(name, goVersion string) error {
+func generateService(name, goVersion string, swag bool) error {
 	data := Data{
 		ServiceName:    name,
 		RootModulePath: rootModulePath,
 		ModulePath:     filepath.Join(rootModulePath, name),
 		GoVersion:      goVersion,
+		WithSwagger:    swag,
 	}
 
 	var err error
@@ -180,6 +182,7 @@ func main() {
 	var (
 		serviceName string
 		goVersion   string
+		swag        bool
 	)
 
 	rootCmd := &cobra.Command{
@@ -191,12 +194,14 @@ func main() {
 		Use:   "new",
 		Short: "Create new microservice",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return generateService(serviceName, goVersion)
+			return generateService(serviceName, goVersion, swag)
 		},
 	}
 
 	newCmd.Flags().StringVarP(&serviceName, "name", "n", "", "service name")
 	newCmd.Flags().StringVarP(&goVersion, "goVersion", "g", "", "go version")
+	newCmd.Flags().BoolVarP(&swag, "swag", "s", false,
+		"add a swager target for documentation generation")
 	newCmd.MarkFlagRequired("name")
 	newCmd.MarkFlagRequired("goVersion")
 

@@ -1,11 +1,11 @@
- .PHONY: build run test clean mocks swag docker
+ .PHONY: build run test clean mocks{{ if .WithSwagger }} swag{{ end }} docker
 
 BIN_DIR := bin
 SERVICE := {{ .ServiceName }}
 VERSION ?= latest
 {{ ToUpper .ServiceName }}_IMAGE ?= ${SERVICE}:${VERSION}
 
-build: swag
+build: {{ if .WithSwagger }} swag{{ end }}
 	go build -o $(BIN_DIR)/$(SERVICE) cmd/server/main.go
 
 run:
@@ -23,8 +23,9 @@ mocks:
 mocks-check: mocks
 	git diff --exit-code
 
+{{ if .WithSwagger }}
 swag:
 	swag init -g cmd/server/main.go -o ./docs
-
+{{ end }}
 docker-build:
 	docker build --tag mtch-$({{ ToUpper .ServiceName }}_IMAGE) -f Dockerfile .
