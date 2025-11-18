@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package mtch.notificationservice;
+option go_package = "github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1;notificationservicepb";
+
+service notificationService {
+  rpc NoopMethod(NoopRequest) returns (NoopResponse);
+}
+
+message NoopRequest {
+  string noopString = 1;
+}
+
+message NoopResponse {
+  string noopString = 1;
+}
