@@ -37,8 +37,6 @@ proto:
             pkg/userservice/userservicepb/v1/userservice.proto\
             pkg/notificationservice/notificationservicepb/v1/notificationservice.proto
 
-# TODO: https://github.com/Arclight-V/mtch/issues/81
-# Don't use this
 # -------- Build --------
 build: $(SERVICES:%=build-%)
 

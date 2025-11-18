@@ -25,10 +25,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 FROM gcr.io/distroless/static-debian12:nonroot
 
 WORKDIR /app
-COPY --from=builder /config/flags.flagd.json ./flags.flagd.json
-RUN chmod +x /app/flags.flagd.json
+COPY --from=builder src/user-service/config/flags.flagd.json ./flags.flagd.json
 COPY --from=builder /out/user-service ./user-service
-RUN chmod +x /app/user-service
 
 EXPOSE 50051
 
