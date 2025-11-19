@@ -2,13 +2,15 @@ package notification
 
 import (
 	"context"
-	"log"
+
+	"github.com/go-kit/log/level"
 
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
+	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 )
 
 func (s *notificationServiceServer) NoopMethod(ctx context.Context, req *notificationservicepb.NoopRequest) (*notificationservicepb.NoopResponse, error) {
-	log.Println("NoopMethod called:", req.NoopString)
+	level.Info(s.logger).Log("msg", "NoopMethod called:", "NoopString", req.NoopString)
 
 	ns := &domain.NoopStruct{
 		NoopString: req.NoopString,
