@@ -14,24 +14,23 @@ import (
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 	"go.opentelemetry.io/otel/attribute"
 
-	"github.com/Arclight-V/mtch/notification/inte
+	"github.com/Arclight-V/mtch/notification/internal/features"
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
-/pkg/logging"
-	"github.com/Arclight-V/mtch/pkg/no
+	"github.com/Arclight-V/mtch/pkg/notificationservice"
 	"github.com/Arclight-V/mtch/pkg/platform/config"
 	"github.com/Arclight-V/mtch/pkg/prober"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
 	"github.com/Arclight-V/mtch/pkg/signaler"
-    "github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/pkg/tracing/otel"
+
 	grpcnotification "github.com/Arclight-V/mtch/notification/internal/adapter/grpc/notification"
 	usecase "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
-
 )
 
+func main() {
 	cfg, err := config.GetConfig(os.Getenv("NOTIFICATION_CONFIG"))
-    cfg, err := config.GetConfig(os.Getenv("NOTIFICATION_CONFIG"))
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
@@ -54,10 +53,11 @@ import (
 		level.Error(logger).Log("msg", "failed to create FeatureList", "err", err)
 		os.Exit(1)
 	}
+
 	// TODO: DELETE_ME / CHANGE_ME
 	_ = featureList
-    _ = featureList
 
+	metrics := prometheus.NewRegistry()
 	metrics.MustRegister(
 		versioncollector.NewCollector("mtch-notification"),
 		collectors.NewGoCollector(
@@ -65,11 +65,10 @@ import (
 		),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
-    	)
+
 	prometheus.DefaultRegisterer = metrics
-    	prometheus.DefaultRegisterer = metrics
+
 	var g run.Group
-    var g run.Group
 
 	// Setup optional tracing.
 	{
@@ -141,9 +140,9 @@ import (
 			srv.Shutdown(err)
 		})
 	}
+
 	notificationUC := usecase.NewNotificationUseCase(logger)
 	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger)
-    server := grpcnotification.NewNotificationServiceServer(notificationUC, logger)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{
