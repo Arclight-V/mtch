@@ -1,0 +1,22 @@
+package {{ .ServiceName }}
+
+import (
+	"context"
+	"log"
+
+	domain "{{ .RootModulePath }}/{{ .ServiceName }}/internal/domain/{{ .ServiceName }}"
+)
+
+type {{ .ServiceName }}UseCase struct {
+
+}
+
+func New{{capitalize .ServiceName }}UseCase() *{{ .ServiceName }}UseCase {
+	return &{{ .ServiceName }}UseCase{}
+}
+
+func (u *{{ .ServiceName }}UseCase) NoopMethod(ctx context.Context, in *domain.NoopInput) (*domain.NoopOutput, error) {
+    log.Println("NoopMethod called:", in.NoopStruct.NoopString)
+
+	return &domain.NoopOutput{NoopString: "NoopString" }, nil
+}

@@ -2,13 +2,15 @@ package {{ .ServiceName }}
 
 import (
 	"{{ .RootModulePath }}/pkg/{{ .ServiceName}}service/{{ .ServiceName }}servicepb/v1"
+	usecase "{{ .RootModulePath }}/{{ .ServiceName}}/internal/usecase/{{ .ServiceName}}"
 )
 
 type {{ .ServiceName }}ServiceServer struct {
 	{{ .ServiceName }}servicepb.Unimplemented{{ capitalize .ServiceName }}ServiceServer
 
+    {{ .ServiceName }}UC usecase.{{ capitalize .ServiceName }}UseCase
 }
 
-func New{{ capitalize .ServiceName }}ServiceServer() *{{ .ServiceName }}ServiceServer {
-	return &{{ .ServiceName }}ServiceServer{}
+func New{{ capitalize .ServiceName }}ServiceServer({{ .ServiceName }}UC usecase.{{ capitalize .ServiceName }}UseCase) *{{ .ServiceName }}ServiceServer {
+	return &{{ .ServiceName }}ServiceServer{{"{"}} {{ .ServiceName }}UC: {{ .ServiceName }}UC {{"}"}}
 }

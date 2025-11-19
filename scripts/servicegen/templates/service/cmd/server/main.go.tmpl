@@ -27,6 +27,7 @@ import (
     "{{ .ModulePath }}/internal/features"
 
     grpc{{ .ServiceName }} "{{ .ModulePath }}/internal/adapter/grpc/{{ .ServiceName }}"
+    usecase "{{ .RootModulePath }}/{{ .ServiceName }}/internal/usecase/{{ .ServiceName }}"
 
 )
 
@@ -142,7 +143,8 @@ func main() {
 		})
 	}
 
-    server := grpc{{ .ServiceName }}.New{{ capitalize .ServiceName }}ServiceServer()
+    {{ .ServiceName }}UC := usecase.New{{ capitalize .ServiceName }}UseCase()
+    server := grpc{{ .ServiceName }}.New{{ capitalize .ServiceName }}ServiceServer({{ .ServiceName }}UC)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{

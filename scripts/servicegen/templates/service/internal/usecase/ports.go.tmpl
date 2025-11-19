@@ -1,0 +1,14 @@
+package {{ .ServiceName }}
+
+import (
+	"context"
+
+	domain "{{ .RootModulePath }}/{{ .ServiceName }}/internal/domain/{{ .ServiceName }}"
+)
+
+// {{ capitalize .ServiceName }}UseCase interface
+//
+//go:generate mockgen -source=$GOFILE -package=mocks -destination=./mocks/ports_mock.go
+type {{ capitalize .ServiceName }}UseCase interface {
+	NoopMethod(ctx context.Context, in *domain.NoopInput) (*domain.NoopOutput, error)
+}
