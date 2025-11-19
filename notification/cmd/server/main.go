@@ -26,6 +26,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/tracing/otel"
 
 	grpcnotification "github.com/Arclight-V/mtch/notification/internal/adapter/grpc/notification"
+	usecase "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
 )
 
 func main() {
@@ -140,7 +141,8 @@ func main() {
 		})
 	}
 
-	server := grpcnotification.NewNotificationServiceServer()
+	notificationUC := usecase.NewNotificationUseCase()
+	server := grpcnotification.NewNotificationServiceServer(notificationUC)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{
