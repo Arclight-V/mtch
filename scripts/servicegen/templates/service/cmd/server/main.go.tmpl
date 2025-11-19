@@ -143,8 +143,8 @@ func main() {
 		})
 	}
 
-    {{ .ServiceName }}UC := usecase.New{{ capitalize .ServiceName }}UseCase()
-    server := grpc{{ .ServiceName }}.New{{ capitalize .ServiceName }}ServiceServer({{ .ServiceName }}UC)
+    {{ .ServiceName }}UC := usecase.New{{ capitalize .ServiceName }}UseCase(logger)
+    server := grpc{{ .ServiceName }}.New{{ capitalize .ServiceName }}ServiceServer({{ .ServiceName }}UC, logger)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{

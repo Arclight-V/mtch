@@ -2,21 +2,23 @@ package {{ .ServiceName }}
 
 import (
 	"context"
-	"log"
+
+    "github.com/go-kit/log"
+    "github.com/go-kit/log/level"
 
 	domain "{{ .RootModulePath }}/{{ .ServiceName }}/internal/domain/{{ .ServiceName }}"
 )
 
 type {{ .ServiceName }}UseCase struct {
-
+    logger log.Logger
 }
 
-func New{{capitalize .ServiceName }}UseCase() *{{ .ServiceName }}UseCase {
-	return &{{ .ServiceName }}UseCase{}
+func New{{capitalize .ServiceName }}UseCase(logger log.Logger) *{{ .ServiceName }}UseCase {
+	return &{{ .ServiceName }}UseCase{logger: logger}
 }
 
 func (u *{{ .ServiceName }}UseCase) NoopMethod(ctx context.Context, in *domain.NoopInput) (*domain.NoopOutput, error) {
-    log.Println("NoopMethod called:", in.NoopStruct.NoopString)
+    level.Info(u.logger).Log("msg", "NoopMethod called:", "NoopString", in.NoopStruct.NoopString)
 
 	return &domain.NoopOutput{NoopString: "NoopString" }, nil
 }

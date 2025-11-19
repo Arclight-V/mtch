@@ -2,14 +2,15 @@ package {{ .ServiceName }}
 
 import (
 	"context"
-	"log"
 
-	"{{ .RootModulePath }}/pkg/{{ .ServiceName }}service/{{ .ServiceName }}servicepb/v1"
+    "github.com/go-kit/log/level"
+
 	domain "{{ .RootModulePath }}/{{ .ServiceName }}/internal/domain/{{ .ServiceName }}"
+	"{{ .RootModulePath }}/pkg/{{ .ServiceName }}service/{{ .ServiceName }}servicepb/v1"
 )
 
 func (s *{{ .ServiceName }}ServiceServer) NoopMethod(ctx context.Context, req *{{ .ServiceName }}servicepb.NoopRequest) (*{{ .ServiceName }}servicepb.NoopResponse, error) {
-	log.Println("NoopMethod called:", req.NoopString)
+	level.Info(s.logger).Log("msg", "NoopMethod called:", "NoopString", req.NoopString)
 
 	ns := &domain.NoopStruct{
 		NoopString: req.NoopString,
