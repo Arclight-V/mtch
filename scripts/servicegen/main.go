@@ -134,24 +134,65 @@ func generateService(name, goVersion string, swag bool) error {
 		return nil
 	})
 
-	if err = execCMD(filepath.Join(
-		name,
-		"internal/adapter/grpc",
-	),
-		"mkdir",
-		name,
-	); err != nil {
-		log.Println("Failed to mkdir", err)
-	}
+	{
 
-	if err = execCMD(filepath.Join(
-		name,
-		"internal/adapter/grpc",
-	),
-		"mv",
-		"service.go", filepath.Join(name, "service.go"),
-	); err != nil {
-		log.Println("Failed to mv service.go", err)
+		if err = execCMD(filepath.Join(
+			name,
+			"internal/adapter/grpc",
+		),
+			"mkdir",
+			name,
+		); err != nil {
+			log.Println("Failed to mkdir", err)
+		}
+
+		if err = execCMD(filepath.Join(
+			name,
+			"internal/adapter/grpc",
+		),
+			"mv",
+			"service.go", "handlers.go", filepath.Join(name),
+		); err != nil {
+			log.Println("Failed to mv service.go, handlers.go", err)
+		}
+
+		if err = execCMD(filepath.Join(
+			name,
+			"internal/domain",
+		),
+			"mkdir",
+			name,
+		); err != nil {
+			log.Println("Failed to mkdir", err)
+		}
+		if err = execCMD(filepath.Join(
+			name,
+			"internal/domain",
+		),
+			"mv",
+			"servicename.go", filepath.Join(name, name+".go"),
+		); err != nil {
+			log.Printf("Failed to mv %v %v\n", name+".go", err)
+		}
+
+		if err = execCMD(filepath.Join(
+			name,
+			"internal/usecase",
+		),
+			"mkdir",
+			name,
+		); err != nil {
+			log.Println("Failed to mkdir", err)
+		}
+		if err = execCMD(filepath.Join(
+			name,
+			"internal/usecase",
+		),
+			"mv",
+			"interactor.go", "ports.go", filepath.Join(name),
+		); err != nil {
+			log.Println("Failed to mv interactor.go, ports.go", err)
+		}
 	}
 
 	filepath.WalkDir(templatesPkgPath, func(path string, d fs.DirEntry, err error) error {

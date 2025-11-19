@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package mtch.{{ .ServiceName }}service;
-option go_package = "github.com/Arclight-V/mtch/pkg/{{ .ServiceName }}service/{{ .ServiceName }}servicepb/v1;{{ .ServiceName }}servicepb";
+option go_package = "{{ .RootModulePath }}/pkg/{{ .ServiceName }}service/{{ .ServiceName }}servicepb/v1;{{ .ServiceName }}servicepb";
 
 service {{ .ServiceName }}Service {
   rpc NoopMethod(NoopRequest) returns (NoopResponse);
