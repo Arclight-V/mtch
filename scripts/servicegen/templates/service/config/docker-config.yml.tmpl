@@ -2,7 +2,7 @@ meta:
   TEMPLATE: true
 
 {{ .ServiceName }}_server:
-  PORT: ":CHANGE_ME"
+  GRPC_ADDR: "{{ .ServiceName }}:50051"
   GRACE_PERIOD: "3s"
 
 http:
