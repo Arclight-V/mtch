@@ -42,7 +42,10 @@ func main() {
 
 	logger := logging.NewLogger(cfg.LogCfg.Level, cfg.LogCfg.Format, cfg.LogCfg.DebugName)
 
-	provider, err := flagd.NewProvider()
+	provider, err := flagd.NewProvider(
+		flagd.WithFileResolver(),
+		flagd.WithOfflineFilePath(cfg.FlagD.FlagsPath),
+	)
 	if err != nil {
 		level.Error(logger).Log("msg", "failed to initialize flagd", "err", err.Error())
 		os.Exit(1)
