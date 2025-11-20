@@ -1,6 +1,9 @@
 user_service_client:
   GRPC_ADDR: "localhost:50051"
 
+notification_service_client:
+  GRPC_ADDR: "localhost:50052"
+
 http:
   LISTEN_ADDR: ":8000"
   METRICS_LISTEN_ADDR: ":10902"
@@ -13,7 +16,7 @@ smtp_client:
   FROM: "no-reply@match.com"
 
 logging:
-  LEVEL: "info"
+  LEVEL: "debug"
   FORMAT: "json"
   DEBUG_NAME: ""
 

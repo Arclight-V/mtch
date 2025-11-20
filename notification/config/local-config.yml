@@ -6,7 +6,7 @@ http:
   METRICS_LISTEN_ADDR: ":10904"
 
 logging:
-  LEVEL: "info"
+  LEVEL: "debug"
   FORMAT: "json"
   DEBUG_NAME: ""
 
