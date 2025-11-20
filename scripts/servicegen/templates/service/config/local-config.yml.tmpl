@@ -2,14 +2,14 @@ meta:
   TEMPLATE: true
 
 {{ .ServiceName }}_server:
-  PORT: ":CHANGE_ME"
+  GRPC_ADDR: "localhost:CHANGE_ME"
   GRACE_PERIOD: "3s"
 
 http:
   METRICS_LISTEN_ADDR: ":CHANGE_ME"
 
 logging:
-  LEVEL: "info"
+  LEVEL: "debug"
   FORMAT: "json"
   DEBUG_NAME: ""
 
