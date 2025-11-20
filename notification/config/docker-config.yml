@@ -5,6 +5,13 @@ notification_server:
 http:
   METRICS_LISTEN_ADDR: ":10904"
 
+smtp_client:
+  HOST: "mailhog"                 
+  PORT: "1025"
+  USER: "..."
+  PASS: "..."
+  FROM: "no-reply@match.com"
+
 logging:
   LEVEL: "info"
   FORMAT: "json"

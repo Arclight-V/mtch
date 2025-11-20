@@ -15,6 +15,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/notification/internal/infrastructure/email"
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/notificationservice"
@@ -141,7 +142,8 @@ func main() {
 		})
 	}
 
-	notificationUC := usecase.NewNotificationUseCase(logger)
+	emailSender := email.NewSMTPClient(cfg)
+	notificationUC := usecase.NewNotificationUseCase(emailSender, logger)
 	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")

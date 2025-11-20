@@ -9,20 +9,17 @@ import (
 	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 )
 
-func (s *notificationServiceServer) NoopMethod(ctx context.Context, req *notificationservicepb.NoopRequest) (*notificationservicepb.NoopResponse, error) {
-	level.Info(s.logger).Log("msg", "NoopMethod called:", "NoopString", req.NoopString)
+func (s *notificationServiceServer) NotifyUserRegistered(ctx context.Context, req *notificationservicepb.NotificationUserContactsRequest) (*notificationservicepb.NotificationUserContactsResponse, error) {
+	level.Info(s.logger).Log("msg", "NoopMethod called:", "NoopString", req)
 
-	ns := &domain.NoopStruct{
-		NoopString: req.NoopString,
-	}
+	usc := protoContactsToUserContacts(req.UserID, req.Contacts)
+	in := &domain.Input{UserContacts: usc}
 
-	in := &domain.NoopInput{NoopStruct: ns}
-
-	noop, err := s.notificationUC.NoopMethod(ctx, in)
+	_, err := s.notificationUC.NotifyUserRegistered(ctx, in)
 	if err != nil {
-		return &notificationservicepb.NoopResponse{}, err
+		return &notificationservicepb.NotificationUserContactsResponse{}, err
 	}
-	resp := &notificationservicepb.NoopResponse{NoopString: noop.NoopString}
+	resp := &notificationservicepb.NotificationUserContactsResponse{}
 
 	return resp, nil
 }

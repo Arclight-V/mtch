@@ -1,13 +1,29 @@
 package notification
 
-type NoopStruct struct {
-	NoopString string
+type Channel int
+
+const (
+	ChannelEmail Channel = iota
+	ChanelPush
+	ChannelCall
+
+	Reject
+)
+
+type UserContact struct {
+	Channel Channel
+	Value   string
+	Meta    map[string]string
 }
 
-type NoopInput struct {
-	NoopStruct *NoopStruct
+type UserContacts struct {
+	UserID   string
+	Contacts []*UserContact
 }
 
-type NoopOutput struct {
-	NoopString string
+type Input struct {
+	UserContacts *UserContacts
+}
+
+type Output struct {
 }

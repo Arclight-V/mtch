@@ -5,6 +5,13 @@ notification_server:
 http:
   METRICS_LISTEN_ADDR: ":10904"
 
+smtp_client:
+  HOST: "127.0.0.1"
+  PORT: "1025"
+  USER: "..."
+  PASS: "..."
+  FROM: "no-reply@match.com"
+
 logging:
   LEVEL: "debug"
   FORMAT: "json"

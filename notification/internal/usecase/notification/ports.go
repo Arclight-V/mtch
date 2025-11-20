@@ -10,5 +10,5 @@ import (
 //
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=./mocks/ports_mock.go
 type NotificationUseCase interface {
-	NoopMethod(ctx context.Context, in *domain.NoopInput) (*domain.NoopOutput, error)
+	NotifyUserRegistered(ctx context.Context, in *domain.Input) (*domain.Output, error)
 }

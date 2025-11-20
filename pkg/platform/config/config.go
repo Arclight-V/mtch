@@ -12,7 +12,8 @@ import (
 
 type Config struct {
 	Server                    *ServerCfg                    `mapstructure:"server"`
-	Client                    *UserServiceClientCfg         `mapstructure:"user_service_client"`
+	UserServiceClient         *UserServiceClientCfg         `mapstructure:"user_service_client"`
+	NotificationServiceClient *NotificationServiceClientCfg `mapstructure:"notification_service_client"`
 	Http                      *HTTPCfg                      `mapstructure:"http"`
 	SMTPClient                *SMTPClient                   `mapstructure:"smtp_client"`
 	LogCfg                    *LogCfg                       `mapstructure:"logging"`
@@ -36,6 +37,10 @@ type UserServiceClientCfg struct {
 type UserServiceServerCfg struct {
 	Port        string        `mapstructure:"port"`
 	GracePeriod time.Duration `mapstructure:"grace_period"`
+}
+
+type NotificationServiceClientCfg struct {
+	GRPCAddr string `mapstructure:"grpc_addr"`
 }
 
 // NotificationServiceServerCfg configuration parameters for the Notification service
