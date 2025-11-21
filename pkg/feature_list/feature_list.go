@@ -84,3 +84,12 @@ func NewFeatureList(provider openfeature.FeatureProvider, domain string, logger 
 
 	return featureList, nil
 }
+
+func NewNoopFeatureList(features Features) *FeatureList {
+	return &FeatureList{
+		provider: openfeature.NoopProvider{},
+		client:   openfeature.NewClient(""),
+		logger:   log.NewNopLogger(),
+		features: features,
+	}
+}
