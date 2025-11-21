@@ -14,8 +14,6 @@ import (
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 	"go.opentelemetry.io/otel/attribute"
 
-	"github.com/Arclight-V/mtch/notification/internal/features"
-	"github.com/Arclight-V/mtch/notification/internal/infrastructure/email"
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/notificationservice"
@@ -27,6 +25,8 @@ import (
 	"github.com/Arclight-V/mtch/pkg/tracing/otel"
 
 	grpcnotification "github.com/Arclight-V/mtch/notification/internal/adapter/grpc/notification"
+	"github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/notification/internal/infrastructure/email"
 	usecase "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
 )
 
@@ -54,9 +54,6 @@ func main() {
 		level.Error(logger).Log("msg", "failed to create FeatureList", "err", err)
 		os.Exit(1)
 	}
-
-	// TODO: DELETE_ME / CHANGE_ME
-	_ = featureList
 
 	metrics := prometheus.NewRegistry()
 	metrics.MustRegister(
@@ -143,8 +140,8 @@ func main() {
 	}
 
 	emailSender := email.NewSMTPClient(cfg)
-	notificationUC := usecase.NewNotificationUseCase(emailSender, logger)
-	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger)
+	notificationUC := usecase.NewNotificationUseCase(emailSender, logger, featureList)
+	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger, featureList)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{
