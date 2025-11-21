@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Arclight-V/mtch/auth-service/internal/domain"
+	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
 
@@ -13,6 +14,8 @@ type UserRepo interface {
 	Login(ctx context.Context, request *userservicepb.LoginRequest) (*userservicepb.LoginResponse, error)
 	Register(ctx context.Context, request *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error)
 	VerifyEmail(ctx context.Context, request *userservicepb.VerifyEmailRequest) (*userservicepb.VerifyEmailResponse, error)
+
+	NotifyUserRegistered(ctx context.Context, request *notificationservicepb.NotificationUserContactsRequest) (*notificationservicepb.NotificationUserContactsResponse, error)
 }
 
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=../usecase/mocks/token_signer_mock.go

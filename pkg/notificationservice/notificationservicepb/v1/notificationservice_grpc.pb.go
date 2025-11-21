@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: notificationservice.proto
+// source: pkg/notificationservice/notificationservicepb/v1/notificationservice.proto
 
 package notificationservicepb
 
@@ -19,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NotificationService_NoopMethod_FullMethodName = "/mtch.notificationservice.notificationService/NoopMethod"
+	NotificationService_NotifyUserRegistered_FullMethodName = "/mtch.notificationservice.NotificationService/NotifyUserRegistered"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// TODO:: добавить изменения в шаблон написание сервиса с большой буквы
 type NotificationServiceClient interface {
-	NoopMethod(ctx context.Context, in *NoopRequest, opts ...grpc.CallOption) (*NoopResponse, error)
+	NotifyUserRegistered(ctx context.Context, in *NotificationUserContactsRequest, opts ...grpc.CallOption) (*NotificationUserContactsResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -37,10 +39,10 @@ func NewNotificationServiceClient(cc grpc.ClientConnInterface) NotificationServi
 	return &notificationServiceClient{cc}
 }
 
-func (c *notificationServiceClient) NoopMethod(ctx context.Context, in *NoopRequest, opts ...grpc.CallOption) (*NoopResponse, error) {
+func (c *notificationServiceClient) NotifyUserRegistered(ctx context.Context, in *NotificationUserContactsRequest, opts ...grpc.CallOption) (*NotificationUserContactsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(NoopResponse)
-	err := c.cc.Invoke(ctx, NotificationService_NoopMethod_FullMethodName, in, out, cOpts...)
+	out := new(NotificationUserContactsResponse)
+	err := c.cc.Invoke(ctx, NotificationService_NotifyUserRegistered_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +52,10 @@ func (c *notificationServiceClient) NoopMethod(ctx context.Context, in *NoopRequ
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
+//
+// TODO:: добавить изменения в шаблон написание сервиса с большой буквы
 type NotificationServiceServer interface {
-	NoopMethod(context.Context, *NoopRequest) (*NoopResponse, error)
+	NotifyUserRegistered(context.Context, *NotificationUserContactsRequest) (*NotificationUserContactsResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -62,8 +66,8 @@ type NotificationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedNotificationServiceServer struct{}
 
-func (UnimplementedNotificationServiceServer) NoopMethod(context.Context, *NoopRequest) (*NoopResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NoopMethod not implemented")
+func (UnimplementedNotificationServiceServer) NotifyUserRegistered(context.Context, *NotificationUserContactsRequest) (*NotificationUserContactsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NotifyUserRegistered not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -86,20 +90,20 @@ func RegisterNotificationServiceServer(s grpc.ServiceRegistrar, srv Notification
 	s.RegisterService(&NotificationService_ServiceDesc, srv)
 }
 
-func _NotificationService_NoopMethod_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NoopRequest)
+func _NotificationService_NotifyUserRegistered_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotificationUserContactsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotificationServiceServer).NoopMethod(ctx, in)
+		return srv.(NotificationServiceServer).NotifyUserRegistered(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: NotificationService_NoopMethod_FullMethodName,
+		FullMethod: NotificationService_NotifyUserRegistered_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).NoopMethod(ctx, req.(*NoopRequest))
+		return srv.(NotificationServiceServer).NotifyUserRegistered(ctx, req.(*NotificationUserContactsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -108,14 +112,14 @@ func _NotificationService_NoopMethod_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var NotificationService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "mtch.notificationservice.notificationService",
+	ServiceName: "mtch.notificationservice.NotificationService",
 	HandlerType: (*NotificationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "NoopMethod",
-			Handler:    _NotificationService_NoopMethod_Handler,
+			MethodName: "NotifyUserRegistered",
+			Handler:    _NotificationService_NotifyUserRegistered_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "notificationservice.proto",
+	Metadata: "pkg/notificationservice/notificationservicepb/v1/notificationservice.proto",
 }

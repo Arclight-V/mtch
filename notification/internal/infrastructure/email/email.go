@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-gomail/gomail"
 
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/notification"
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
 )
 

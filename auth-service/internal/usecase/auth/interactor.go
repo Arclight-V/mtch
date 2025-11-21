@@ -7,10 +7,10 @@ import (
 
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/messagebroker"
+	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase"
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
 )
 
@@ -20,7 +20,6 @@ type Interactor struct {
 	TokenSigner       usecase.TokenSigner
 	Hasher            security.PasswordHasher
 	PasswordValidator security.PasswordValidator
-	EmailSender       notification.EmailSender
 	VerifyTokenRepo   usecase.VerifyTokenRepo
 	Publisher         messagebroker.Publisher
 	FeatureList       *feature_list.FeatureList
@@ -108,19 +107,18 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 		return output, nil
 	}
 
-	verifyTokenIssue, token, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
+	verifyTokenIssue, _, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
 	if err != nil {
 		return nil, err
 	}
 
-	vd := notification.VerifyData{
-		Email:       in.Contact,
-		VerifyToken: token,
+	contacts := []*notificationservicepb.Contact{{Chanel: notificationservicepb.Channel_ChannelEmail, Value: output.Email}}
+	notifyReq := &notificationservicepb.NotificationUserContactsRequest{UserID: output.UserID, Contacts: contacts}
+
+	if _, err := uc.UserRepo.NotifyUserRegistered(ctx, notifyReq); err != nil {
+		log.Printf("req: %v", err)
 	}
 
-	if err := uc.EmailSender.SendUserRegistered(ctx, vd); err != nil {
-		return nil, err
-	}
 	if err := uc.VerifyTokenRepo.InsertIssue(ctx, verifyTokenIssue); err != nil {
 		return nil, err
 	}

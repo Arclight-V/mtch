@@ -3,14 +3,34 @@ syntax = "proto3";
 package mtch.notificationservice;
 option go_package = "github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1;notificationservicepb";
 
-service notificationService {
-  rpc NoopMethod(NoopRequest) returns (NoopResponse);
+// TODO:: добавить изменения в шаблон написание сервиса с большой буквы
+service NotificationService {
+  rpc NotifyUserRegistered(NotificationUserContactsRequest) returns (NotificationUserContactsResponse);
 }
 
-message NoopRequest {
-  string noopString = 1;
+enum Channel {
+  // Send a notification by email
+  ChannelEmail = 0;
+
+  // Send a notification by push
+  ChannelPush = 1;
+
+  // Send a notification by phone
+  ChannelCall = 2;
+
+  // Not created for a business reason
+  REJECTED = 3;
 }
 
-message NoopResponse {
-  string noopString = 1;
+message Contact {
+  Channel chanel = 1;
+  string value = 2;
+  map <string, string> meta= 3;
 }
+
+message NotificationUserContactsRequest {
+  string userID = 1;
+  repeated Contact contacts = 2;
+}
+
+message NotificationUserContactsResponse {}

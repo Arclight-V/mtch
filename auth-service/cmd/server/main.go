@@ -26,6 +26,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/messagebroker/kafka/producer"
+	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 	config "github.com/Arclight-V/mtch/pkg/platform/config"
 	"github.com/Arclight-V/mtch/pkg/prober"
 	"github.com/Arclight-V/mtch/pkg/signaler"
@@ -35,7 +36,6 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/crypto"
-	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/email"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
@@ -166,8 +166,9 @@ func main() {
 
 	level.Debug(logger).Log("msg", "setting up receive HTTP handler")
 	{
-		conn, err := grpc.NewClient(
-			cfg.Client.GRPCAddr,
+		level.Debug(logger).Log("msg", "creating gRPC user-service client", "addr", cfg.UserServiceClient.GRPCAddr)
+		connUserService, err := grpc.NewClient(
+			cfg.UserServiceClient.GRPCAddr,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithChainUnaryInterceptor(grpcserver.NewUnaryClientRequestIDInterceptor()),
 			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
@@ -175,14 +176,28 @@ func main() {
 		if err != nil {
 			level.Error(logger).Log("msg", errors.Wrapf(err, "failed to create gRPC client: %v", err))
 		}
-		defer conn.Close()
+		defer connUserService.Close()
 
-		repo := grpcclient.NewGRPCUserRepo(userservicepb.NewUserServiceClient(conn))
+		level.Debug(logger).Log("msg", "creating gRPC notification-service client", "addr", cfg.NotificationServiceClient.GRPCAddr)
+		connNotificationService, err := grpc.NewClient(
+			cfg.NotificationServiceClient.GRPCAddr,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithChainUnaryInterceptor(grpcserver.NewUnaryClientRequestIDInterceptor()),
+			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		)
+		if err != nil {
+			level.Error(logger).Log("msg", errors.Wrapf(err, "failed to create gRPC client: %v", err))
+		}
+		defer connNotificationService.Close()
+
+		repo := grpcclient.NewGRPCUserRepo(
+			userservicepb.NewUserServiceClient(connUserService),
+			notificationservicepb.NewNotificationServiceClient(connNotificationService),
+		)
 		//authMetrics := httpmetrics.NewAuthMetrics(metrics)
 		signer := jwt_signer.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 		hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
 		passwordValidator := passwd.NewUserPasswordValidator()
-		emailSender := email.NewSMTPClient(cfg)
 		verifyTokenRepo := repository.NewVerifyTokensMem()
 
 		var publisher messagebroker.Publisher
@@ -208,7 +223,6 @@ func main() {
 			TokenSigner:       signer,
 			Hasher:            hasher,
 			PasswordValidator: passwordValidator,
-			EmailSender:       emailSender,
 			VerifyTokenRepo:   verifyTokenRepo,
 			Publisher:         publisher,
 			FeatureList:       featureList,

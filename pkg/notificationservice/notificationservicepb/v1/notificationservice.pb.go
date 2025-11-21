@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: notificationservice.proto
+// source: pkg/notificationservice/notificationservicepb/v1/notificationservice.proto
 
 package notificationservicepb
 
@@ -21,158 +21,289 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type NoopRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	NoopString    string                 `protobuf:"bytes,1,opt,name=noopString,proto3" json:"noopString,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
+type Channel int32
 
-func (x *NoopRequest) Reset() {
-	*x = NoopRequest{}
-	mi := &file_notificationservice_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NoopRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NoopRequest) ProtoMessage() {}
-
-func (x *NoopRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_notificationservice_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NoopRequest.ProtoReflect.Descriptor instead.
-func (*NoopRequest) Descriptor() ([]byte, []int) {
-	return file_notificationservice_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *NoopRequest) GetNoopString() string {
-	if x != nil {
-		return x.NoopString
-	}
-	return ""
-}
-
-type NoopResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	NoopString    string                 `protobuf:"bytes,1,opt,name=noopString,proto3" json:"noopString,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *NoopResponse) Reset() {
-	*x = NoopResponse{}
-	mi := &file_notificationservice_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NoopResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NoopResponse) ProtoMessage() {}
-
-func (x *NoopResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_notificationservice_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NoopResponse.ProtoReflect.Descriptor instead.
-func (*NoopResponse) Descriptor() ([]byte, []int) {
-	return file_notificationservice_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *NoopResponse) GetNoopString() string {
-	if x != nil {
-		return x.NoopString
-	}
-	return ""
-}
-
-var File_notificationservice_proto protoreflect.FileDescriptor
-
-const file_notificationservice_proto_rawDesc = "" +
-	"\n" +
-	"\x19notificationservice.proto\x12\x18mtch.notificationservice\"-\n" +
-	"\vNoopRequest\x12\x1e\n" +
-	"\n" +
-	"noopString\x18\x01 \x01(\tR\n" +
-	"noopString\".\n" +
-	"\fNoopResponse\x12\x1e\n" +
-	"\n" +
-	"noopString\x18\x01 \x01(\tR\n" +
-	"noopString2r\n" +
-	"\x13notificationService\x12[\n" +
-	"\n" +
-	"NoopMethod\x12%.mtch.notificationservice.NoopRequest\x1a&.mtch.notificationservice.NoopResponseBcZagithub.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1;notificationservicepbb\x06proto3"
-
-var (
-	file_notificationservice_proto_rawDescOnce sync.Once
-	file_notificationservice_proto_rawDescData []byte
+const (
+	// Send a notification by email
+	Channel_ChannelEmail Channel = 0
+	// Send a notification by push
+	Channel_ChannelPush Channel = 1
+	// Send a notification by phone
+	Channel_ChannelCall Channel = 2
+	// Not created for a business reason
+	Channel_REJECTED Channel = 3
 )
 
-func file_notificationservice_proto_rawDescGZIP() []byte {
-	file_notificationservice_proto_rawDescOnce.Do(func() {
-		file_notificationservice_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_notificationservice_proto_rawDesc), len(file_notificationservice_proto_rawDesc)))
+// Enum value maps for Channel.
+var (
+	Channel_name = map[int32]string{
+		0: "ChannelEmail",
+		1: "ChannelPush",
+		2: "ChannelCall",
+		3: "REJECTED",
+	}
+	Channel_value = map[string]int32{
+		"ChannelEmail": 0,
+		"ChannelPush":  1,
+		"ChannelCall":  2,
+		"REJECTED":     3,
+	}
+)
+
+func (x Channel) Enum() *Channel {
+	p := new(Channel)
+	*p = x
+	return p
+}
+
+func (x Channel) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Channel) Descriptor() protoreflect.EnumDescriptor {
+	return file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_enumTypes[0].Descriptor()
+}
+
+func (Channel) Type() protoreflect.EnumType {
+	return &file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_enumTypes[0]
+}
+
+func (x Channel) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Channel.Descriptor instead.
+func (Channel) EnumDescriptor() ([]byte, []int) {
+	return file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescGZIP(), []int{0}
+}
+
+type Contact struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Chanel        Channel                `protobuf:"varint,1,opt,name=chanel,proto3,enum=mtch.notificationservice.Channel" json:"chanel,omitempty"`
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Meta          map[string]string      `protobuf:"bytes,3,rep,name=meta,proto3" json:"meta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Contact) Reset() {
+	*x = Contact{}
+	mi := &file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Contact) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Contact) ProtoMessage() {}
+
+func (x *Contact) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Contact.ProtoReflect.Descriptor instead.
+func (*Contact) Descriptor() ([]byte, []int) {
+	return file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Contact) GetChanel() Channel {
+	if x != nil {
+		return x.Chanel
+	}
+	return Channel_ChannelEmail
+}
+
+func (x *Contact) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+func (x *Contact) GetMeta() map[string]string {
+	if x != nil {
+		return x.Meta
+	}
+	return nil
+}
+
+type NotificationUserContactsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserID        string                 `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	Contacts      []*Contact             `protobuf:"bytes,2,rep,name=contacts,proto3" json:"contacts,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NotificationUserContactsRequest) Reset() {
+	*x = NotificationUserContactsRequest{}
+	mi := &file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationUserContactsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationUserContactsRequest) ProtoMessage() {}
+
+func (x *NotificationUserContactsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationUserContactsRequest.ProtoReflect.Descriptor instead.
+func (*NotificationUserContactsRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *NotificationUserContactsRequest) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+func (x *NotificationUserContactsRequest) GetContacts() []*Contact {
+	if x != nil {
+		return x.Contacts
+	}
+	return nil
+}
+
+type NotificationUserContactsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NotificationUserContactsResponse) Reset() {
+	*x = NotificationUserContactsResponse{}
+	mi := &file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationUserContactsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationUserContactsResponse) ProtoMessage() {}
+
+func (x *NotificationUserContactsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationUserContactsResponse.ProtoReflect.Descriptor instead.
+func (*NotificationUserContactsResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescGZIP(), []int{2}
+}
+
+var File_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto protoreflect.FileDescriptor
+
+const file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDesc = "" +
+	"\n" +
+	"Jpkg/notificationservice/notificationservicepb/v1/notificationservice.proto\x12\x18mtch.notificationservice\"\xd4\x01\n" +
+	"\aContact\x129\n" +
+	"\x06chanel\x18\x01 \x01(\x0e2!.mtch.notificationservice.ChannelR\x06chanel\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\x12?\n" +
+	"\x04meta\x18\x03 \x03(\v2+.mtch.notificationservice.Contact.MetaEntryR\x04meta\x1a7\n" +
+	"\tMetaEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"x\n" +
+	"\x1fNotificationUserContactsRequest\x12\x16\n" +
+	"\x06userID\x18\x01 \x01(\tR\x06userID\x12=\n" +
+	"\bcontacts\x18\x02 \x03(\v2!.mtch.notificationservice.ContactR\bcontacts\"\"\n" +
+	" NotificationUserContactsResponse*K\n" +
+	"\aChannel\x12\x10\n" +
+	"\fChannelEmail\x10\x00\x12\x0f\n" +
+	"\vChannelPush\x10\x01\x12\x0f\n" +
+	"\vChannelCall\x10\x02\x12\f\n" +
+	"\bREJECTED\x10\x032\xa5\x01\n" +
+	"\x13NotificationService\x12\x8d\x01\n" +
+	"\x14NotifyUserRegistered\x129.mtch.notificationservice.NotificationUserContactsRequest\x1a:.mtch.notificationservice.NotificationUserContactsResponseBcZagithub.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1;notificationservicepbb\x06proto3"
+
+var (
+	file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescOnce sync.Once
+	file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescData []byte
+)
+
+func file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescGZIP() []byte {
+	file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescOnce.Do(func() {
+		file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDesc), len(file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDesc)))
 	})
-	return file_notificationservice_proto_rawDescData
+	return file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDescData
 }
 
-var file_notificationservice_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_notificationservice_proto_goTypes = []any{
-	(*NoopRequest)(nil),  // 0: mtch.notificationservice.NoopRequest
-	(*NoopResponse)(nil), // 1: mtch.notificationservice.NoopResponse
+var file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_goTypes = []any{
+	(Channel)(0),                             // 0: mtch.notificationservice.Channel
+	(*Contact)(nil),                          // 1: mtch.notificationservice.Contact
+	(*NotificationUserContactsRequest)(nil),  // 2: mtch.notificationservice.NotificationUserContactsRequest
+	(*NotificationUserContactsResponse)(nil), // 3: mtch.notificationservice.NotificationUserContactsResponse
+	nil,                                      // 4: mtch.notificationservice.Contact.MetaEntry
 }
-var file_notificationservice_proto_depIdxs = []int32{
-	0, // 0: mtch.notificationservice.notificationService.NoopMethod:input_type -> mtch.notificationservice.NoopRequest
-	1, // 1: mtch.notificationservice.notificationService.NoopMethod:output_type -> mtch.notificationservice.NoopResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+var file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_depIdxs = []int32{
+	0, // 0: mtch.notificationservice.Contact.chanel:type_name -> mtch.notificationservice.Channel
+	4, // 1: mtch.notificationservice.Contact.meta:type_name -> mtch.notificationservice.Contact.MetaEntry
+	1, // 2: mtch.notificationservice.NotificationUserContactsRequest.contacts:type_name -> mtch.notificationservice.Contact
+	2, // 3: mtch.notificationservice.NotificationService.NotifyUserRegistered:input_type -> mtch.notificationservice.NotificationUserContactsRequest
+	3, // 4: mtch.notificationservice.NotificationService.NotifyUserRegistered:output_type -> mtch.notificationservice.NotificationUserContactsResponse
+	4, // [4:5] is the sub-list for method output_type
+	3, // [3:4] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
-func init() { file_notificationservice_proto_init() }
-func file_notificationservice_proto_init() {
-	if File_notificationservice_proto != nil {
+func init() { file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_init() }
+func file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_init() {
+	if File_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notificationservice_proto_rawDesc), len(file_notificationservice_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   2,
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDesc), len(file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_rawDesc)),
+			NumEnums:      1,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_notificationservice_proto_goTypes,
-		DependencyIndexes: file_notificationservice_proto_depIdxs,
-		MessageInfos:      file_notificationservice_proto_msgTypes,
+		GoTypes:           file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_goTypes,
+		DependencyIndexes: file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_depIdxs,
+		EnumInfos:         file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_enumTypes,
+		MessageInfos:      file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_msgTypes,
 	}.Build()
-	File_notificationservice_proto = out.File
-	file_notificationservice_proto_goTypes = nil
-	file_notificationservice_proto_depIdxs = nil
+	File_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto = out.File
+	file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_goTypes = nil
+	file_pkg_notificationservice_notificationservicepb_v1_notificationservice_proto_depIdxs = nil
 }

@@ -4,9 +4,12 @@ go 1.24.0
 
 require (
 	github.com/Arclight-V/mtch v0.0.0
+	github.com/go-gomail/gomail v0.0.0-20160411212932-81ebce5c23df
 	github.com/go-kit/log v0.2.1
+	github.com/golang/mock v1.6.0
 	github.com/oklog/run v1.2.0
 	github.com/open-feature/go-sdk-contrib/providers/flagd v0.3.0
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
 	go.opentelemetry.io/otel v1.38.0
 )
@@ -80,6 +83,8 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251020155222-88f65dc88635 // indirect
 	google.golang.org/grpc v1.76.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

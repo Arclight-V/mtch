@@ -1,6 +1,9 @@
 user_service_client:
   GRPC_ADDR: "user:50051"         # в докере идём по имени сервиса
 
+notification_service_client:
+  GRPC_ADDR: "notification:50052"
+
 http:
   LISTEN_ADDR: ":8000"
   METRICS_LISTEN_ADDR: ":10902"   # подровняй healthcheck/Prometheus
