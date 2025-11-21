@@ -3,6 +3,8 @@ package {{ .ServiceName }}
 import (
     "github.com/go-kit/log"
 
+    "github.com/Arclight-V/mtch/pkg/feature_list"
+
 	usecase "{{ .RootModulePath }}/{{ .ServiceName}}/internal/usecase/{{ .ServiceName}}"
 	"{{ .RootModulePath }}/pkg/{{ .ServiceName}}service/{{ .ServiceName }}servicepb/v1"
 )
@@ -12,8 +14,13 @@ type {{ .ServiceName }}ServiceServer struct {
 
     {{ .ServiceName }}UC usecase.{{ capitalize .ServiceName }}UseCase
     logger log.Logger
+    featureList    *feature_list.FeatureList
 }
 
-func New{{ capitalize .ServiceName }}ServiceServer({{ .ServiceName }}UC usecase.{{ capitalize .ServiceName }}UseCase, logger log.Logger) *{{ .ServiceName }}ServiceServer {
-	return &{{ .ServiceName }}ServiceServer{{"{"}} {{ .ServiceName }}UC: {{ .ServiceName }}UC, logger: logger {{"}"}}
+func New{{ capitalize .ServiceName }}ServiceServer(
+    {{ .ServiceName }}UC usecase.{{ capitalize .ServiceName }}UseCase,
+     logger log.Logger,
+     featureList *feature_list.FeatureList,
+     ) *{{ .ServiceName }}ServiceServer {
+	return &{{ .ServiceName }}ServiceServer{{"{"}} {{ .ServiceName }}UC: {{ .ServiceName }}UC, logger: logger, featureList: featureList {{"}"}}
 }
