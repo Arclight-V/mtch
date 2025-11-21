@@ -2,20 +2,22 @@ package notification
 
 import (
 	"context"
-	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
-	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/mocks"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/test/bufconn"
 	"net"
 	"testing"
 	"time"
 
 	"github.com/go-kit/log"
 	"github.com/golang/mock/gomock"
-
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/test/bufconn"
 
+	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
+
+	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
+	"github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/mocks"
 )
 
 const bufSize = 1024 * 1024
@@ -39,7 +41,8 @@ func newBufconnServer(t *testing.T) (context.Context, *grpc.ClientConn, func()) 
 		Return(&domain.Output{}, nil).Times(1)
 
 	logger := log.NewNopLogger()
-	nss := NewNotificationServiceServer(mockNotificationUseCase, logger)
+	featureList := feature_list.NewNoopFeatureList(features.Features)
+	nss := NewNotificationServiceServer(mockNotificationUseCase, logger, featureList)
 
 	notificationservicepb.RegisterNotificationServiceServer(s, nss)
 

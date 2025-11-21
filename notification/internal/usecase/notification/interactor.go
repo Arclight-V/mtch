@@ -7,17 +7,23 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/pkg/errors"
 
+	"github.com/Arclight-V/mtch/pkg/feature_list"
+
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
 )
 
 type notificationUseCase struct {
 	emailSender EmailSender
 
-	logger log.Logger
+	logger      log.Logger
+	featureList *feature_list.FeatureList
 }
 
-func NewNotificationUseCase(emailSender EmailSender, logger log.Logger) *notificationUseCase {
-	return &notificationUseCase{emailSender: emailSender, logger: logger}
+func NewNotificationUseCase(
+	emailSender EmailSender,
+	logger log.Logger,
+	featureList *feature_list.FeatureList) *notificationUseCase {
+	return &notificationUseCase{emailSender: emailSender, logger: logger, featureList: featureList}
 }
 
 func (n *notificationUseCase) NotifyUserRegistered(ctx context.Context, in *domain.Input) (*domain.Output, error) {
