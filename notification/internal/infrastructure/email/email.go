@@ -34,12 +34,12 @@ type SMTPClient struct {
 	From string
 }
 
-func NewSMTPClient(cfg *config.Config) *SMTPClient {
-	return &SMTPClient{Host: cfg.SMTPClient.Host,
-		Port: cfg.SMTPClient.Port,
-		User: cfg.SMTPClient.User,
-		Pass: cfg.SMTPClient.Pass,
-		From: cfg.SMTPClient.From}
+func NewSMTPClient(cfg *config.SMTPClient) *SMTPClient {
+	return &SMTPClient{Host: cfg.Host,
+		Port: cfg.Port,
+		User: cfg.User,
+		Pass: cfg.Pass,
+		From: cfg.From}
 }
 
 func (s *SMTPClient) send(ctx context.Context, to, subject, html string) error {
