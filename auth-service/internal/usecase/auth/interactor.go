@@ -107,6 +107,7 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 	}
 
 	verifyTokenIssue, _, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
+	_ = verifyTokenIssue
 	if err != nil {
 		return nil, err
 	}
@@ -118,20 +119,12 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 		log.Printf("req: %v", err)
 	}
 
-	if err := uc.VerifyTokenRepo.InsertIssue(ctx, verifyTokenIssue); err != nil {
-		return nil, err
-	}
-
 	return output, nil
 }
 
 func (uc *Interactor) VerifyEmail(ctx context.Context, in VerifyEmailInput) (VerifyEmailOutput, error) {
 	v, err := uc.TokenSigner.ParseVerifyToken(in.Token)
 	if err != nil {
-		return VerifyEmailOutput{}, err
-	}
-
-	if err := uc.VerifyTokenRepo.TryConsumeJTI(ctx, v); err != nil {
 		return VerifyEmailOutput{}, err
 	}
 
