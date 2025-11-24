@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/Arclight-V/mtch/auth-service/internal/features"
-	"github.com/Arclight-V/mtch/pkg/messagebroker"
 	"log"
 	"mime"
 	"os"
@@ -35,11 +33,11 @@ import (
 
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
 	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
+	"github.com/Arclight-V/mtch/auth-service/internal/features"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/crypto"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
 	passwd "github.com/Arclight-V/mtch/auth-service/internal/infrastructure/password_validator"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
-	"github.com/Arclight-V/mtch/auth-service/internal/usecase/repository"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
 )
@@ -198,8 +196,6 @@ func main() {
 		signer := jwt_signer.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
 		hasher := crypto.NewBcryptHasher(bcrypt.DefaultCost)
 		passwordValidator := passwd.NewUserPasswordValidator()
-		verifyTokenRepo := repository.NewVerifyTokensMem()
-
 		var publisher messagebroker.Publisher
 
 		kafkaEnable := featureList.IsEnabled(feature_list.FeatureKafka)
@@ -223,7 +219,6 @@ func main() {
 			TokenSigner:       signer,
 			Hasher:            hasher,
 			PasswordValidator: passwordValidator,
-			VerifyTokenRepo:   verifyTokenRepo,
 			Publisher:         publisher,
 			FeatureList:       featureList,
 		}
