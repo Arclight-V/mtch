@@ -20,7 +20,6 @@ type Interactor struct {
 	TokenSigner       usecase.TokenSigner
 	Hasher            security.PasswordHasher
 	PasswordValidator security.PasswordValidator
-	VerifyTokenRepo   usecase.VerifyTokenRepo
 	Publisher         messagebroker.Publisher
 	FeatureList       *feature_list.FeatureList
 }
