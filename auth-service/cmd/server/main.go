@@ -23,6 +23,7 @@ import (
 
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
+	"github.com/Arclight-V/mtch/pkg/messagebroker"
 	"github.com/Arclight-V/mtch/pkg/messagebroker/kafka/producer"
 	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 	config "github.com/Arclight-V/mtch/pkg/platform/config"

@@ -2,6 +2,8 @@ package notification_test
 
 import (
 	"context"
+	"github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"testing"
 
 	"github.com/go-kit/log"
@@ -18,8 +20,8 @@ func TestNotifyUserRegistered_Ok(t *testing.T) {
 
 	mockEmailSender := mocks.NewMockEmailSender(ctrl)
 	logger := log.NewNopLogger()
-
-	nuc := notification.NewNotificationUseCase(mockEmailSender, logger)
+	featureList := feature_list.NewNoopFeatureList(features.Features)
+	nuc := notification.NewNotificationUseCase(mockEmailSender, logger, featureList)
 
 	in := domain.Input{UserContacts: &domain.UserContacts{
 		UserID: "u1",
