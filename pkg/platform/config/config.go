@@ -23,6 +23,7 @@ type Config struct {
 	Kafka                     *KafkaConfig                  `mapstructure:"kafka"`
 	FlagD                     *FlagDConfig                  `mapstructure:"flagd"`
 	Meta                      *Meta                         `mapstructure:"meta"`
+	CodeGeneratorCfg          *CodeGeneratorCfg             `mapstructure:"code_generator"`
 }
 
 type ServerCfg struct {
@@ -105,6 +106,12 @@ type FlagDConfig struct {
 
 type Meta struct {
 	Template bool `mapstructure:"template"`
+}
+
+type CodeGeneratorCfg struct {
+	ExpiresAt   time.Duration `mapstructure:"expires_at"`
+	CountDigits int           `mapstructure:"count_digits"`
+	MaxAttempts int           `mapstructure:"max_attempts"`
 }
 
 // LoadConfig Load config file from given path
