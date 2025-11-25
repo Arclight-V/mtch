@@ -139,7 +139,7 @@ func main() {
 		})
 	}
 
-	emailSender := email.NewSMTPClient(cfg)
+	emailSender := email.NewSMTPClient(cfg.SMTPClient)
 	notificationUC := usecase.NewNotificationUseCase(emailSender, logger, featureList)
 	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger, featureList)
 
