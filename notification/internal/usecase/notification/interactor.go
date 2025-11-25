@@ -10,26 +10,42 @@ import (
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
+	"github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/repository"
 )
 
 type notificationUseCase struct {
-	emailSender EmailSender
+	emailSender   EmailSender
+	varifyCodeMem *repository.VerifyCodesMem
 
-	logger      log.Logger
-	featureList *feature_list.FeatureList
+	logger        log.Logger
+	featureList   *feature_list.FeatureList
+	codeGenerator *codegen.CodeGenerator
 }
 
 func NewNotificationUseCase(
 	emailSender EmailSender,
 	logger log.Logger,
-	featureList *feature_list.FeatureList) *notificationUseCase {
-	return &notificationUseCase{emailSender: emailSender, logger: logger, featureList: featureList}
+	featureList *feature_list.FeatureList,
+	verifyCodeMem *repository.VerifyCodesMem,
+	codeGenerator *codegen.CodeGenerator,
+
+) *notificationUseCase {
+	return &notificationUseCase{
+		emailSender:   emailSender,
+		logger:        logger,
+		featureList:   featureList,
+		varifyCodeMem: verifyCodeMem,
+		codeGenerator: codeGenerator,
+	}
 }
 
 func (n *notificationUseCase) NotifyUserRegistered(ctx context.Context, in *domain.Input) (*domain.Output, error) {
 	level.Info(n.logger).Log("msg", "NotifyUserRegistered:", "domain.Input", in)
 
 	var err error
+	vc := n.codeGenerator.NewVerificationCode(in.UserContacts.UserID)
 
 	for _, c := range in.UserContacts.Contacts {
 		switch c.Channel {
@@ -40,6 +56,11 @@ func (n *notificationUseCase) NotifyUserRegistered(ctx context.Context, in *doma
 			}
 			if sendErr := n.emailSender.SendUserRegistered(ctx, vd); sendErr != nil {
 				_ = errors.Wrap(err, sendErr.Error())
+			}
+			if !n.featureList.IsEnabled(features.StoreCodesInDB) {
+				if errInsert := n.varifyCodeMem.InsertIssue(ctx, vc); errInsert != nil {
+					err = errors.Wrap(err, errInsert.Error())
+				}
 			}
 
 		case domain.ChanelPush:

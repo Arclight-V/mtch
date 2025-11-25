@@ -22,8 +22,8 @@ func (verificationPurpose VerificationPurpose) String() string {
 type VerificationCode struct {
 	UserID      string
 	Code        string
-	Purpose     VerificationPurpose
 	ExpiresAt   time.Time
+	Purpose     VerificationPurpose
 	Attempts    int
 	MaxAttempts int
 }

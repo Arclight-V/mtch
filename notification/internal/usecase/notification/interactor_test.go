@@ -2,16 +2,19 @@ package notification_test
 
 import (
 	"context"
-	"github.com/Arclight-V/mtch/notification/internal/features"
-	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"testing"
 
 	"github.com/go-kit/log"
 	"github.com/golang/mock/gomock"
 
+	"github.com/Arclight-V/mtch/pkg/feature_list"
+
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
+	"github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
 	notification "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/mocks"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/repository"
 )
 
 func TestNotifyUserRegistered_Ok(t *testing.T) {
@@ -21,7 +24,10 @@ func TestNotifyUserRegistered_Ok(t *testing.T) {
 	mockEmailSender := mocks.NewMockEmailSender(ctrl)
 	logger := log.NewNopLogger()
 	featureList := feature_list.NewNoopFeatureList(features.Features)
-	nuc := notification.NewNotificationUseCase(mockEmailSender, logger, featureList)
+	verifyCodeMems := repository.NewVerifyCodesMem()
+	codegen := codegen.NewNoopCodeGenerator()
+
+	nuc := notification.NewNotificationUseCase(mockEmailSender, logger, featureList, verifyCodeMems, codegen)
 
 	in := domain.Input{UserContacts: &domain.UserContacts{
 		UserID: "u1",
