@@ -20,9 +20,10 @@ func (verificationPurpose VerificationPurpose) String() string {
 
 // VerificationCode represents a one-time code used to confirm user actions.
 type VerificationCode struct {
-	UserID    string
-	Code      string
-	Purpose   VerificationPurpose
-	ExpiresAt time.Time
-	Attempts  int
+	UserID      string
+	Code        string
+	Purpose     VerificationPurpose
+	ExpiresAt   time.Time
+	Attempts    int
+	MaxAttempts int
 }
