@@ -26,8 +26,10 @@ import (
 
 	grpcnotification "github.com/Arclight-V/mtch/notification/internal/adapter/grpc/notification"
 	"github.com/Arclight-V/mtch/notification/internal/features"
+	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/email"
 	usecase "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/repository"
 )
 
 func main() {
@@ -140,7 +142,9 @@ func main() {
 	}
 
 	emailSender := email.NewSMTPClient(cfg.SMTPClient)
-	notificationUC := usecase.NewNotificationUseCase(emailSender, logger, featureList)
+	codeGenerator := codegen.NewCodeGenerator(cfg.CodeGeneratorCfg)
+	verifyCodeMems := repository.NewVerifyCodesMem()
+	notificationUC := usecase.NewNotificationUseCase(emailSender, logger, featureList, verifyCodeMems, codeGenerator)
 	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger, featureList)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")

@@ -51,3 +51,12 @@ func (c *CodeGenerator) generateCode() string {
 
 	return fmt.Sprintf("%0*d", c.countDigits, digit)
 }
+
+func NewNoopCodeGenerator() *CodeGenerator {
+	return &CodeGenerator{
+		expiresAt:   4 * time.Minute,
+		countDigits: 6,
+		maxN:        int(math.Pow10(6)),
+		maxAttempts: 5,
+	}
+}

@@ -22,7 +22,7 @@ func TestInsertIssueOK(t *testing.T) {
 		Attempts:  0,
 	}
 
-	if err := verifyCodesMemRepo.InsertIssue(ctx, vc); err != nil {
+	if err := verifyCodesMemRepo.InsertIssue(ctx, &vc); err != nil {
 		t.Fatal(err)
 	}
 
@@ -40,11 +40,11 @@ func TestInsertIssueNot_OK(t *testing.T) {
 		Attempts:  0,
 	}
 
-	if err := verifyCodesMemRepo.InsertIssue(ctx, vc); err != nil {
+	if err := verifyCodesMemRepo.InsertIssue(ctx, &vc); err != nil {
 		t.Fatal("Error must be nil")
 	}
 
-	if err := verifyCodesMemRepo.InsertIssue(ctx, vc); err == nil {
+	if err := verifyCodesMemRepo.InsertIssue(ctx, &vc); err == nil {
 		t.Fatal("Error must not be nil")
 	}
 }
@@ -72,7 +72,7 @@ func TestVerifyCodesMem_Concurrency_Insert(t *testing.T) {
 					ExpiresAt: time.Now().Add(time.Minute * 3),
 					Attempts:  0,
 				}
-				if err := verifyCodesMemRepo.InsertIssue(ctx, vc); err != nil {
+				if err := verifyCodesMemRepo.InsertIssue(ctx, &vc); err != nil {
 					t.Error("Error must be nil")
 					return
 				}

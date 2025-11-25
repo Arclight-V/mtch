@@ -10,14 +10,14 @@ import (
 
 type VerifyCodesMem struct {
 	mu     sync.Mutex
-	byCode map[string][]domain.VerificationCode
+	byCode map[string][]*domain.VerificationCode
 }
 
 func NewVerifyCodesMem() *VerifyCodesMem {
-	return &VerifyCodesMem{byCode: make(map[string][]domain.VerificationCode)}
+	return &VerifyCodesMem{byCode: make(map[string][]*domain.VerificationCode)}
 }
 
-func (m *VerifyCodesMem) InsertIssue(_ context.Context, v domain.VerificationCode) error {
+func (m *VerifyCodesMem) InsertIssue(_ context.Context, v *domain.VerificationCode) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
