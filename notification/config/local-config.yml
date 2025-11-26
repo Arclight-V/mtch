@@ -24,3 +24,16 @@ code_generator:
   expires_at: "10m"
   count_digits: 6
   max_attempts: 5
+
+postgres:
+  host: "CHANGE_ME"
+  port: "CHANGE_ME"
+  user: "CHANGE_ME"
+  dbname: "CHANGE_ME"
+  password: "CHANGE_ME"
+  pg_driver: "CHANGE_ME"
+# Options
+  conn_max_lifetime: "10s"
+  conn_max_idle_time: "5s"
+  max_open_conns: 10
+  max_idle_conns: 15

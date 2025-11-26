@@ -12,12 +12,13 @@ import (
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
 	"github.com/Arclight-V/mtch/notification/internal/features"
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
-	"github.com/Arclight-V/mtch/notification/internal/usecase/repository"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/repository"
 )
 
 type notificationUseCase struct {
 	emailSender   EmailSender
 	varifyCodeMem *repository.VerifyCodesMem
+	repo          PGRepository
 
 	logger        log.Logger
 	featureList   *feature_list.FeatureList
@@ -30,7 +31,7 @@ func NewNotificationUseCase(
 	featureList *feature_list.FeatureList,
 	verifyCodeMem *repository.VerifyCodesMem,
 	codeGenerator *codegen.CodeGenerator,
-
+	repo PGRepository,
 ) *notificationUseCase {
 	return &notificationUseCase{
 		emailSender:   emailSender,
@@ -38,6 +39,7 @@ func NewNotificationUseCase(
 		featureList:   featureList,
 		varifyCodeMem: verifyCodeMem,
 		codeGenerator: codeGenerator,
+		repo:          repo,
 	}
 }
 
@@ -50,17 +52,21 @@ func (n *notificationUseCase) NotifyUserRegistered(ctx context.Context, in *doma
 	for _, c := range in.UserContacts.Contacts {
 		switch c.Channel {
 		case domain.ChannelEmail:
+			if !n.featureList.IsEnabled(features.StoreCodesInDB) {
+				if errInsert := n.varifyCodeMem.InsertIssue(ctx, vc); errInsert != nil {
+					err = errors.Wrap(err, errInsert.Error())
+				}
+			} else {
+				if errInsert := n.repo.InsertIssue(ctx, vc); errInsert != nil {
+					err = errors.Wrap(err, errInsert.Error())
+				}
+			}
 			vd := VerifyData{
 				Email:       c.Value,
 				VerifyToken: "token",
 			}
 			if sendErr := n.emailSender.SendUserRegistered(ctx, vd); sendErr != nil {
 				_ = errors.Wrap(err, sendErr.Error())
-			}
-			if !n.featureList.IsEnabled(features.StoreCodesInDB) {
-				if errInsert := n.varifyCodeMem.InsertIssue(ctx, vc); errInsert != nil {
-					err = errors.Wrap(err, errInsert.Error())
-				}
 			}
 
 		case domain.ChanelPush:

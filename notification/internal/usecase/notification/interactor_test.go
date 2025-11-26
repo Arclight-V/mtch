@@ -2,6 +2,7 @@ package notification_test
 
 import (
 	"context"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/repository"
 	"testing"
 
 	"github.com/go-kit/log"
@@ -14,7 +15,6 @@ import (
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
 	notification "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
 	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/mocks"
-	"github.com/Arclight-V/mtch/notification/internal/usecase/repository"
 )
 
 func TestNotifyUserRegistered_Ok(t *testing.T) {
@@ -26,17 +26,30 @@ func TestNotifyUserRegistered_Ok(t *testing.T) {
 	featureList := feature_list.NewNoopFeatureList(features.Features)
 	verifyCodeMems := repository.NewVerifyCodesMem()
 	codegen := codegen.NewNoopCodeGenerator()
+	mockPGrepository := mocks.NewMockPGRepository(ctrl)
+	nuc := notification.NewNotificationUseCase(
+		mockEmailSender,
+		logger,
+		featureList,
+		verifyCodeMems,
+		codegen,
+		mockPGrepository,
+	)
 
-	nuc := notification.NewNotificationUseCase(mockEmailSender, logger, featureList, verifyCodeMems, codegen)
+	mockPGrepository.
+		EXPECT().
+		InsertIssue(gomock.Any(), gomock.AssignableToTypeOf(&domain.VerificationCode{})).
+		Return(nil).
+		Times(1)
 
+	ui := "u1"
 	in := domain.Input{UserContacts: &domain.UserContacts{
-		UserID: "u1",
+		UserID: ui,
 		Contacts: []*domain.UserContact{
 			{Channel: domain.ChannelEmail, Value: "a@b.com"},
 			//{Channel: domain.ChanelPush, Value: "dev-token"},
 		},
 	}}
-
 	vd := notification.VerifyData{
 		Email:       in.UserContacts.Contacts[0].Value,
 		VerifyToken: "token",
