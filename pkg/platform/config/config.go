@@ -117,11 +117,17 @@ type CodeGeneratorCfg struct {
 
 type PostgresCfg struct {
 	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
+	Port     string `mapstructure:"port"`
 	User     string `mapstructure:"user"`
 	DBName   string `mapstructure:"dbname"`
 	Password string `mapstructure:"password"`
 	PgDriver string `mapstructure:"pg_driver"`
+
+	//Options
+	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
+	ConnMaxIdleTime time.Duration `mapstructure:"conn_max_idle_time"`
+	MaxOpenConns    int           `mapstructure:"max_open_conns"`
+	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
 }
 
 // LoadConfig Load config file from given path

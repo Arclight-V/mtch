@@ -18,6 +18,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/notificationservice"
 	"github.com/Arclight-V/mtch/pkg/platform/config"
+	"github.com/Arclight-V/mtch/pkg/postgres"
 	"github.com/Arclight-V/mtch/pkg/prober"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
@@ -29,7 +30,7 @@ import (
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/email"
 	usecase "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
-	"github.com/Arclight-V/mtch/notification/internal/usecase/repository"
+	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/repository"
 )
 
 func main() {
@@ -144,7 +145,18 @@ func main() {
 	emailSender := email.NewSMTPClient(cfg.SMTPClient)
 	codeGenerator := codegen.NewCodeGenerator(cfg.CodeGeneratorCfg)
 	verifyCodeMems := repository.NewVerifyCodesMem()
-	notificationUC := usecase.NewNotificationUseCase(emailSender, logger, featureList, verifyCodeMems, codeGenerator)
+	postgresRepo, err := postgres.NewPsqlDB(cfg.PostgresCfg,
+		postgres.WithConnMaxIdleTime(cfg.PostgresCfg.ConnMaxIdleTime),
+		postgres.WithMaxIdleConns(cfg.PostgresCfg.MaxIdleConns),
+		postgres.WithConnMaxLifetime(cfg.PostgresCfg.ConnMaxLifetime),
+		postgres.WithMaxOpenConns(cfg.PostgresCfg.MaxOpenConns),
+	)
+	if err != nil {
+		level.Error(logger).Log("msg", "error create connect to postgres db")
+
+	}
+	repo := repository.NewNotificationRepository(postgresRepo)
+	notificationUC := usecase.NewNotificationUseCase(emailSender, logger, featureList, verifyCodeMems, codeGenerator, repo)
 	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger, featureList)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
