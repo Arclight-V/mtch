@@ -87,9 +87,19 @@ func TestCodeGenerator_Generate(t *testing.T) {
 	}
 
 	newGen := NewCodeGenerator(cfg)
-	code := newGen.generateCode()
-	if len(code) != newGen.countDigits {
-		t.Errorf("Error len code want:%v, got: %v", newGen.countDigits, len(code))
+	code := newGen.NewVerificationCode("u1")
+	if len(code.Code) != newGen.countDigits {
+		t.Errorf("Error len code want:%v, got: %v", newGen.countDigits, len(code.Code))
 	}
 
+}
+
+func TestNoopCodeGenerator_Generate(t *testing.T) {
+	newGen := NewNoopCodeGenerator()
+	code := newGen.NewVerificationCode("u1")
+	code2 := newGen.NewVerificationCode("u1")
+
+	if code.Code != code2.Code {
+		t.Errorf("Error code want:%v, got: %v", code2.Code, code.Code)
+	}
 }

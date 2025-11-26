@@ -19,3 +19,8 @@ logging:
 
 flagd:
   flags_path: "./flags.flagd.json"
+
+code_generator:
+  expires_at: "10m"
+  count_digits: 6
+  max_attempts: 5
