@@ -24,6 +24,7 @@ type Config struct {
 	FlagD                     *FlagDConfig                  `mapstructure:"flagd"`
 	Meta                      *Meta                         `mapstructure:"meta"`
 	CodeGeneratorCfg          *CodeGeneratorCfg             `mapstructure:"code_generator"`
+	PostgresCfg               *PostgresCfg                  `mapstructure:"postgres"`
 }
 
 type ServerCfg struct {
@@ -112,6 +113,15 @@ type CodeGeneratorCfg struct {
 	ExpiresAt   time.Duration `mapstructure:"expires_at"`
 	CountDigits int           `mapstructure:"count_digits"`
 	MaxAttempts int           `mapstructure:"max_attempts"`
+}
+
+type PostgresCfg struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	DBName   string `mapstructure:"dbname"`
+	Password string `mapstructure:"password"`
+	PgDriver string `mapstructure:"pg_driver"`
 }
 
 // LoadConfig Load config file from given path
