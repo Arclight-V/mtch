@@ -20,6 +20,7 @@
 !*.tmpl
 !*.json
 !*.proto
+!*.sql
 
 !README.md
 !LICENSE
