@@ -26,12 +26,12 @@ code_generator:
   max_attempts: 5
 
 postgres:
-  host: "CHANGE_ME"
-  port: "CHANGE_ME"
-  user: "CHANGE_ME"
-  dbname: "CHANGE_ME"
-  password: "CHANGE_ME"
-  pg_driver: "CHANGE_ME"
+  host: "localhost"
+  port: "5432"
+  user: "mtch"
+  dbname: "mtch_db"
+  password: "mtch_password"
+  pg_driver: "pgx"
 # Options
   conn_max_lifetime: "10s"
   conn_max_idle_time: "5s"

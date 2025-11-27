@@ -25,7 +25,7 @@ func TestNotificationRepositoryInsertIsue(t *testing.T) {
 	ui := uuid.New()
 	mockVerificationCode := codegen.NewVerificationCode(ui.String())
 
-	columns := []string{"user_id", "code", "expires_at", "purpose", "attempts", "max_attempts"}
+	columns := []string{"user_id", "code_hash", "expires_at", "purpose", "attempts", "max_attempts"}
 	_ = sqlmock.NewRows(columns).AddRow(
 		ui,
 		mockVerificationCode.Code,
