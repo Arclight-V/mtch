@@ -123,6 +123,10 @@ compose-up-user:
 compose-up-notification:
 	$(COMPOSE) up -d --build notification
 
+## Start only the postgres db
+compose-up-postgres:
+	$(COMPOSE) up -d --build postgres
+
 ## Start kakfa
 compose-up-kafka:
 	$(COMPOSE) up -d --build kafka kafka-init
@@ -155,6 +159,9 @@ compose-logs-prom:
 
 compose-logs-graf:
 	$(COMPOSE) logs -f --tail=200 grafana
+
+compose-logs-postgress:
+	$(COMPOSE) logs -f --tail=200 mtch-postgres
 
 # --- Interactive / debugging ---------------------------------------------------
 
