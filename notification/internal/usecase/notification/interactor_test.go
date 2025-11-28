@@ -2,7 +2,7 @@ package notification_test
 
 import (
 	"context"
-	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/repository"
+	"github.com/Arclight-V/mtch/notification/internal/infrastructure/repository"
 	"testing"
 
 	"github.com/go-kit/log"
@@ -24,7 +24,7 @@ func TestNotifyUserRegistered_Ok(t *testing.T) {
 	mockEmailSender := mocks.NewMockEmailSender(ctrl)
 	logger := log.NewNopLogger()
 	featureList := feature_list.NewNoopFeatureList(features.Features)
-	verifyCodeMems := repository.NewVerifyCodesMem()
+	verifyCodeMems := repository.NewVerifyCodesMem(logger)
 	codegen := codegen.NewNoopCodeGenerator()
 	mockPGrepository := mocks.NewMockPGRepository(ctrl)
 	nuc := notification.NewNotificationUseCase(

@@ -5,19 +5,31 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
+
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
 )
 
 type VerifyCodesMem struct {
 	mu     sync.Mutex
-	byCode map[string][]*domain.VerificationCode
+	byCode map[string][]domain.VerificationCode
+
+	logger log.Logger
 }
 
-func NewVerifyCodesMem() *VerifyCodesMem {
-	return &VerifyCodesMem{byCode: make(map[string][]*domain.VerificationCode)}
+func NewVerifyCodesMem(logger log.Logger) *VerifyCodesMem {
+	logger = log.With(logger, "component", "VerifyCodesMem")
+
+	return &VerifyCodesMem{
+		logger: logger,
+		byCode: make(map[string][]domain.VerificationCode),
+	}
 }
 
 func (m *VerifyCodesMem) InsertIssue(_ context.Context, v *domain.VerificationCode) error {
+	level.Debug(m.logger).Log("msg", "inserting issue", "v", v)
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -28,7 +40,7 @@ func (m *VerifyCodesMem) InsertIssue(_ context.Context, v *domain.VerificationCo
 			}
 		}
 	}
-	m.byCode[v.UserID] = append(m.byCode[v.UserID], v)
+	m.byCode[v.UserID] = append(m.byCode[v.UserID], *v)
 
 	return nil
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/logging"
 	"github.com/Arclight-V/mtch/pkg/platform/config"
+	"github.com/Arclight-V/mtch/pkg/postgres"
 	"github.com/Arclight-V/mtch/pkg/prober"
 	grpcserver "github.com/Arclight-V/mtch/pkg/server/grpc"
 	httpserver "github.com/Arclight-V/mtch/pkg/server/http"
@@ -143,8 +144,15 @@ func main() {
 		})
 	}
 
-	userRepo := repository.NewUsersDBMemory()
-	userUC := usecase.NewUserUseCase(userRepo)
+	userRepoMem := repository.NewUsersDBMem(logger)
+	postgresRepo, err := postgres.NewPsqlDB(cfg.PostgresCfg,
+		postgres.WithConnMaxIdleTime(cfg.PostgresCfg.ConnMaxIdleTime),
+		postgres.WithMaxIdleConns(cfg.PostgresCfg.MaxIdleConns),
+		postgres.WithConnMaxLifetime(cfg.PostgresCfg.ConnMaxLifetime),
+		postgres.WithMaxOpenConns(cfg.PostgresCfg.MaxOpenConns),
+	)
+	userRepoDB := repository.NewUserRepoDB(logger, postgresRepo)
+	userUC := usecase.NewUserUseCase(logger, featureList, userRepoDB, userRepoMem)
 	server := grpcuser.NewUserServiceServer(userUC)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")

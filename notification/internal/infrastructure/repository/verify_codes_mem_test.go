@@ -7,11 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-kit/log"
+
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
 )
 
 func TestInsertIssueOK(t *testing.T) {
-	verifyCodesMemRepo := NewVerifyCodesMem()
+	logger := log.NewNopLogger()
+	verifyCodesMemRepo := NewVerifyCodesMem(logger)
 	ctx := context.Background()
 
 	vc := domain.VerificationCode{
@@ -29,7 +32,8 @@ func TestInsertIssueOK(t *testing.T) {
 }
 
 func TestInsertIssueNot_OK(t *testing.T) {
-	verifyCodesMemRepo := NewVerifyCodesMem()
+	logger := log.NewNopLogger()
+	verifyCodesMemRepo := NewVerifyCodesMem(logger)
 	ctx := context.Background()
 
 	vc := domain.VerificationCode{
@@ -50,7 +54,8 @@ func TestInsertIssueNot_OK(t *testing.T) {
 }
 
 func TestVerifyCodesMem_Concurrency_Insert(t *testing.T) {
-	verifyCodesMemRepo := NewVerifyCodesMem()
+	logger := log.NewNopLogger()
+	verifyCodesMemRepo := NewVerifyCodesMem(logger)
 	ctx := context.Background()
 
 	goroutines := 10

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/go-kit/log"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
@@ -20,7 +21,8 @@ func TestNotificationRepositoryInsertIsue(t *testing.T) {
 	sqlxDB := sqlx.NewDb(db, "sqlmock")
 	defer sqlxDB.Close()
 
-	pgRepository := NewNotificationRepository(sqlxDB)
+	logger := log.NewNopLogger()
+	pgRepository := NewNotificationRepoDB(logger, sqlxDB)
 	codegen := codegen.NewNoopCodeGenerator()
 	ui := uuid.New()
 	mockVerificationCode := codegen.NewVerificationCode(ui.String())
