@@ -25,37 +25,38 @@ const (
 	Rejected
 )
 
+// User user data
 type User struct {
-	PersonalData *PersonalData
-	UserID       uuid.UUID
-	Role         string
-	Avatar       *string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Activated    bool
+	PersonalData
+	UserID    uuid.UUID `db:"user_id"`
+	Role      string    `db:"role"`
+	Avatar    *string   `db:"avatar"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	Activated bool      `db:"activated"`
+}
+
+// PersonalData personal user data
+type PersonalData struct {
+	FirstName    string    `db:"first_name"`
+	LastName     string    `db:"last_name"`
+	Contact      string    `db:"contact"`
+	Phone        string    `db:"phone"`
+	Email        string    `db:"email"`
+	Password     string    `db:"password"`
+	DateBirthday time.Time `db:"date_birthday"`
+	Gender       string    `db:"gender"`
 }
 
 // NewPendingUser Create new pending User
 func NewPendingUser(data *PersonalData) (*User, error) {
 	return &User{
-		PersonalData: data,
+		PersonalData: *data,
 		Role:         "pending",
 		Activated:    false,
-
 		//TODO: move to db
 		UserID: uuid.New(),
 	}, nil
-}
-
-type PersonalData struct {
-	FirstName    string
-	LastName     string
-	Contact      string
-	Phone        string
-	Email        string
-	Password     string
-	DateBirthday time.Time
-	Gender       string
 }
 
 func (p *PersonalData) SetDateBirthday(year, month, day int) {

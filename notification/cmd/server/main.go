@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	repository2 "github.com/Arclight-V/mtch/notification/internal/infrastructure/repository"
 	"log"
 	"os"
 	"regexp"
@@ -30,7 +31,6 @@ import (
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/email"
 	usecase "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
-	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/repository"
 )
 
 func main() {
@@ -144,7 +144,7 @@ func main() {
 
 	emailSender := email.NewSMTPClient(cfg.SMTPClient)
 	codeGenerator := codegen.NewCodeGenerator(cfg.CodeGeneratorCfg)
-	verifyCodeMems := repository.NewVerifyCodesMem()
+	verifyCodeMems := repository2.NewVerifyCodesMem(logger)
 	postgresRepo, err := postgres.NewPsqlDB(cfg.PostgresCfg,
 		postgres.WithConnMaxIdleTime(cfg.PostgresCfg.ConnMaxIdleTime),
 		postgres.WithMaxIdleConns(cfg.PostgresCfg.MaxIdleConns),
@@ -155,7 +155,7 @@ func main() {
 		level.Error(logger).Log("msg", "error create connect to postgres db")
 
 	}
-	repo := repository.NewNotificationRepository(postgresRepo)
+	repo := repository2.NewNotificationRepoDB(logger, postgresRepo)
 	notificationUC := usecase.NewNotificationUseCase(emailSender, logger, featureList, verifyCodeMems, codeGenerator, repo)
 	server := grpcnotification.NewNotificationServiceServer(notificationUC, logger, featureList)
 

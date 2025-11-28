@@ -2,35 +2,77 @@ package user
 
 import (
 	"context"
-	"errors"
+
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
+	"github.com/pkg/errors"
+
+	"github.com/Arclight-V/mtch/pkg/feature_list"
 
 	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
+	"github.com/Arclight-V/mtch/user-service/internal/features"
 )
 
 type userUseCase struct {
-	userRepo Repository
+	userRepoMem Repository
+	userRepoDB  Repository
+
+	logger      log.Logger
+	featureList *feature_list.FeatureList
 }
 
-func NewUserUseCase(userRepo Repository) *userUseCase {
-	return &userUseCase{userRepo: userRepo}
+func NewUserUseCase(
+	logger log.Logger,
+	featureList *feature_list.FeatureList,
+	userRepoMem Repository,
+	userRepoDB Repository,
+) *userUseCase {
+	logger = log.With(logger, "component", "UserUseCase")
+
+	return &userUseCase{
+		logger:      logger,
+		featureList: featureList,
+		userRepoMem: userRepoMem,
+		userRepoDB:  userRepoDB,
+	}
 }
 
 func (u *userUseCase) Register(ctx context.Context, in *domain.RegisterInput) (*domain.RegisterOutput, error) {
-	existUser, err := u.userRepo.FindByContact(ctx, in.PersonalDate.Contact)
+	level.Debug(u.logger).Log("msg", "Register", "input", in)
+
+	var (
+		existUser *domain.User
+		err       error
+	)
+	if !u.featureList.IsEnabled(features.StoreUsersInDB) {
+		existUser, err = u.userRepoMem.FindByContact(ctx, in.PersonalDate.Contact)
+	} else {
+		existUser, err = u.userRepoDB.FindByContact(ctx, in.PersonalDate.Contact)
+	}
 
 	// a User was not found
 	if err != nil {
-		usr, err2 := u.userRepo.Create(ctx, in)
-		if err2 != nil {
-			return nil, err2
+		var (
+			usr       *domain.User
+			createErr error
+		)
+
+		if !u.featureList.IsEnabled(features.StoreUsersInDB) {
+			usr, createErr = u.userRepoMem.Create(ctx, in)
+		} else {
+			usr, createErr = u.userRepoDB.Create(ctx, in)
 		}
+		if createErr != nil {
+			return nil, errors.Wrap(createErr, "user isn't created")
+		}
+
 		return &domain.RegisterOutput{UserID: usr.UserID, Status: domain.CreatedUnverified}, nil
 	}
 	if existUser.Activated {
-		return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, errors.New("userservice is activated")
+		return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, errors.Wrap(err, "user isn't activated")
 	}
 
-	return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, errors.New("userservice exist, but not activated")
+	return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, errors.New("user is exist, but not activated")
 
 }
 

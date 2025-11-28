@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"github.com/Arclight-V/mtch/notification/internal/infrastructure/repository"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -12,7 +13,6 @@ import (
 	domain "github.com/Arclight-V/mtch/notification/internal/domain/notification"
 	"github.com/Arclight-V/mtch/notification/internal/features"
 	"github.com/Arclight-V/mtch/notification/internal/infrastructure/codegen"
-	"github.com/Arclight-V/mtch/notification/internal/usecase/notification/repository"
 )
 
 type notificationUseCase struct {
