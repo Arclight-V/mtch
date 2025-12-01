@@ -49,7 +49,6 @@ func (u *UserRepoDB) Create(ctx context.Context, regData *domain.RegisterInput) 
 		pendingUser.DateBirthday,
 		pendingUser.Gender,
 		pendingUser.Role,
-		pendingUser.Activated,
 	).StructScan(pendingUser); err != nil {
 		return nil, errors.Wrap(err, "Create.QueryRowxContext")
 	}

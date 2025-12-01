@@ -44,6 +44,7 @@ func (u *userUseCase) Register(ctx context.Context, in *domain.RegisterInput) (*
 		existUser *domain.User
 		err       error
 	)
+
 	if !u.featureList.IsEnabled(features.StoreUsersInDB) {
 		existUser, err = u.userRepoMem.FindByContact(ctx, in.PersonalDate.Contact)
 	} else {
