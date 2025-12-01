@@ -25,7 +25,7 @@ func TestCreateOK(t *testing.T) {
 		Email:        "a@b.com",
 		Password:     "password",
 		DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-		Gender:       "male",
+		Gender:       domain.Male,
 	}
 
 	pendingUser, err := domain.NewPendingUser(&personalData)
@@ -86,7 +86,7 @@ func TestCreateNot_OK(t *testing.T) {
 		Email:        "a@b.com",
 		Password:     "password",
 		DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-		Gender:       "male",
+		Gender:       domain.Male,
 	}
 
 	regData := &domain.RegisterInput{&personalData}
@@ -127,7 +127,7 @@ func TestVerifyCodesMem_Concurrency_Insert(t *testing.T) {
 					Email:        "a@b.com",
 					Password:     "password",
 					DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-					Gender:       "male",
+					Gender:       domain.Male,
 				}
 
 				regData := &domain.RegisterInput{&personalData}

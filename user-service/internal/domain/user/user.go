@@ -25,6 +25,13 @@ const (
 	Rejected
 )
 
+type Gender int
+
+const (
+	Male Gender = iota
+	Female
+)
+
 // User user data
 type User struct {
 	PersonalData
@@ -45,7 +52,7 @@ type PersonalData struct {
 	Email        string    `db:"email"`
 	Password     string    `db:"password"`
 	DateBirthday time.Time `db:"date_birthday"`
-	Gender       string    `db:"gender"`
+	Gender       Gender    `db:"gender"`
 }
 
 // NewPendingUser Create new pending User
