@@ -45,35 +45,24 @@ func (u *userUseCase) Register(ctx context.Context, in *domain.RegisterInput) (*
 		err       error
 	)
 
-	if !u.featureList.IsEnabled(features.StoreUsersInDB) {
-		existUser, err = u.userRepoMem.FindByContact(ctx, in.PersonalDate.Contact)
+	if u.featureList.IsEnabled(features.StoreUsersInDB) {
+		existUser, err = u.userRepoDB.Create(ctx, in)
 	} else {
-		existUser, err = u.userRepoDB.FindByContact(ctx, in.PersonalDate.Contact)
+		existUser, err = u.userRepoMem.Create(ctx, in)
 	}
 
-	// a User was not found
-	if err != nil {
-		var (
-			usr       *domain.User
-			createErr error
-		)
-
-		if !u.featureList.IsEnabled(features.StoreUsersInDB) {
-			usr, createErr = u.userRepoMem.Create(ctx, in)
-		} else {
-			usr, createErr = u.userRepoDB.Create(ctx, in)
+	if err != nil && existUser != nil {
+		switch existUser.Activated {
+		case true:
+			return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, errors.New("user is exist")
+		case false:
+			return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, errors.New("user is exist but is unverified")
 		}
-		if createErr != nil {
-			return nil, errors.Wrap(createErr, "user isn't created")
-		}
-
-		return &domain.RegisterOutput{UserID: usr.UserID, Status: domain.CreatedUnverified}, nil
-	}
-	if existUser.Activated {
-		return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, errors.Wrap(err, "user isn't activated")
+	} else if err != nil {
+		return nil, errors.Wrap(err, "user isn't created")
 	}
 
-	return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, errors.New("user is exist, but not activated")
+	return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.CreatedUnverified}, nil
 
 }
 
