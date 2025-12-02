@@ -192,6 +192,8 @@ func main() {
 		repo := grpcclient.NewGRPCUserRepo(
 			userservicepb.NewUserServiceClient(connUserService),
 			notificationservicepb.NewNotificationServiceClient(connNotificationService),
+			logger,
+			featureList,
 		)
 		//authMetrics := httpmetrics.NewAuthMetrics(metrics)
 		signer := jwt_signer.NewJWTSigner(secretAccessKey, secretRefreshKey, secretVerifyKey)
