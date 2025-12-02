@@ -38,11 +38,11 @@ func (m *UsersDBMem) Create(ctx context.Context, regData *domain.RegisterInput) 
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	cnt := pendingUser.PersonalData.Contact
-	if _, ok := m.users[cnt]; ok {
-		return nil, errors.New("userservice with " + cnt + " already exists")
+	email := pendingUser.PersonalData.Email
+	if _, ok := m.users[email]; ok {
+		return nil, errors.New("user with " + email + " already exists")
 	}
-	m.users[cnt] = *pendingUser
+	m.users[email] = *pendingUser
 
 	return pendingUser, nil
 }
@@ -66,7 +66,7 @@ func (m *UsersDBMem) FindByEmail(ctx context.Context, email string) (*domain.Use
 
 	user, ok := m.users[email]
 	if !ok {
-		return nil, errors.New("userservice not found")
+		return nil, errors.New("user not found")
 	}
 	return &user, nil
 }
@@ -80,7 +80,7 @@ func (m *UsersDBMem) FindByPhone(ctx context.Context, phone string) (*domain.Use
 
 	user, ok := m.users[phone]
 	if !ok {
-		return nil, errors.New("userservice not found")
+		return nil, errors.New("user not found")
 	}
 	return &user, nil
 }

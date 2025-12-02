@@ -14,15 +14,12 @@ func TestNewPendingUser_OK(t *testing.T) {
 		Email:        "a@b.com",
 		Password:     "password",
 		DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-		Gender:       "male",
+		Gender:       Male,
 	}
 
 	vc, err := NewPendingUser(&pd)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if vc.PersonalData == nil {
-		t.Fatal("vc.PersonalData is nil")
 	}
 	if vc.PersonalData.FirstName != pd.FirstName {
 		t.Fatalf("FirstName not equal")

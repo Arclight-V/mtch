@@ -1,4 +1,4 @@
-.PHONY: build run test clean docker
+.PHONY: build run test test-integration clean docker
 
 BIN_DIR := bin
 SERVICE := user-service
@@ -12,7 +12,10 @@ run:
 	./$(BIN_DIR)/$(SERVICE)
 
 test:
-	./... -race -cover
+	go test ./... -race -cover
+
+test-integration:
+	go test -tags=integration ./... -race -cover
 
 clean:
 	rm -rf $(BIN_DIR)

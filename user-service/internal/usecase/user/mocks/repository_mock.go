@@ -7,8 +7,8 @@ package mocks
 import (
 	context "context"
 	reflect "reflect"
-	user "user-service/internal/domain/user"
 
+	user "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 	gomock "github.com/golang/mock/gomock"
 )
 
