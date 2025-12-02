@@ -6,7 +6,7 @@ import (
 	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 )
 
-// User User Case interface
+// UserUserCase interface
 //
 //go:generate mockgen -source=$GOFILE -package=mocks -destination=./mocks/ports_mock.go
 type UserUseCase interface {

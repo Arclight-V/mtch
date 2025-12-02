@@ -153,7 +153,7 @@ func main() {
 	)
 	userRepoDB := repository.NewUserRepoDB(logger, postgresRepo)
 	userUC := usecase.NewUserUseCase(logger, featureList, userRepoDB, userRepoMem)
-	server := grpcuser.NewUserServiceServer(userUC)
+	server := grpcuser.NewUserServiceServer(userUC, logger, featureList)
 
 	level.Debug(logger).Log("msg", "starting GRPC server")
 	{

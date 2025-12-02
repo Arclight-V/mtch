@@ -4,9 +4,9 @@ import (
 	"github.com/go-kit/log"
 
 	"github.com/Arclight-V/mtch/pkg/feature_list"
+	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 
 	usecase "github.com/Arclight-V/mtch/notification/internal/usecase/notification"
-	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 )
 
 type notificationServiceServer struct {

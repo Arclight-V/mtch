@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/go-kit/log/level"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -13,7 +14,7 @@ import (
 )
 
 func (s *usersServiceServer) Register(ctx context.Context, req *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error) {
-	log.Println("Register called:", req.PersonalData.Contact)
+	level.Debug(s.logger).Log("method", "Register", "req", req)
 
 	pd := &domain.PersonalData{
 		FirstName: req.PersonalData.FirstName,
@@ -30,7 +31,7 @@ func (s *usersServiceServer) Register(ctx context.Context, req *userservicepb.Re
 
 	user, err := s.userUC.Register(ctx, in)
 	if err != nil {
-		return &userservicepb.RegisterResponse{}, err
+		return nil, err
 	}
 	resp := &userservicepb.RegisterResponse{UserId: user.UserID.String(), Status: userservicepb.CreateUserStatus(user.Status)}
 
