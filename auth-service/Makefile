@@ -1,4 +1,4 @@
- .PHONY: build run test clean mocks swag docker
+ .PHONY: build run test test-integration clean mocks swag docker
 
 BIN_DIR := bin
 SERVICE := auth-service
@@ -13,6 +13,9 @@ run:
 
 test:
 	go test -race -covermode=atomic -coverprofile=coverage.out ./...
+
+test-integration:
+	go test -tags=integration ./... -race -cover
 
 clean:
 	rm -rf $(BIN_DIR)

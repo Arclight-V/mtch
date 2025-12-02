@@ -10,6 +10,7 @@ import (
 	"github.com/go-kit/log"
 
 	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
+	user_test_data "github.com/Arclight-V/mtch/user-service/internal/domain/user/testdata"
 )
 
 func TestCreateOK(t *testing.T) {
@@ -17,23 +18,12 @@ func TestCreateOK(t *testing.T) {
 	userRepoMem := NewUsersDBMem(logger)
 	ctx := context.Background()
 
-	personalData := domain.PersonalData{
-		FirstName:    "John",
-		LastName:     "Doe",
-		Contact:      "email",
-		Phone:        "+7999999999",
-		Email:        "a@b.com",
-		Password:     "password",
-		DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-		Gender:       domain.Male,
-	}
-
-	pendingUser, err := domain.NewPendingUser(&personalData)
+	pendingUser, err := user_test_data.NewTestPendingUser()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	regData := &domain.RegisterInput{&personalData}
+	regData := &domain.RegisterInput{&pendingUser.PersonalData}
 
 	user, err := userRepoMem.Create(ctx, regData)
 	if err != nil {
@@ -78,20 +68,14 @@ func TestCreateNot_OK(t *testing.T) {
 	verifyCodesMemRepo := NewUsersDBMem(logger)
 	ctx := context.Background()
 
-	personalData := domain.PersonalData{
-		FirstName:    "John",
-		LastName:     "Doe",
-		Contact:      "email",
-		Phone:        "+7999999999",
-		Email:        "a@b.com",
-		Password:     "password",
-		DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-		Gender:       domain.Male,
+	pendingUser, err := user_test_data.NewTestPendingUser()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	regData := &domain.RegisterInput{&personalData}
+	regData := &domain.RegisterInput{&pendingUser.PersonalData}
 
-	_, err := verifyCodesMemRepo.Create(ctx, regData)
+	_, err = verifyCodesMemRepo.Create(ctx, regData)
 	if err != nil {
 		t.Fatal("create user", err)
 	}
@@ -110,6 +94,7 @@ func TestVerifyCodesMem_Concurrency_Insert(t *testing.T) {
 	goroutines := 10
 	perGoroutines := 10
 
+	errCh := make(chan error, goroutines*perGoroutines)
 	var wg sync.WaitGroup
 
 	wg.Add(goroutines)
@@ -123,8 +108,8 @@ func TestVerifyCodesMem_Concurrency_Insert(t *testing.T) {
 					FirstName:    fmt.Sprintf("Joie_%d_%d", id, j),
 					LastName:     "Doe",
 					Contact:      "email",
-					Phone:        "+7999999999",
-					Email:        "a@b.com",
+					Phone:        fmt.Sprintf("+79999999%d%d", id, j),
+					Email:        fmt.Sprintf("a@b%d%d.com", id, j),
 					Password:     "password",
 					DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
 					Gender:       domain.Male,
@@ -132,16 +117,18 @@ func TestVerifyCodesMem_Concurrency_Insert(t *testing.T) {
 
 				regData := &domain.RegisterInput{&personalData}
 
-				_, err := verifyCodesMemRepo.Create(ctx, regData)
-				if err != nil {
-					t.Fatal("create user", err)
-				}
-
-				if _, err := verifyCodesMemRepo.Create(ctx, regData); err != nil {
-					t.Error("Error must be nil")
-					return
+				if _, errCreate := verifyCodesMemRepo.Create(ctx, regData); errCreate != nil {
+					errCh <- errCreate
 				}
 			}
 		}()
 	}
+
+	wg.Wait()
+	close(errCh)
+
+	for e := range errCh {
+		t.Errorf("unexpected error %v", e)
+	}
+
 }

@@ -1,4 +1,4 @@
-.PHONY: proto build  run test docker
+.PHONY: proto build  run test test-integration docker
 
 TAG ?= latest
 PREFIX ?= mtch-
@@ -53,8 +53,14 @@ run-%:
 # -------- Test --------
 test: $(SERVICES:%=test-%)
 
+test-integration: $(SERVICES:%=test-integration-%)
+
+test-integration-%:
+	$(MAKE) -C $* test-integration
+
 test-%:
 	$(MAKE) -C $* test
+
 
 # -------- Docker build --------
 docker-build: $(SERVICES:%=docker-build-%)

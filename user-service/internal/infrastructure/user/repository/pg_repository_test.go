@@ -2,15 +2,16 @@ package repository
 
 import (
 	"context"
-	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-kit/log"
-	//"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
+
+	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
+	user_test_data "github.com/Arclight-V/mtch/user-service/internal/domain/user/testdata"
 )
 
 func TestUserRepoDBCreate_OK(t *testing.T) {
@@ -24,18 +25,7 @@ func TestUserRepoDBCreate_OK(t *testing.T) {
 	logger := log.NewNopLogger()
 	userRepoDB := NewUserRepoDB(logger, sqlxDB)
 
-	personalData := domain.PersonalData{
-		FirstName:    "John",
-		LastName:     "Doe",
-		Contact:      "email",
-		Phone:        "+7999999999",
-		Email:        "a@b.com",
-		Password:     "password",
-		DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-		Gender:       domain.Male,
-	}
-
-	pendingUser, err := domain.NewPendingUser(&personalData)
+	pendingUser, err := user_test_data.NewTestPendingUser()
 	if err != nil {
 		t.Fatal("failed to create user", err)
 	}
@@ -87,7 +77,7 @@ func TestUserRepoDBCreate_OK(t *testing.T) {
 		pendingUser.Role,
 	).WillReturnRows(rows)
 
-	regData := domain.RegisterInput{PersonalDate: &personalData}
+	regData := domain.RegisterInput{PersonalDate: &pendingUser.PersonalData}
 
 	user, err := userRepoDB.Create(context.Background(), &regData)
 	require.NoError(t, err)
@@ -114,18 +104,7 @@ func TestUserRepoDBCreate_Not_OK(t *testing.T) {
 	logger := log.NewNopLogger()
 	userRepoDB := NewUserRepoDB(logger, sqlxDB)
 
-	personalData := domain.PersonalData{
-		FirstName:    "John",
-		LastName:     "Doe",
-		Contact:      "email",
-		Phone:        "+7999999999",
-		Email:        "a@b.com",
-		Password:     "password",
-		DateBirthday: time.Date(1992, time.Month(11), 28, 0, 0, 0, 0, time.UTC),
-		Gender:       domain.Male,
-	}
-
-	pendingUser, err := domain.NewPendingUser(&personalData)
+	pendingUser, err := user_test_data.NewTestPendingUser()
 	pendingUser.CreatedAt = time.Now()
 	pendingUser.UpdatedAt = pendingUser.CreatedAt
 	if err != nil {
@@ -165,7 +144,7 @@ func TestUserRepoDBCreate_Not_OK(t *testing.T) {
 		pendingUser.Activated,
 	).WillReturnRows(rows)
 
-	regData := domain.RegisterInput{PersonalDate: &personalData}
+	regData := domain.RegisterInput{PersonalDate: &pendingUser.PersonalData}
 
 	_, err = userRepoDB.Create(context.Background(), &regData)
 	_, err = userRepoDB.Create(context.Background(), &regData)
