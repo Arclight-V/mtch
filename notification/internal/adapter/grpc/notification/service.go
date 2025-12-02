@@ -22,5 +22,11 @@ func NewNotificationServiceServer(
 	logger log.Logger,
 	featureList *feature_list.FeatureList,
 ) *notificationServiceServer {
-	return &notificationServiceServer{notificationUC: notificationUC, logger: logger, featureList: featureList}
+	logger = log.With(logger, "component", "gRPC/notificationServiceServer")
+
+	return &notificationServiceServer{
+		notificationUC: notificationUC,
+		logger:         logger,
+		featureList:    featureList,
+	}
 }

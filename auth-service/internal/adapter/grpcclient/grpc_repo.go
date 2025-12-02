@@ -3,6 +3,10 @@ package grpcclient
 import (
 	"context"
 
+	"github.com/go-kit/log"
+
+	"github.com/Arclight-V/mtch/pkg/feature_list"
+
 	"github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
 	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
@@ -10,10 +14,25 @@ import (
 type GrpcUserRepo struct {
 	userClient         userservicepb.UserServiceClient
 	notificationClient notificationservicepb.NotificationServiceClient
+
+	logger      log.Logger
+	featureList *feature_list.FeatureList
 }
 
-func NewGRPCUserRepo(userClient userservicepb.UserServiceClient, notificationClient notificationservicepb.NotificationServiceClient) *GrpcUserRepo {
-	return &GrpcUserRepo{userClient: userClient, notificationClient: notificationClient}
+func NewGRPCUserRepo(
+	userClient userservicepb.UserServiceClient,
+	notificationClient notificationservicepb.NotificationServiceClient,
+	logger log.Logger,
+	featureList *feature_list.FeatureList,
+) *GrpcUserRepo {
+	logger = log.With(logger, "component", "gRPC/GrpcUserClient")
+
+	return &GrpcUserRepo{
+		userClient:         userClient,
+		notificationClient: notificationClient,
+		logger:             logger,
+		featureList:        featureList,
+	}
 }
 
 func (r *GrpcUserRepo) Login(ctx context.Context, request *userservicepb.LoginRequest) (*userservicepb.LoginResponse, error) {

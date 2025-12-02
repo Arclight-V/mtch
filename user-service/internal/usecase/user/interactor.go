@@ -13,6 +13,12 @@ import (
 	"github.com/Arclight-V/mtch/user-service/internal/features"
 )
 
+var (
+	ErrUserIsExist           = errors.New("user is exist")
+	ErrUserIsExistUnverified = errors.New("user is exist but is unverified")
+	ErrUserNotCreated        = errors.New("user isn't created")
+)
+
 type userUseCase struct {
 	userRepoMem Repository
 	userRepoDB  Repository
@@ -54,12 +60,12 @@ func (u *userUseCase) Register(ctx context.Context, in *domain.RegisterInput) (*
 	if err != nil && existUser != nil {
 		switch existUser.Activated {
 		case true:
-			return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, errors.New("user is exist")
+			return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsVerified}, ErrUserIsExistUnverified
 		case false:
-			return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, errors.New("user is exist but is unverified")
+			return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.ExistsUnverified}, ErrUserIsExist
 		}
 	} else if err != nil {
-		return nil, errors.Wrap(err, "user isn't created")
+		return nil, errors.Wrap(err, ErrUserNotCreated.Error())
 	}
 
 	return &domain.RegisterOutput{UserID: existUser.UserID, Status: domain.CreatedUnverified}, nil
