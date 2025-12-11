@@ -12,6 +12,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 
+	"github.com/Arclight-V/mtch/user-service/internal/adapter/grpc/user/testdata"
 	domain "github.com/Arclight-V/mtch/user-service/internal/domain/user"
 	"github.com/Arclight-V/mtch/user-service/internal/usecase/user"
 	"github.com/Arclight-V/mtch/user-service/internal/usecase/user/mocks"
@@ -27,18 +28,7 @@ func TestUsersServiceServer_Register(t *testing.T) {
 
 	nuss := NewUserServiceServer(mockUserUseCase, logger, featureList)
 
-	req := &userservicepb.RegisterRequest{
-		PersonalData: &userservicepb.PersonalData{
-			FirstName: "John",
-			LastName:  "Doe",
-			Contact:   "email",
-			Phone:     "+7999999999",
-			Email:     "a@b.com",
-			Password:  "password",
-			BirthDate: &userservicepb.Date{BirthDay: 28, BirthMonth: 11, BirthYear: 1992},
-			Gender:    "male",
-		},
-	}
+	req := testdata.NewTestPBRequest()
 
 	tests := []struct {
 		name      string
