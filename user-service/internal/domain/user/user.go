@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 )
 
 type CreateUserStatus int
@@ -68,6 +70,22 @@ func NewPendingUser(data *PersonalData) (*User, error) {
 
 func (p *PersonalData) SetDateBirthday(year, month, day int) {
 	p.DateBirthday = time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+}
+
+func NewPersonalDataFromRegisterRequest(req *userservicepb.RegisterRequest) *PersonalData {
+	pd := &PersonalData{
+		FirstName: req.PersonalData.FirstName,
+		LastName:  req.PersonalData.LastName,
+		Contact:   req.PersonalData.Contact,
+		Password:  req.PersonalData.Password,
+	}
+	pd.SetDateBirthday(
+		int(req.PersonalData.BirthDate.BirthYear),
+		int(req.PersonalData.BirthDate.BirthMonth),
+		int(req.PersonalData.BirthDate.BirthDay),
+	)
+
+	return pd
 }
 
 // Get avatar string

@@ -16,17 +16,7 @@ import (
 func (s *usersServiceServer) Register(ctx context.Context, req *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error) {
 	level.Debug(s.logger).Log("method", "Register", "req", req)
 
-	pd := &domain.PersonalData{
-		FirstName: req.PersonalData.FirstName,
-		LastName:  req.PersonalData.LastName,
-		Contact:   req.PersonalData.Contact,
-		Password:  req.PersonalData.Password,
-	}
-	pd.SetDateBirthday(
-		int(req.PersonalData.BirthDate.BirthYear),
-		int(req.PersonalData.BirthDate.BirthMonth),
-		int(req.PersonalData.BirthDate.BirthDay))
-
+	pd := domain.NewPersonalDataFromRegisterRequest(req)
 	in := &domain.RegisterInput{PersonalDate: pd}
 
 	user, err := s.userUC.Register(ctx, in)
