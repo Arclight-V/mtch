@@ -27,6 +27,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 
+	"github.com/Arclight-V/mtch/pkg/feature_list"
+
 	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/models"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"github.com/Arclight-V/mtch/pkg/server/http/middleware"
@@ -48,15 +50,17 @@ type Options struct {
 	FrontendPath string
 }
 type Handler struct {
-	logger  log.Logger
 	router  http.Handler
 	options *Options
 	httpSrv *http.Server
+	regUC   auth.RegisterUseCase
 
-	regUC         auth.RegisterUseCase
-	loginUC       auth.LoginUseCase
-	verifyEmailUC auth.VerifyEmailUseCase
-	validate      *validator.Validate
+	loginUC  auth.LoginUseCase
+	verifyUC auth.VerifyUseCase
+	validate *validator.Validate
+
+	logger      log.Logger
+	featureList *feature_list.FeatureList
 
 	requestsTotal   *prometheus.CounterVec
 	requestDuration *prometheus.HistogramVec
@@ -64,11 +68,12 @@ type Handler struct {
 
 func NewHandler(
 	logger log.Logger,
+	featureList *feature_list.FeatureList,
 	o *Options,
 
 	regUC auth.RegisterUseCase,
 	loginUC auth.LoginUseCase,
-	verifyEmailUC auth.VerifyEmailUseCase) *Handler {
+	verifyUC auth.VerifyUseCase) *Handler {
 	if logger == nil {
 		logger = log.NewNopLogger()
 	}
@@ -82,13 +87,14 @@ func NewHandler(
 	validate.RegisterAlias("contact", "email|e164")
 
 	h := &Handler{
-		logger:  logger,
-		options: o,
+		logger:      logger,
+		featureList: featureList,
+		options:     o,
 
-		regUC:         regUC,
-		loginUC:       loginUC,
-		verifyEmailUC: verifyEmailUC,
-		validate:      validate,
+		regUC:    regUC,
+		loginUC:  loginUC,
+		verifyUC: verifyUC,
+		validate: validate,
 
 		requestsTotal: promauto.With(registerer).NewCounterVec(
 			prometheus.CounterOpts{
@@ -136,9 +142,9 @@ func NewHandler(
 	)
 
 	authMux.HandleFunc(
-		pat.Get("/verify-email"),
-		instrf("GET "+apiBase+"/auth/verify-email",
-			http.HandlerFunc(h.VerifyEmail),
+		pat.Post("/verify-code"),
+		instrf("POST "+apiBase+"/auth/verify-code",
+			http.HandlerFunc(h.VerifyCode),
 		),
 	)
 
@@ -185,7 +191,6 @@ func (h *Handler) Run() error {
 
 	level.Info(h.logger).Log("msg", "Serving plain HTTP", "address", h.options.ListenAddress)
 	return h.httpSrv.Serve(listener)
-
 }
 
 func (h *Handler) Shutdown() {
@@ -262,7 +267,6 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	fmt.Println(in)
 	if err := h.validate.Struct(in); err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
@@ -271,14 +275,17 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	birthDay, err := strconv.Atoi(in.BirthDay)
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 	birthMonth, err := strconv.Atoi(in.BirthMonth)
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 	birthEarth, err := strconv.Atoi(in.BirthYear)
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	regInput := &auth.RegisterInput{
@@ -313,34 +320,43 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(&out)
 }
 
-func (h *Handler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
-	level.Info(h.logger).Log("msg", "VerifyEmail called")
-
-	//token := pat.Param(r, "token")
-	token := r.URL.Query().Get("token")
-	if token == "" {
-		writeJSONError(w, http.StatusBadRequest, "token is required")
+func (h *Handler) VerifyCode(w http.ResponseWriter, r *http.Request) {
+	level.Debug(h.logger).Log("msg", "VerifyCode called")
+	if !h.featureList.IsEnabled(feature_list.VerifyCodeEnabled) {
+		writeJSONError(w, http.StatusNotImplemented, "Verify code is disabled")
+		return
+	}
+	if r.Header.Get("Content-Type") != "application/json" {
+		writeJSONError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
+		return
+	}
+	var in models.VerifyCodeRequest
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.validate.Struct(in); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()
 
-	verifyOut, err := h.verifyEmailUC.VerifyEmail(ctx, auth.VerifyEmailInput{Token: token})
+	verifyOut, err := h.verifyUC.VerifyCode(ctx, &auth.VerifyInput{Code: in.Code})
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
-	out := models.VerifyEmailResponse{
-		User: models.VerifiedEmailUserDTO{
-			UserID:     verifyOut.UserID,
-			VerifiedAt: verifyOut.VerifiedAt,
-			Verified:   verifyOut.Verified,
-		},
+	out := models.VerifyCodeResponse{
+		UserID:     verifyOut.UserID,
+		VerifiedAt: verifyOut.VerifiedAt,
+		Verified:   verifyOut.Verified,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(&out)
-	fmt.Println(token)
 }
 
 func writeJSONError(w http.ResponseWriter, status int, message string) {

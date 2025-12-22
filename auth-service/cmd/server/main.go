@@ -72,8 +72,8 @@ func main() {
 
 	featureList, err := feature_list.NewFeatureList(provider, "mtch-auth-service", logger, features.Features)
 	if err != nil {
-		// If a FeatureList initialization error occurs, log it and exit
-		level.Error(logger).Log("msg", "failed to create FeatureList", "err", err)
+		// If a featureList initialization error occurs, log it and exit
+		level.Error(logger).Log("msg", "failed to create featureList", "err", err)
 		os.Exit(1)
 	}
 
@@ -217,25 +217,19 @@ func main() {
 			publisher = p
 		}
 
-		userClient := auth.Interactor{
-			UserRepo:          repo,
-			TokenSigner:       signer,
-			Hasher:            hasher,
-			PasswordValidator: passwordValidator,
-			Publisher:         publisher,
-			FeatureList:       featureList,
-		}
+		userClient := auth.NewAuthUseCase(logger, featureList, repo, signer, hasher, passwordValidator, publisher)
 
-		webHandler := httpadapter.NewHandler(logger,
+		webHandler := httpadapter.NewHandler(logger, featureList,
 			&httpadapter.Options{
 				ListenAddress: cfg.Http.ListenAddr,
 				Registry:      metrics,
 				FrontendPath:  cfg.FrontEnd.FrontendPath,
 			},
 
-			&userClient,
-			&userClient,
-			&userClient)
+			userClient,
+			userClient,
+			userClient,
+		)
 
 		_ = mime.AddExtensionType(".wasm", "application/wasm")
 

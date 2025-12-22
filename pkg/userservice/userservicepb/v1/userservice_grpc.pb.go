@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_Register_FullMethodName    = "/mtch.userservice.UserService/Register"
-	UserService_Login_FullMethodName       = "/mtch.userservice.UserService/Login"
-	UserService_VerifyEmail_FullMethodName = "/mtch.userservice.UserService/VerifyEmail"
+	UserService_Register_FullMethodName   = "/mtch.userservice.UserService/Register"
+	UserService_Login_FullMethodName      = "/mtch.userservice.UserService/Login"
+	UserService_VerifyCode_FullMethodName = "/mtch.userservice.UserService/VerifyCode"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -30,7 +30,7 @@ const (
 type UserServiceClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*VerifyEmailResponse, error)
+	VerifyCode(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*VerifyResponse, error)
 }
 
 type userServiceClient struct {
@@ -61,10 +61,10 @@ func (c *userServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	return out, nil
 }
 
-func (c *userServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*VerifyEmailResponse, error) {
+func (c *userServiceClient) VerifyCode(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*VerifyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VerifyEmailResponse)
-	err := c.cc.Invoke(ctx, UserService_VerifyEmail_FullMethodName, in, out, cOpts...)
+	out := new(VerifyResponse)
+	err := c.cc.Invoke(ctx, UserService_VerifyCode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (c *userServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequ
 type UserServiceServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	VerifyEmail(context.Context, *VerifyEmailRequest) (*VerifyEmailResponse, error)
+	VerifyCode(context.Context, *VerifyRequest) (*VerifyResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -94,8 +94,8 @@ func (UnimplementedUserServiceServer) Register(context.Context, *RegisterRequest
 func (UnimplementedUserServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedUserServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*VerifyEmailResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyEmail not implemented")
+func (UnimplementedUserServiceServer) VerifyCode(context.Context, *VerifyRequest) (*VerifyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyCode not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -154,20 +154,20 @@ func _UserService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_VerifyEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VerifyEmailRequest)
+func _UserService_VerifyCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).VerifyEmail(ctx, in)
+		return srv.(UserServiceServer).VerifyCode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_VerifyEmail_FullMethodName,
+		FullMethod: UserService_VerifyCode_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).VerifyEmail(ctx, req.(*VerifyEmailRequest))
+		return srv.(UserServiceServer).VerifyCode(ctx, req.(*VerifyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -188,8 +188,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_Login_Handler,
 		},
 		{
-			MethodName: "VerifyEmail",
-			Handler:    _UserService_VerifyEmail_Handler,
+			MethodName: "VerifyCode",
+			Handler:    _UserService_VerifyCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

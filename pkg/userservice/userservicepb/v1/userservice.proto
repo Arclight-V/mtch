@@ -8,7 +8,7 @@ option go_package = "github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1
 service UserService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
-  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+  rpc VerifyCode(VerifyRequest) returns (VerifyResponse);
 }
 
 enum CreateUserStatus {
@@ -79,11 +79,11 @@ message LoginResponse {
   int64 expires_in = 5;
 }
 
-message VerifyEmailRequest {
-  string uuid = 1;
+message VerifyRequest {
+  string code = 1;
 }
 
-message VerifyEmailResponse {
+message VerifyResponse {
   bool verified = 1;
   google.protobuf.Timestamp verified_at = 2;
 }
