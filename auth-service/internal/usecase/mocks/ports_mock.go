@@ -9,8 +9,9 @@ import (
 	reflect "reflect"
 	time "time"
 
-
 	domain "github.com/Arclight-V/mtch/auth-service/internal/domain"
+	notificationservicepb "github.com/Arclight-V/mtch/pkg/notificationservice/notificationservicepb/v1"
+	userservicepb "github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -38,10 +39,10 @@ func (m *MockUserRepo) EXPECT() *MockUserRepoMockRecorder {
 }
 
 // Login mocks base method.
-func (m *MockUserRepo) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (m *MockUserRepo) Login(ctx context.Context, request *userservicepb.LoginRequest) (*userservicepb.LoginResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, request)
-	ret0, _ := ret[0].(*pb.LoginResponse)
+	ret0, _ := ret[0].(*userservicepb.LoginResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -52,11 +53,26 @@ func (mr *MockUserRepoMockRecorder) Login(ctx, request interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockUserRepo)(nil).Login), ctx, request)
 }
 
+// NotifyUserRegistered mocks base method.
+func (m *MockUserRepo) NotifyUserRegistered(ctx context.Context, request *notificationservicepb.NotificationUserContactsRequest) (*notificationservicepb.NotificationUserContactsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NotifyUserRegistered", ctx, request)
+	ret0, _ := ret[0].(*notificationservicepb.NotificationUserContactsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NotifyUserRegistered indicates an expected call of NotifyUserRegistered.
+func (mr *MockUserRepoMockRecorder) NotifyUserRegistered(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotifyUserRegistered", reflect.TypeOf((*MockUserRepo)(nil).NotifyUserRegistered), ctx, request)
+}
+
 // Register mocks base method.
-func (m *MockUserRepo) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (m *MockUserRepo) Register(ctx context.Context, request *userservicepb.RegisterRequest) (*userservicepb.RegisterResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Register", ctx, request)
-	ret0, _ := ret[0].(*pb.RegisterResponse)
+	ret0, _ := ret[0].(*userservicepb.RegisterResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -67,19 +83,19 @@ func (mr *MockUserRepoMockRecorder) Register(ctx, request interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockUserRepo)(nil).Register), ctx, request)
 }
 
-// VerifyEmail mocks base method.
-func (m *MockUserRepo) VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {
+// VerifyCode mocks base method.
+func (m *MockUserRepo) VerifyCode(ctx context.Context, request *userservicepb.VerifyRequest) (*userservicepb.VerifyResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyEmail", ctx, request)
-	ret0, _ := ret[0].(*pb.VerifyEmailResponse)
+	ret := m.ctrl.Call(m, "VerifyCode", ctx, request)
+	ret0, _ := ret[0].(*userservicepb.VerifyResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// VerifyEmail indicates an expected call of VerifyEmail.
-func (mr *MockUserRepoMockRecorder) VerifyEmail(ctx, request interface{}) *gomock.Call {
+// VerifyCode indicates an expected call of VerifyCode.
+func (mr *MockUserRepoMockRecorder) VerifyCode(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockUserRepo)(nil).VerifyEmail), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyCode", reflect.TypeOf((*MockUserRepo)(nil).VerifyCode), ctx, request)
 }
 
 // MockTokenSigner is a mock of TokenSigner interface.
@@ -216,4 +232,51 @@ func (m *MockVerifyTokenRepo) TryConsumeJTI(ctx context.Context, v domain.Verify
 func (mr *MockVerifyTokenRepoMockRecorder) TryConsumeJTI(ctx, v interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TryConsumeJTI", reflect.TypeOf((*MockVerifyTokenRepo)(nil).TryConsumeJTI), ctx, v)
+}
+
+// MockMetrics is a mock of Metrics interface.
+type MockMetrics struct {
+	ctrl     *gomock.Controller
+	recorder *MockMetricsMockRecorder
+}
+
+// MockMetricsMockRecorder is the mock recorder for MockMetrics.
+type MockMetricsMockRecorder struct {
+	mock *MockMetrics
+}
+
+// NewMockMetrics creates a new mock instance.
+func NewMockMetrics(ctrl *gomock.Controller) *MockMetrics {
+	mock := &MockMetrics{ctrl: ctrl}
+	mock.recorder = &MockMetricsMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockMetrics) EXPECT() *MockMetricsMockRecorder {
+	return m.recorder
+}
+
+// IncLoginAttempts mocks base method.
+func (m *MockMetrics) IncLoginAttempts(status string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "IncLoginAttempts", status)
+}
+
+// IncLoginAttempts indicates an expected call of IncLoginAttempts.
+func (mr *MockMetricsMockRecorder) IncLoginAttempts(status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncLoginAttempts", reflect.TypeOf((*MockMetrics)(nil).IncLoginAttempts), status)
+}
+
+// ObserveLoginDuration mocks base method.
+func (m *MockMetrics) ObserveLoginDuration(status string, s float64) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ObserveLoginDuration", status, s)
+}
+
+// ObserveLoginDuration indicates an expected call of ObserveLoginDuration.
+func (mr *MockMetricsMockRecorder) ObserveLoginDuration(status, s interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ObserveLoginDuration", reflect.TypeOf((*MockMetrics)(nil).ObserveLoginDuration), status, s)
 }

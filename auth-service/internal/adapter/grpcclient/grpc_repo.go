@@ -51,9 +51,9 @@ func (r *GrpcUserRepo) Register(ctx context.Context, request *userservicepb.Regi
 	return resp, nil
 }
 
-func (r *GrpcUserRepo) VerifyEmail(ctx context.Context, request *userservicepb.VerifyEmailRequest) (*userservicepb.VerifyEmailResponse, error) {
+func (r *GrpcUserRepo) VerifyCode(ctx context.Context, request *userservicepb.VerifyRequest) (*userservicepb.VerifyResponse, error) {
 	//TODO implement me
-	resp, err := r.userClient.VerifyEmail(ctx, request)
+	resp, err := r.userClient.VerifyCode(ctx, request)
 	if err != nil {
 		return nil, err
 	}

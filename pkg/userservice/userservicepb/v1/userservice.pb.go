@@ -581,27 +581,27 @@ func (x *LoginResponse) GetExpiresIn() int64 {
 	return 0
 }
 
-type VerifyEmailRequest struct {
+type VerifyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VerifyEmailRequest) Reset() {
-	*x = VerifyEmailRequest{}
+func (x *VerifyRequest) Reset() {
+	*x = VerifyRequest{}
 	mi := &file_pkg_userservice_userservicepb_v1_userservice_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VerifyEmailRequest) String() string {
+func (x *VerifyRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyEmailRequest) ProtoMessage() {}
+func (*VerifyRequest) ProtoMessage() {}
 
-func (x *VerifyEmailRequest) ProtoReflect() protoreflect.Message {
+func (x *VerifyRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_userservice_userservicepb_v1_userservice_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -613,19 +613,19 @@ func (x *VerifyEmailRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyEmailRequest.ProtoReflect.Descriptor instead.
-func (*VerifyEmailRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use VerifyRequest.ProtoReflect.Descriptor instead.
+func (*VerifyRequest) Descriptor() ([]byte, []int) {
 	return file_pkg_userservice_userservicepb_v1_userservice_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *VerifyEmailRequest) GetUuid() string {
+func (x *VerifyRequest) GetCode() string {
 	if x != nil {
-		return x.Uuid
+		return x.Code
 	}
 	return ""
 }
 
-type VerifyEmailResponse struct {
+type VerifyResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Verified      bool                   `protobuf:"varint,1,opt,name=verified,proto3" json:"verified,omitempty"`
 	VerifiedAt    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=verified_at,json=verifiedAt,proto3" json:"verified_at,omitempty"`
@@ -633,20 +633,20 @@ type VerifyEmailResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *VerifyEmailResponse) Reset() {
-	*x = VerifyEmailResponse{}
+func (x *VerifyResponse) Reset() {
+	*x = VerifyResponse{}
 	mi := &file_pkg_userservice_userservicepb_v1_userservice_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *VerifyEmailResponse) String() string {
+func (x *VerifyResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*VerifyEmailResponse) ProtoMessage() {}
+func (*VerifyResponse) ProtoMessage() {}
 
-func (x *VerifyEmailResponse) ProtoReflect() protoreflect.Message {
+func (x *VerifyResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_userservice_userservicepb_v1_userservice_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -658,19 +658,19 @@ func (x *VerifyEmailResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use VerifyEmailResponse.ProtoReflect.Descriptor instead.
-func (*VerifyEmailResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use VerifyResponse.ProtoReflect.Descriptor instead.
+func (*VerifyResponse) Descriptor() ([]byte, []int) {
 	return file_pkg_userservice_userservicepb_v1_userservice_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *VerifyEmailResponse) GetVerified() bool {
+func (x *VerifyResponse) GetVerified() bool {
 	if x != nil {
 		return x.Verified
 	}
 	return false
 }
 
-func (x *VerifyEmailResponse) GetVerifiedAt() *timestamppb.Timestamp {
+func (x *VerifyResponse) GetVerifiedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.VerifiedAt
 	}
@@ -729,10 +729,10 @@ const file_pkg_userservice_userservicepb_v1_userservice_proto_rawDesc = "" +
 	"\faccess_token\x18\x03 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x04 \x01(\tR\frefreshToken\x12\x1d\n" +
 	"\n" +
-	"expires_in\x18\x05 \x01(\x03R\texpiresIn\"(\n" +
-	"\x12VerifyEmailRequest\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\tR\x04uuid\"n\n" +
-	"\x13VerifyEmailResponse\x12\x1a\n" +
+	"expires_in\x18\x05 \x01(\x03R\texpiresIn\"#\n" +
+	"\rVerifyRequest\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\"i\n" +
+	"\x0eVerifyResponse\x12\x1a\n" +
 	"\bverified\x18\x01 \x01(\bR\bverified\x12;\n" +
 	"\vverified_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"verifiedAt*\x88\x01\n" +
@@ -741,11 +741,12 @@ const file_pkg_userservice_userservicepb_v1_userservice_proto_rawDesc = "" +
 	"\x12CREATED_UNVERIFIED\x10\x01\x12\x13\n" +
 	"\x0fEXISTS_VERIFIED\x10\x02\x12\x15\n" +
 	"\x11EXISTS_UNVERIFIED\x10\x03\x12\f\n" +
-	"\bREJECTED\x10\x042\x86\x02\n" +
+	"\bREJECTED\x10\x042\xfb\x01\n" +
 	"\vUserService\x12Q\n" +
 	"\bRegister\x12!.mtch.userservice.RegisterRequest\x1a\".mtch.userservice.RegisterResponse\x12H\n" +
-	"\x05Login\x12\x1e.mtch.userservice.LoginRequest\x1a\x1f.mtch.userservice.LoginResponse\x12Z\n" +
-	"\vVerifyEmail\x12$.mtch.userservice.VerifyEmailRequest\x1a%.mtch.userservice.VerifyEmailResponseBKZIgithub.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1;userservicepbb\x06proto3"
+	"\x05Login\x12\x1e.mtch.userservice.LoginRequest\x1a\x1f.mtch.userservice.LoginResponse\x12O\n" +
+	"\n" +
+	"VerifyCode\x12\x1f.mtch.userservice.VerifyRequest\x1a .mtch.userservice.VerifyResponseBKZIgithub.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1;userservicepbb\x06proto3"
 
 var (
 	file_pkg_userservice_userservicepb_v1_userservice_proto_rawDescOnce sync.Once
@@ -770,8 +771,8 @@ var file_pkg_userservice_userservicepb_v1_userservice_proto_goTypes = []any{
 	(*RegisterResponse)(nil),      // 5: mtch.userservice.RegisterResponse
 	(*LoginRequest)(nil),          // 6: mtch.userservice.LoginRequest
 	(*LoginResponse)(nil),         // 7: mtch.userservice.LoginResponse
-	(*VerifyEmailRequest)(nil),    // 8: mtch.userservice.VerifyEmailRequest
-	(*VerifyEmailResponse)(nil),   // 9: mtch.userservice.VerifyEmailResponse
+	(*VerifyRequest)(nil),         // 8: mtch.userservice.VerifyRequest
+	(*VerifyResponse)(nil),        // 9: mtch.userservice.VerifyResponse
 	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
 }
 var file_pkg_userservice_userservicepb_v1_userservice_proto_depIdxs = []int32{
@@ -782,13 +783,13 @@ var file_pkg_userservice_userservicepb_v1_userservice_proto_depIdxs = []int32{
 	3,  // 4: mtch.userservice.RegisterRequest.personal_data:type_name -> mtch.userservice.PersonalData
 	0,  // 5: mtch.userservice.RegisterResponse.status:type_name -> mtch.userservice.CreateUserStatus
 	1,  // 6: mtch.userservice.LoginResponse.user:type_name -> mtch.userservice.User
-	10, // 7: mtch.userservice.VerifyEmailResponse.verified_at:type_name -> google.protobuf.Timestamp
+	10, // 7: mtch.userservice.VerifyResponse.verified_at:type_name -> google.protobuf.Timestamp
 	4,  // 8: mtch.userservice.UserService.Register:input_type -> mtch.userservice.RegisterRequest
 	6,  // 9: mtch.userservice.UserService.Login:input_type -> mtch.userservice.LoginRequest
-	8,  // 10: mtch.userservice.UserService.VerifyEmail:input_type -> mtch.userservice.VerifyEmailRequest
+	8,  // 10: mtch.userservice.UserService.VerifyCode:input_type -> mtch.userservice.VerifyRequest
 	5,  // 11: mtch.userservice.UserService.Register:output_type -> mtch.userservice.RegisterResponse
 	7,  // 12: mtch.userservice.UserService.Login:output_type -> mtch.userservice.LoginResponse
-	9,  // 13: mtch.userservice.UserService.VerifyEmail:output_type -> mtch.userservice.VerifyEmailResponse
+	9,  // 13: mtch.userservice.UserService.VerifyCode:output_type -> mtch.userservice.VerifyResponse
 	11, // [11:14] is the sub-list for method output_type
 	8,  // [8:11] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name

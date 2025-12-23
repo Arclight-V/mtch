@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
-	"log"
+	"github.com/go-kit/log/level"
 	"time"
+
+	"github.com/go-kit/log"
 
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 	"github.com/Arclight-V/mtch/pkg/messagebroker"
@@ -14,31 +16,53 @@ import (
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/security"
 )
 
-type Interactor struct {
-	UserRepo usecase.UserRepo
+type AuthUseCase struct {
+	userRepo usecase.UserRepo
 	//Metrics           *prometheus.Registry
-	TokenSigner       usecase.TokenSigner
-	Hasher            security.PasswordHasher
-	PasswordValidator security.PasswordValidator
-	Publisher         messagebroker.Publisher
-	FeatureList       *feature_list.FeatureList
+	tokenSigner       usecase.TokenSigner
+	hasher            security.PasswordHasher
+	passwordValidator security.PasswordValidator
+	publisher         messagebroker.Publisher
+
+	logger      log.Logger
+	featureList *feature_list.FeatureList
 }
 
-func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
+func NewAuthUseCase(
+	logger log.Logger,
+	featureList *feature_list.FeatureList,
+	userRepo usecase.UserRepo,
+	tokenSigner usecase.TokenSigner,
+	hasher security.PasswordHasher,
+	passwordValidator security.PasswordValidator,
+	publisher messagebroker.Publisher,
+) *AuthUseCase {
+	return &AuthUseCase{
+		logger:            logger,
+		featureList:       featureList,
+		userRepo:          userRepo,
+		tokenSigner:       tokenSigner,
+		hasher:            hasher,
+		passwordValidator: passwordValidator,
+		publisher:         publisher,
+	}
+}
+
+func (uc *AuthUseCase) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
 	request := &userservicepb.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	}
-	resp, err := uc.UserRepo.Login(ctx, request)
+	resp, err := uc.userRepo.Login(ctx, request)
 	if err != nil {
 		return LoginOutput{}, err
 	}
 
-	access, err := uc.TokenSigner.SignAccess(resp.User.Uuid, resp.SessionId)
+	access, err := uc.tokenSigner.SignAccess(resp.User.Uuid, resp.SessionId)
 	if err != nil {
 		return LoginOutput{}, err
 	}
-	refresh, err := uc.TokenSigner.SignAccess(resp.User.Uuid, resp.SessionId)
+	refresh, err := uc.tokenSigner.SignAccess(resp.User.Uuid, resp.SessionId)
 	if err != nil {
 		return LoginOutput{}, err
 	}
@@ -49,12 +73,12 @@ func (uc *Interactor) Login(ctx context.Context, input LoginInput) (LoginOutput,
 	return LoginOutput{}, nil
 }
 
-func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*RegisterOutput, error) {
-	if err := uc.PasswordValidator.Validate(in.Password); err != nil {
+func (uc *AuthUseCase) Register(ctx context.Context, in *RegisterInput) (*RegisterOutput, error) {
+	if err := uc.passwordValidator.Validate(in.Password); err != nil {
 		return nil, err
 	}
 
-	if err := in.SetPassword(in.Password, uc.Hasher); err != nil {
+	if err := in.SetPassword(in.Password, uc.hasher); err != nil {
 		return nil, err
 	}
 	if err := in.SetEmailOrPhone(); err != nil {
@@ -75,7 +99,7 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 		},
 	}
 
-	resp, err := uc.UserRepo.Register(ctx, pbRegReq)
+	resp, err := uc.userRepo.Register(ctx, pbRegReq)
 	if err != nil {
 		return nil, err
 	}
@@ -84,10 +108,9 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 		UserID: resp.UserId,
 		Email:  in.Contact,
 	}
-	log.Printf("userservice registered to: %v", output)
 
 	// Evaluate kafka-enable feature flag
-	kafkaEnable := uc.FeatureList.IsEnabled(feature_list.FeatureKafka)
+	kafkaEnable := uc.featureList.IsEnabled(feature_list.FeatureKafka)
 	if kafkaEnable {
 		event := messagebroker.Event{
 			Topic: "notifications.request.v1",
@@ -100,45 +123,34 @@ func (uc *Interactor) Register(ctx context.Context, in *RegisterInput) (*Registe
 				"content-type":  []byte("application/json"),
 			},
 		}
-		if err := uc.Publisher.Publish(context.TODO(), &event); err != nil {
+		if err := uc.publisher.Publish(context.TODO(), &event); err != nil {
 			return nil, err
 		}
 		return output, nil
 	}
 
-	verifyTokenIssue, _, err := uc.TokenSigner.SignVerifyToken(output.UserID, 24*time.Hour)
-	_ = verifyTokenIssue
-	if err != nil {
-		return nil, err
-	}
-
 	contacts := []*notificationservicepb.Contact{{Chanel: notificationservicepb.Channel_ChannelEmail, Value: output.Email}}
 	notifyReq := &notificationservicepb.NotificationUserContactsRequest{UserID: output.UserID, Contacts: contacts}
 
-	if _, err := uc.UserRepo.NotifyUserRegistered(ctx, notifyReq); err != nil {
-		log.Printf("req: %v", err)
+	if _, err := uc.userRepo.NotifyUserRegistered(ctx, notifyReq); err != nil {
+		level.Error(uc.logger).Log("msg", "failed to notify user", "err", err)
 	}
 
 	return output, nil
 }
 
-func (uc *Interactor) VerifyEmail(ctx context.Context, in VerifyEmailInput) (VerifyEmailOutput, error) {
-	v, err := uc.TokenSigner.ParseVerifyToken(in.Token)
+func (uc *AuthUseCase) VerifyCode(ctx context.Context, in *VerifyInput) (*VerifyOutput, error) {
+
+	pbResp := &userservicepb.VerifyRequest{
+		Code: in.Code,
+	}
+
+	resp, err := uc.userRepo.VerifyCode(ctx, pbResp)
 	if err != nil {
-		return VerifyEmailOutput{}, err
+		return nil, err
 	}
 
-	pbResp := &userservicepb.VerifyEmailRequest{
-		Uuid: v.UserID,
-	}
-
-	resp, err := uc.UserRepo.VerifyEmail(ctx, pbResp)
-	if err != nil {
-		return VerifyEmailOutput{}, err
-	}
-
-	output := VerifyEmailOutput{
-		UserID:     v.UserID,
+	output := &VerifyOutput{
 		VerifiedAt: resp.VerifiedAt.AsTime(),
 		Verified:   resp.Verified,
 	}
