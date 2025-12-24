@@ -72,11 +72,11 @@ func (u *userUseCase) Register(ctx context.Context, in *domain.RegisterInput) (*
 
 }
 
-func (u *userUseCase) VerifyEmail(ctx context.Context, in *domain.VerifyEmailInput) (*domain.VerifyEmailOutput, error) {
+func (u *userUseCase) VerifyEmail(ctx context.Context, in *domain.VerifyInput) (*domain.VerifyOutput, error) {
 	// TODO: implement me
 	//existUser, err := u.userRepo.FindById(ctx, in.UserID)
 	//if err != nil {
-	//	return &models.VerifyEmailOutput{}, err
+	//	return &models.VerifyOutput{}, err
 	//}
 
 	return nil, nil

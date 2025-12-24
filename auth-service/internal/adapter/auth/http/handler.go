@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	models2 "github.com/Arclight-V/mtch/auth-service/internal/adapter/auth/http/models"
 	goji "goji.io"
 	"goji.io/pat"
 	"net"
@@ -29,7 +30,6 @@ import (
 
 	"github.com/Arclight-V/mtch/pkg/feature_list"
 
-	"github.com/Arclight-V/mtch/auth-service/internal/adapter/http/models"
 	"github.com/Arclight-V/mtch/auth-service/internal/usecase/auth"
 	"github.com/Arclight-V/mtch/pkg/server/http/middleware"
 )
@@ -262,7 +262,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
 		return
 	}
-	var in models.RegisterRequest
+	var in models2.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
@@ -308,8 +308,8 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out := models.RegisterResponse{
-		User: models.PendingUserDTO{
+	out := models2.RegisterResponse{
+		User: models2.PendingUserDTO{
 			UserID:   regOutput.UserID,
 			Email:    regOutput.Email,
 			Verified: false,
@@ -330,7 +330,7 @@ func (h *Handler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
 		return
 	}
-	var in models.VerifyCodeRequest
+	var in models2.VerifyCodeRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
@@ -349,7 +349,7 @@ func (h *Handler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out := models.VerifyCodeResponse{
+	out := models2.VerifyCodeResponse{
 		UserID:     verifyOut.UserID,
 		VerifiedAt: verifyOut.VerifiedAt,
 		Verified:   verifyOut.Verified,
@@ -362,7 +362,7 @@ func (h *Handler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(models.ErrorResponse{Error: message})
+	_ = json.NewEncoder(w).Encode(models2.ErrorResponse{Error: message})
 }
 
 func requestID(next http.Handler) http.Handler {
