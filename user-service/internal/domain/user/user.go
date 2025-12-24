@@ -127,11 +127,13 @@ type RegisterOutput struct {
 	Status CreateUserStatus
 }
 
-type VerifyEmailInput struct {
+type VerifyInput struct {
 	UserID string
+	Code   string
 }
 
-type VerifyEmailOutput struct {
+type VerifyOutput struct {
+	UserID     string
 	VerifiedAt time.Time
 	Verified   bool
 }

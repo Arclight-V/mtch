@@ -3,7 +3,8 @@ package models
 import "time"
 
 type VerifyCodeRequest struct {
-	Code string `json:"code"`
+	UserID string `json:"userid"`
+	Code   string `json:"code"`
 }
 
 type VerifyCodeResponse struct {

@@ -583,7 +583,8 @@ func (x *LoginResponse) GetExpiresIn() int64 {
 
 type VerifyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -618,6 +619,13 @@ func (*VerifyRequest) Descriptor() ([]byte, []int) {
 	return file_pkg_userservice_userservicepb_v1_userservice_proto_rawDescGZIP(), []int{7}
 }
 
+func (x *VerifyRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 func (x *VerifyRequest) GetCode() string {
 	if x != nil {
 		return x.Code
@@ -627,8 +635,9 @@ func (x *VerifyRequest) GetCode() string {
 
 type VerifyResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Verified      bool                   `protobuf:"varint,1,opt,name=verified,proto3" json:"verified,omitempty"`
-	VerifiedAt    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=verified_at,json=verifiedAt,proto3" json:"verified_at,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Verified      bool                   `protobuf:"varint,2,opt,name=verified,proto3" json:"verified,omitempty"`
+	VerifiedAt    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=verified_at,json=verifiedAt,proto3" json:"verified_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -661,6 +670,13 @@ func (x *VerifyResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use VerifyResponse.ProtoReflect.Descriptor instead.
 func (*VerifyResponse) Descriptor() ([]byte, []int) {
 	return file_pkg_userservice_userservicepb_v1_userservice_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *VerifyResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 func (x *VerifyResponse) GetVerified() bool {
@@ -729,12 +745,14 @@ const file_pkg_userservice_userservicepb_v1_userservice_proto_rawDesc = "" +
 	"\faccess_token\x18\x03 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x04 \x01(\tR\frefreshToken\x12\x1d\n" +
 	"\n" +
-	"expires_in\x18\x05 \x01(\x03R\texpiresIn\"#\n" +
-	"\rVerifyRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\"i\n" +
-	"\x0eVerifyResponse\x12\x1a\n" +
-	"\bverified\x18\x01 \x01(\bR\bverified\x12;\n" +
-	"\vverified_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"expires_in\x18\x05 \x01(\x03R\texpiresIn\"<\n" +
+	"\rVerifyRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\"\x82\x01\n" +
+	"\x0eVerifyResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
+	"\bverified\x18\x02 \x01(\bR\bverified\x12;\n" +
+	"\vverified_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"verifiedAt*\x88\x01\n" +
 	"\x10CreateUserStatus\x12\"\n" +
 	"\x1eCREATE_USER_STATUS_UNSPECIFIED\x10\x00\x12\x16\n" +

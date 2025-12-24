@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/Arclight-V/mtch/auth-service/internal/adapter/auth/http"
 	"log"
 	"mime"
 	"os"
@@ -32,8 +33,7 @@ import (
 	"github.com/Arclight-V/mtch/pkg/tracing/otel"
 	"github.com/Arclight-V/mtch/pkg/userservice/userservicepb/v1"
 
-	"github.com/Arclight-V/mtch/auth-service/internal/adapter/grpcclient"
-	httpadapter "github.com/Arclight-V/mtch/auth-service/internal/adapter/http"
+	authgrpc "github.com/Arclight-V/mtch/auth-service/internal/adapter/auth/grpc"
 	"github.com/Arclight-V/mtch/auth-service/internal/features"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/crypto"
 	"github.com/Arclight-V/mtch/auth-service/internal/infrastructure/jwt_signer"
@@ -189,7 +189,7 @@ func main() {
 		}
 		defer connNotificationService.Close()
 
-		repo := grpcclient.NewGRPCUserRepo(
+		authClientGrpc := authgrpc.NewAuthClient(
 			userservicepb.NewUserServiceClient(connUserService),
 			notificationservicepb.NewNotificationServiceClient(connNotificationService),
 			logger,
@@ -217,7 +217,7 @@ func main() {
 			publisher = p
 		}
 
-		userClient := auth.NewAuthUseCase(logger, featureList, repo, signer, hasher, passwordValidator, publisher)
+		userClient := auth.NewAuthUseCase(logger, featureList, authClientGrpc, signer, hasher, passwordValidator, publisher)
 
 		webHandler := httpadapter.NewHandler(logger, featureList,
 			&httpadapter.Options{

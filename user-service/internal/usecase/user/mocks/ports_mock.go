@@ -51,10 +51,10 @@ func (mr *MockUserUseCaseMockRecorder) Register(ctx, in interface{}) *gomock.Cal
 }
 
 // VerifyEmail mocks base method.
-func (m *MockUserUseCase) VerifyEmail(ctx context.Context, in *user.VerifyEmailInput) (*user.VerifyEmailOutput, error) {
+func (m *MockUserUseCase) VerifyEmail(ctx context.Context, in *user.VerifyInput) (*user.VerifyOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifyEmail", ctx, in)
-	ret0, _ := ret[0].(*user.VerifyEmailOutput)
+	ret0, _ := ret[0].(*user.VerifyOutput)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
