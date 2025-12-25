@@ -1,6 +1,6 @@
 module github.com/Arclight-V/mtch
 
-go 1.24.0
+go 1.25
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.12.0

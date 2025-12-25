@@ -1,6 +1,6 @@
 module github.com/Arclight-V/mtch/auth-service
 
-go 1.24.0
+go 1.25
 
 require (
 	goji.io v2.0.2+incompatible
