@@ -1,6 +1,6 @@
 module github.com/Arclight-V/mtch/notification
 
-go 1.24.0
+go 1.25
 
 require (
 	github.com/Arclight-V/mtch v0.0.0
